@@ -8,21 +8,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          timeout: 60s
-          command_timeout: 20m
-          script: bash /home/vzla.site/deploy.sh
-      - name: Reintento si el primer SSH falla
-        if: failure()
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: "82.29.169.39 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHk76JHNWLZOI+T3xOwZtad6YBn51O80bQcz03eGuJYb"
           timeout: 120s
           command_timeout: 20m
           script: bash /home/vzla.site/deploy.sh
