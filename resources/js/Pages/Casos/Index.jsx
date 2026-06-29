@@ -13,9 +13,8 @@ const NEED_LABELS = {
 const PASTEL = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#fde68a'];
 
 const COLUMNS = [
-    { key: 'open',     label: 'Sin apadrinar', color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
-    { key: 'adopted',  label: 'Apadrinados',   color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
-    { key: 'resolved', label: 'Resueltos',      color: '#64748b', bg: '#f1f5f9', dot: '#94a3b8' },
+    { key: 'open',    label: 'Sin apadrinar', color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
+    { key: 'adopted', label: 'Apadrinados',   color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -71,6 +70,12 @@ function CaseCard({ c, idx }) {
         >
             {/* Avatar + nombre */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {c.photo_path ? (
+                    <img src={c.photo_path} alt="Foto" style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        objectFit: 'cover', flexShrink: 0,
+                    }} />
+                ) : (
                 <div style={{
                     width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
                     background: PASTEL[idx % PASTEL.length],
@@ -80,6 +85,7 @@ function CaseCard({ c, idx }) {
                         {initials(c.family_name, c.is_anonymous)}
                     </span>
                 </div>
+                )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                         fontSize: 13, fontWeight: 700, color: '#1e293b',
@@ -207,10 +213,9 @@ function Column({ col, cases }) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function CasosIndex({ by_status }) {
-    const open     = by_status?.open     ?? [];
-    const adopted  = by_status?.adopted  ?? [];
-    const resolved = by_status?.resolved ?? [];
-    const total    = open.length + adopted.length + resolved.length;
+    const open    = by_status?.open    ?? [];
+    const adopted = by_status?.adopted ?? [];
+    const total   = open.length + adopted.length;
 
     return (
         <MainLayout>
@@ -258,7 +263,7 @@ export default function CasosIndex({ by_status }) {
                         <div key={col.key} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
                             <Column
                                 col={col}
-                                cases={col.key === 'open' ? open : col.key === 'adopted' ? adopted : resolved}
+                                cases={col.key === 'open' ? open : adopted}
                             />
                         </div>
                     ))}

@@ -38,6 +38,7 @@ export default function CasosPublicar() {
         state:         '',
         contact_phone: '',
         photo:         null,
+        photo_path:    '',
     });
 
     const toggleNeed = (value) => {
@@ -231,6 +232,20 @@ export default function CasosPublicar() {
                             className="w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-blue-50 file:text-blue-700 file:font-semibold hover:file:bg-blue-100 transition-colors" />
                         {errors.photo && (
                             <p className="text-xs text-red-600 mt-1 leading-snug">{errors.photo}</p>
+                        )}
+                    </div>
+
+                    {/* photo_path */}
+                    <div>
+                        <label className={labelClass}>Foto de la familia (URL opcional)</label>
+                        <input
+                            type="url"
+                            value={data.photo_path}
+                            onChange={(e) => setData('photo_path', e.target.value)}
+                            placeholder="https://ejemplo.com/foto.jpg"
+                            className={inputClass} />
+                        {errors.photo_path && (
+                            <p className="text-xs text-red-600 mt-1 leading-snug">{errors.photo_path}</p>
                         )}
                     </div>
 

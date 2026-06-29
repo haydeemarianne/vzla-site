@@ -11,10 +11,12 @@ use Inertia\Inertia;
 
 class ValidatorController extends Controller
 {
-    private function requireAdmin()
+    private function requireAdmin(): void
     {
         if (! session('is_admin')) {
-            abort(redirect('/admin/login'));
+            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+                redirect('/admin/login')
+            );
         }
     }
 
