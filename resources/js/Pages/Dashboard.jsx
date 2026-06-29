@@ -1,6 +1,6 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { Link } from '@inertiajs/react';
-import { Heart, Trash2, Wrench, Truck, FileText, Gift, ArrowRight } from 'lucide-react';
+import { Heart, Trash2, Wrench, Truck, FileText, ArrowRight } from 'lucide-react';
 
 const PASTEL = ['#dfe6f4', '#e7dcf2', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#fde68a'];
 
@@ -44,14 +44,6 @@ const MODULOS = [
         iconColor: '#92600e',
         title: 'Materiales imprimibles',
         desc: 'Carteles, formularios y recursos para imprimir',
-    },
-    {
-        href: '/donantes',
-        icon: Gift,
-        bg: '#f0d6d6',
-        iconColor: '#CE6969',
-        title: 'Donantes',
-        desc: 'Empresas e individuos que ofrecen recursos',
     },
 ];
 
