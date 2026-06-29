@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /home/venezuela.site/public_html
+cd /home/vzla.site/public_html
 
 echo "==> Pull..."
 git pull origin main

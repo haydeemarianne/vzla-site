@@ -15,7 +15,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           timeout: 60s
           command_timeout: 20m
-          script: bash /home/venezuela.site/deploy.sh
+          script: bash /home/vzla.site/deploy.sh
       - name: Reintento si el primer SSH falla
         if: failure()
         uses: appleboy/ssh-action@v1
@@ -25,4 +25,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           timeout: 120s
           command_timeout: 20m
-          script: bash /home/venezuela.site/deploy.sh
+          script: bash /home/vzla.site/deploy.sh
