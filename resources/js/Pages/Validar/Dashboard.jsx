@@ -124,8 +124,7 @@ const RailCircle = ({ children, dark = false, style = {} }) => (
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════ */
 export default function ValidarDashboard({
-    validator,
-    token,
+    admin_email,
     pending_children,
     pending_engineers,
     pending_zones,
@@ -150,7 +149,7 @@ export default function ValidarDashboard({
 
     /* action helper */
     const act = (action, type, id, body = {}) => {
-        router.post(`/validar/${token}/${action}`, { type, id, ...body }, { preserveScroll: true });
+        router.post(`/validar/${action}`, { type, id, ...body }, { preserveScroll: true });
     };
 
     /* tab config */
@@ -195,7 +194,7 @@ export default function ValidarDashboard({
         return dt.toLocaleDateString('es-VE', { day:'2-digit', month:'short' });
     };
 
-    const validatorInitials = initials(validator?.name || 'V');
+    const validatorInitials = initials(admin_email || 'Admin');
 
     /* ── render ── */
     return (

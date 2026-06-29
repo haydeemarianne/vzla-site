@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Validator;
 use App\Models\MissingChild;
 use App\Models\UnattendedZone;
 use App\Models\VolunteerEngineer;
@@ -12,50 +11,41 @@ use Inertia\Inertia;
 
 class ValidatorController extends Controller
 {
-    private function findValidator(string $token): Validator
+    private function requireAdmin()
     {
-        $validator = Validator::where('token', $token)->where('active', true)->firstOrFail();
-        $validator->update(['last_active_at' => now()]);
-        return $validator;
+        if (! session('is_admin')) {
+            abort(redirect('/admin/login'));
+        }
     }
 
-    public function dashboard(string $token)
+    public function dashboard()
     {
-        $validator = $this->findValidator($token);
+        $this->requireAdmin();
 
         return Inertia::render('Validar/Dashboard', [
-            'validator'           => $validator,
-            'token'               => $token,
-            'pending_children'    => MissingChild::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_engineers'   => VolunteerEngineer::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_zones'       => UnattendedZone::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_cases'       => SupportCase::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_volunteers'  => CaseVolunteer::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'admin_email'        => session('admin_email'),
+            'pending_children'   => MissingChild::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_engineers'  => VolunteerEngineer::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_zones'      => UnattendedZone::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_cases'      => SupportCase::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_volunteers' => CaseVolunteer::where('validation_status', 'pending')->latest()->limit(30)->get(),
         ]);
     }
 
-    public function approve(Request $request, string $token)
+    public function approve(Request $request)
     {
-        $this->findValidator($token);
+        $this->requireAdmin();
         $this->resolveModel($request->type, $request->id)
             ->update(['validation_status' => 'approved', 'validated_at' => now()]);
         return back()->with('success', 'Aprobado.');
     }
 
-    public function reject(Request $request, string $token)
+    public function reject(Request $request)
     {
-        $this->findValidator($token);
+        $this->requireAdmin();
         $this->resolveModel($request->type, $request->id)
             ->update(['validation_status' => 'rejected']);
         return back()->with('success', 'Rechazado.');
-    }
-
-    public function markDuplicate(Request $request, string $token)
-    {
-        $this->findValidator($token);
-        $this->resolveModel($request->type, $request->id)
-            ->update(['validation_status' => 'duplicate', 'possible_duplicate_of' => $request->duplicate_of]);
-        return back()->with('success', 'Marcado como duplicado.');
     }
 
     private function resolveModel(string $type, int $id)

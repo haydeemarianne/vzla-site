@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Heart, Trash2, Wrench, Home, Settings } from 'lucide-react';
 
 const BOTTOM_NAV = [
@@ -46,13 +46,16 @@ export default function MainLayout({ children }) {
                     </span>
                 </div>
 
-                <button style={{
-                    width: '34px', height: '34px', borderRadius: '50%',
-                    background: '#fff', border: 0,
-                    boxShadow: '0 4px 12px rgba(16,24,40,.08)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer',
-                }}>
+                <button
+                    onClick={() => router.visit('/admin/login')}
+                    aria-label="Panel de administración"
+                    style={{
+                        width: '34px', height: '34px', borderRadius: '50%',
+                        background: '#fff', border: 0,
+                        boxShadow: '0 4px 12px rgba(16,24,40,.08)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer',
+                    }}>
                     <Settings size={17} color="#475569" />
                 </button>
             </header>

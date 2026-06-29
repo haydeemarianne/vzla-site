@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MissingChildController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\HospitalListController;
 use App\Http\Controllers\UnattendedZoneController;
@@ -11,12 +10,25 @@ use App\Http\Controllers\VolunteerEngineerController;
 use App\Http\Controllers\CleaningPointController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\ValidatorController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SupportCaseController;
 use App\Http\Controllers\CaseVolunteerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index']);
 
+// ── Admin / Panel validador ──────────────────────────────────────────────────
+Route::get('/admin/login',  [AdminController::class, 'login']);
+Route::post('/admin/login', [AdminController::class, 'authenticate']);
+Route::post('/admin/logout',[AdminController::class, 'logout']);
+
+Route::prefix('validar')->group(function () {
+    Route::get('/',          [ValidatorController::class, 'dashboard']);
+    Route::post('/approve',  [ValidatorController::class, 'approve']);
+    Route::post('/reject',   [ValidatorController::class, 'reject']);
+});
+
+// ── Personas ─────────────────────────────────────────────────────────────────
 Route::prefix('personas')->group(function () {
     Route::get('/', [PersonController::class, 'index']);
     Route::get('/salvo', [PersonController::class, 'safeCreate']);
@@ -26,7 +38,6 @@ Route::prefix('personas')->group(function () {
     Route::get('/{person}', [PersonController::class, 'show']);
 });
 
-// Redirects de rutas anteriores
 Route::redirect('/ninos', '/personas?type=child');
 Route::redirect('/ninos/reportar', '/personas/registrar?type=child');
 
@@ -80,13 +91,6 @@ Route::prefix('transporte')->group(function () {
     Route::post('/registrar', [TransportController::class, 'driverStore']);
     Route::post('/solicitudes/{transportRequest}/tomar', [TransportController::class, 'take']);
     Route::post('/solicitudes/{transportRequest}/completar', [TransportController::class, 'complete']);
-});
-
-Route::prefix('validar')->group(function () {
-    Route::get('/{token}', [ValidatorController::class, 'dashboard']);
-    Route::post('/{token}/approve', [ValidatorController::class, 'approve']);
-    Route::post('/{token}/reject', [ValidatorController::class, 'reject']);
-    Route::post('/{token}/duplicate', [ValidatorController::class, 'markDuplicate']);
 });
 
 Route::prefix('casos')->group(function () {
