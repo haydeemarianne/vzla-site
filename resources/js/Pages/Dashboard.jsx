@@ -192,7 +192,7 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning }) {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium text-slate-900 truncate leading-tight">{point.zone_name}</p>
-                                            <p className="text-[10px] text-slate-400">{point.state} · {point.volunteers_count ?? 0} voluntarios</p>
+                                            <p className="text-[10px] text-slate-400">{point.state} · {point.helpers_count ?? 0} ayudantes</p>
                                         </div>
                                     </div>
                                 ))}

@@ -20,7 +20,7 @@ class DashboardController extends Controller
                 'cases_adopted'   => SupportCase::approved()->adopted()->count(),
                 'cases_resolved'  => SupportCase::approved()->resolved()->count(),
                 'volunteers'      => CaseVolunteer::where('validation_status', 'approved')->count(),
-                'cleaning_points' => CleaningPoint::where('status', 'active')->count(),
+                'cleaning_points' => CleaningPoint::whereIn('status', ['pending', 'in_process'])->count(),
                 'engineers'       => VolunteerEngineer::where('validation_status', 'approved')->count(),
                 'donors'          => DonorCompany::where('validation_status', 'approved')->count(),
                 'materials'       => PrintableMaterial::where('validation_status', 'approved')->count(),
@@ -30,10 +30,10 @@ class DashboardController extends Controller
                 ->latest()
                 ->limit(6)
                 ->get(['id', 'family_name', 'is_anonymous', 'needs', 'zone', 'state', 'people_count', 'status', 'has_children', 'has_elderly']),
-            'recent_cleaning' => CleaningPoint::where('status', 'active')
+            'recent_cleaning' => CleaningPoint::whereIn('status', ['pending', 'in_process'])
                 ->latest()
                 ->limit(4)
-                ->get(['id', 'zone_name', 'state', 'volunteers_count', 'created_at']),
+                ->get(['id', 'zone_name', 'state', 'helpers_count', 'created_at']),
         ]);
     }
 }
