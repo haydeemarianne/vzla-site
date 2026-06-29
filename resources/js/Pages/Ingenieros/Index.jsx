@@ -1,101 +1,390 @@
 import MainLayout from '@/Layouts/MainLayout';
-import { Link } from '@inertiajs/react';
-import { FiTool, FiPlus, FiPhone, FiMail, FiMapPin, FiCalendar } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { router } from '@inertiajs/react';
+import { useState } from 'react';
+import { AlertTriangle, MapPin } from 'lucide-react';
 
-export default function IngenierosIndex({ engineers, total }) {
+const DANOS_OPTIONS = ['Grietas', 'Techo caído', 'Inclinación', 'Columnas', 'Otro'];
+const ZONAS_OPTIONS = ['Caracas', 'La Guaira', 'Los Teques', 'Miranda', 'Vargas'];
+
+const inputStyle = {
+    width: '100%',
+    border: '1px solid #e2e6ee',
+    borderRadius: 13,
+    padding: '13px 14px',
+    fontSize: 14.5,
+    color: '#0f172a',
+    background: '#fff',
+    outline: 'none',
+    boxSizing: 'border-box',
+    fontFamily: "'Onest', system-ui, sans-serif",
+    transition: 'border-color .15s',
+};
+
+const labelStyle = {
+    fontSize: 12,
+    fontWeight: 700,
+    color: '#334155',
+    display: 'block',
+    marginBottom: 6,
+    fontFamily: "'Onest', system-ui, sans-serif",
+};
+
+function ChipSelector({ options, selected, onToggle }) {
     return (
-        <MainLayout>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Ingenieros voluntarios</h1>
-                    <p className="text-slate-500 text-sm mt-0.5">
-                        {total} ingeniero{total !== 1 ? 's' : ''} disponible{total !== 1 ? 's' : ''} para inspecciones gratuitas
-                    </p>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                    <Link href="/ingenieros/registrar"
-                        className="flex items-center gap-2 border border-blue-700 text-blue-700 hover:bg-blue-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                        <FiPlus className="w-4 h-4" /> Soy ingeniero
-                    </Link>
-                    <Link href="/ingenieros/solicitar"
-                        className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                        <FiTool className="w-4 h-4" /> Solicitar inspeccion
-                    </Link>
-                </div>
-            </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 9 }}>
+            {options.map((opt) => {
+                const active = selected.includes(opt);
+                return (
+                    <button
+                        key={opt}
+                        type="button"
+                        onClick={() => onToggle(opt)}
+                        style={{
+                            background: active ? '#4263ac' : '#fff',
+                            color: active ? '#fff' : '#334155',
+                            border: `1px solid ${active ? '#4263ac' : '#e2e6ee'}`,
+                            padding: '8px 13px',
+                            borderRadius: 11,
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            fontFamily: "'Onest', system-ui, sans-serif",
+                            transition: 'all .15s',
+                        }}
+                    >
+                        {opt}
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
 
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-amber-800">
-                    <strong>No entres a una estructura danada</strong> hasta que un profesional la evalúe.
-                    Solicita una inspeccion gratuita — puede salvar tu vida.
+function FocusableInput({ style, ...props }) {
+    const [focused, setFocused] = useState(false);
+    return (
+        <input
+            {...props}
+            style={{
+                ...style,
+                borderColor: focused ? '#4263ac' : '#e2e6ee',
+            }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+        />
+    );
+}
+
+function TabSolicitar() {
+    const [selectedDanos, setSelectedDanos] = useState([]);
+    const [direccion, setDireccion] = useState('');
+    const [telefono, setTelefono] = useState('');
+    const [phoneFocused, setPhoneFocused] = useState(false);
+
+    const toggleDano = (d) =>
+        setSelectedDanos((prev) =>
+            prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d]
+        );
+
+    return (
+        <div>
+            {/* Aviso ámbar */}
+            <div
+                style={{
+                    marginTop: 18,
+                    background: '#fff7ed',
+                    border: '1px solid #fde7c6',
+                    borderRadius: 16,
+                    padding: 14,
+                    display: 'flex',
+                    gap: 10,
+                    alignItems: 'flex-start',
+                }}
+            >
+                <AlertTriangle size={18} color="#b45309" style={{ flexShrink: 0, marginTop: 1 }} />
+                <p style={{ fontSize: 12.5, color: '#92400e', lineHeight: 1.5, margin: 0 }}>
+                    ¿Tu casa tiene grietas o daño visible?{' '}
+                    <strong>No entres</strong> hasta que un ingeniero la evalúe.
                 </p>
             </div>
 
-            {engineers.data.length === 0 ? (
-                <div className="text-center py-16 text-slate-400">
-                    <FiTool className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p className="font-medium text-slate-600">Aun no hay ingenieros registrados</p>
-                    <Link href="/ingenieros/registrar"
-                        className="mt-4 inline-flex items-center gap-2 border border-blue-700 text-blue-700 hover:bg-blue-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                        <FiPlus className="w-4 h-4" /> Ser el primero en registrarse
-                    </Link>
+            {/* Formulario */}
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 13,
+                    marginTop: 16,
+                }}
+            >
+                {/* Dirección */}
+                <div>
+                    <label style={labelStyle}>Dirección del inmueble</label>
+                    <FocusableInput
+                        type="text"
+                        placeholder="Calle, edificio, sector..."
+                        value={direccion}
+                        onChange={(e) => setDireccion(e.target.value)}
+                        style={inputStyle}
+                    />
                 </div>
-            ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {engineers.data.map((engineer, i) => (
-                        <motion.div key={engineer.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, ease: 'easeOut', delay: i * 0.06 }}
-                            className="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md transition-shadow flex flex-col">
 
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <FiTool className="text-blue-700 w-5 h-5" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="font-bold text-slate-900 leading-tight truncate">{engineer.name}</p>
-                                    <p className="text-xs text-slate-500">{engineer.specialty}</p>
-                                </div>
-                            </div>
-
-                            {engineer.license_number && (
-                                <p className="text-xs text-slate-400 mb-2">Matricula: {engineer.license_number}</p>
-                            )}
-
-                            {engineer.zones_available?.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 mb-3">
-                                    {engineer.zones_available.map((zone) => (
-                                        <span key={zone}
-                                            className="flex items-center gap-1 text-xs bg-slate-50 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full">
-                                            <FiMapPin className="w-2.5 h-2.5" /> {zone}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            {engineer.available_until && (
-                                <p className="flex items-center gap-1.5 text-xs text-slate-400 mb-3">
-                                    <FiCalendar className="w-3.5 h-3.5" />
-                                    Disponible hasta {new Date(engineer.available_until).toLocaleDateString('es', { day: 'numeric', month: 'long' })}
-                                </p>
-                            )}
-
-                            <div className="border-t border-slate-100 pt-3 mt-auto space-y-2">
-                                <a href={`tel:${engineer.phone}`}
-                                    className="flex items-center gap-2 text-sm text-slate-600 hover:text-blue-700 transition-colors">
-                                    <FiPhone className="w-3.5 h-3.5 flex-shrink-0" /> {engineer.phone}
-                                </a>
-                                <a href={`mailto:${engineer.email}`}
-                                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-700 transition-colors truncate">
-                                    <FiMail className="w-3.5 h-3.5 flex-shrink-0" /> {engineer.email}
-                                </a>
-                            </div>
-                        </motion.div>
-                    ))}
+                {/* Daños observados */}
+                <div>
+                    <label style={labelStyle}>¿Qué daño observas?</label>
+                    <ChipSelector
+                        options={DANOS_OPTIONS}
+                        selected={selectedDanos}
+                        onToggle={toggleDano}
+                    />
                 </div>
-            )}
+
+                {/* Teléfono */}
+                <div>
+                    <label style={labelStyle}>Tu teléfono</label>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
+                        <div
+                            style={{
+                                background: '#f8fafc',
+                                border: '1px solid #e2e6ee',
+                                borderRadius: 13,
+                                padding: '0 14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                fontSize: 15,
+                                fontWeight: 700,
+                                color: '#334155',
+                                whiteSpace: 'nowrap',
+                                fontFamily: "'Onest', system-ui, sans-serif",
+                            }}
+                        >
+                            🇻🇪 +58
+                        </div>
+                        <input
+                            type="tel"
+                            inputMode="numeric"
+                            placeholder="4XX XXX XXXX"
+                            value={telefono}
+                            onChange={(e) => setTelefono(e.target.value)}
+                            style={{
+                                ...inputStyle,
+                                flex: 1,
+                                borderColor: phoneFocused ? '#4263ac' : '#e2e6ee',
+                            }}
+                            onFocus={() => setPhoneFocused(true)}
+                            onBlur={() => setPhoneFocused(false)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Botón solicitar */}
+            <button
+                onClick={() => router.visit('/ingenieros/solicitar')}
+                style={{
+                    marginTop: 22,
+                    width: '100%',
+                    background: '#4263ac',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 15,
+                    padding: '14px 0',
+                    borderRadius: 14,
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: "'Onest', system-ui, sans-serif",
+                    letterSpacing: '-0.1px',
+                }}
+            >
+                Solicitar evaluación
+            </button>
+        </div>
+    );
+}
+
+function TabRegistrar() {
+    const [selectedZonas, setSelectedZonas] = useState([]);
+    const [nombre, setNombre] = useState('');
+    const [colegiatura, setColegiatura] = useState('');
+    const [nombreFocused, setNombreFocused] = useState(false);
+    const [civFocused, setCivFocused] = useState(false);
+
+    const toggleZona = (z) =>
+        setSelectedZonas((prev) =>
+            prev.includes(z) ? prev.filter((x) => x !== z) : [...prev, z]
+        );
+
+    return (
+        <div>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 13,
+                    marginTop: 16,
+                }}
+            >
+                {/* Nombre */}
+                <div>
+                    <label style={labelStyle}>Nombre y apellido</label>
+                    <input
+                        type="text"
+                        placeholder="Ing. Carlos Mendoza"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        style={{
+                            ...inputStyle,
+                            borderColor: nombreFocused ? '#4263ac' : '#e2e6ee',
+                        }}
+                        onFocus={() => setNombreFocused(true)}
+                        onBlur={() => setNombreFocused(false)}
+                    />
+                </div>
+
+                {/* Colegiatura */}
+                <div>
+                    <label style={labelStyle}>N° de colegiatura (CIV)</label>
+                    <input
+                        type="text"
+                        placeholder="CIV 000000"
+                        value={colegiatura}
+                        onChange={(e) => setColegiatura(e.target.value)}
+                        style={{
+                            ...inputStyle,
+                            borderColor: civFocused ? '#4263ac' : '#e2e6ee',
+                        }}
+                        onFocus={() => setCivFocused(true)}
+                        onBlur={() => setCivFocused(false)}
+                    />
+                </div>
+
+                {/* Zonas */}
+                <div>
+                    <label style={labelStyle}>Zonas donde puedes evaluar</label>
+                    <ChipSelector
+                        options={ZONAS_OPTIONS}
+                        selected={selectedZonas}
+                        onToggle={toggleZona}
+                    />
+                </div>
+            </div>
+
+            {/* Botón registrar */}
+            <button
+                onClick={() => router.visit('/ingenieros/registrar')}
+                style={{
+                    marginTop: 22,
+                    width: '100%',
+                    background: '#4263ac',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 15,
+                    padding: '14px 0',
+                    borderRadius: 14,
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: "'Onest', system-ui, sans-serif",
+                    letterSpacing: '-0.1px',
+                }}
+            >
+                Registrarme como voluntario
+            </button>
+
+            {/* Nota validación */}
+            <p
+                style={{
+                    fontSize: 11.5,
+                    color: '#94a3b8',
+                    textAlign: 'center',
+                    marginTop: 11,
+                    lineHeight: 1.5,
+                }}
+            >
+                Tu colegiatura será validada por el equipo antes de asignarte casos.
+            </p>
+        </div>
+    );
+}
+
+export default function IngenierosIndex({ engineers, total }) {
+    const [ing, setIng] = useState('sol');
+
+    return (
+        <MainLayout>
+            <div
+                style={{
+                    padding: '6px 20px 100px',
+                    fontFamily: "'Onest', system-ui, sans-serif",
+                }}
+            >
+                {/* Header */}
+                <h1
+                    style={{
+                        fontSize: 21,
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        letterSpacing: '-0.4px',
+                        margin: 0,
+                    }}
+                >
+                    Ingenieros voluntarios
+                </h1>
+                <p
+                    style={{
+                        fontSize: 12.5,
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginTop: 1,
+                        marginBottom: 0,
+                    }}
+                >
+                    Evaluación estructural gratuita
+                </p>
+
+                {/* Segmented control */}
+                <div
+                    style={{
+                        marginTop: 14,
+                        background: '#eceef2',
+                        borderRadius: 13,
+                        padding: 5,
+                        display: 'flex',
+                        gap: 6,
+                    }}
+                >
+                    {[
+                        { key: 'sol', label: 'Solicitar evaluación' },
+                        { key: 'reg', label: 'Soy ingeniero' },
+                    ].map(({ key, label }) => {
+                        const active = ing === key;
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => setIng(key)}
+                                style={{
+                                    flex: 1,
+                                    padding: '9px 10px',
+                                    borderRadius: 9,
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: 13,
+                                    fontWeight: active ? 700 : 600,
+                                    color: active ? '#0f172a' : '#64748b',
+                                    background: active ? '#fff' : 'transparent',
+                                    boxShadow: active ? '0 2px 8px rgba(16,24,40,.08)' : 'none',
+                                    fontFamily: "'Onest', system-ui, sans-serif",
+                                    transition: 'all .15s',
+                                }}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Tabs */}
+                {ing === 'sol' ? <TabSolicitar /> : <TabRegistrar />}
+            </div>
         </MainLayout>
     );
 }

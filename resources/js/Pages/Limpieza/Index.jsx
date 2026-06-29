@@ -1,239 +1,395 @@
 import MainLayout from '@/Layouts/MainLayout';
-import { Link, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
-import { FiTrash2, FiPlus, FiUsers, FiMapPin, FiCamera, FiCheckCircle, FiLoader } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { Link, router } from '@inertiajs/react';
+import { Clock, MapPin } from 'lucide-react';
 
-const TYPE_LABEL  = { domestic: 'Basura domestica', debris: 'Escombros y basura', both: 'Ambos tipos' };
-const VOLUME_LABEL = { low: 'Poco', medium: 'Bastante', high: 'Mucho' };
-const VOLUME_COLOR = { low: 'text-slate-500', medium: 'text-amber-600', high: 'text-red-600' };
-
-const STATUS_CFG = {
-    pending:    { label: 'Pendiente',   badge: 'bg-amber-50 text-amber-700 border border-amber-200',  card: 'border-slate-200' },
-    in_process: { label: 'En proceso',  badge: 'bg-blue-50 text-blue-700 border border-blue-200',     card: 'border-blue-200' },
-    resolved:   { label: 'Resuelto',    badge: 'bg-green-50 text-green-700 border border-green-200',  card: 'border-green-200 opacity-70' },
+const TYPE_BADGE = {
+    debris:   { bg: '#fef3e2', color: '#b45309', label: 'Escombros' },
+    domestic: { bg: '#f1f4f9', color: '#334155', label: 'Basura' },
+    both:     { bg: '#eef2fa', color: '#4263ac', label: 'Drenaje' },
 };
 
-function ResolveModal({ point, onClose }) {
-    const { data, setData, post, processing } = useForm({ photo: null });
-    const [preview, setPreview] = useState(null);
+const PASTEL_AVATARS = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf'];
 
-    const handlePhoto = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        setData('photo', file);
-        setPreview(URL.createObjectURL(file));
-    };
+function AvatarStack({ count }) {
+    const shown = Math.min(count || 0, 4);
+    const initials = ['JR', 'ML', 'CA', 'PS'];
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex' }}>
+                {Array.from({ length: shown }).map((_, i) => (
+                    <div
+                        key={i}
+                        style={{
+                            width: 26,
+                            height: 26,
+                            borderRadius: '50%',
+                            background: PASTEL_AVATARS[i % PASTEL_AVATARS.length],
+                            border: '2px solid #fff',
+                            marginLeft: i === 0 ? 0 : -8,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 9,
+                            fontWeight: 700,
+                            color: '#475569',
+                            zIndex: shown - i,
+                            position: 'relative',
+                        }}
+                    >
+                        {initials[i] || '?'}
+                    </div>
+                ))}
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>
+                {count || 0}/10 voluntarios
+            </span>
+        </div>
+    );
+}
 
-    const submit = (e) => {
-        e.preventDefault();
-        post(`/limpieza/${point.id}/resolver`, {
-            forceFormData: true,
-            onSuccess: () => { toast.success('¡Punto resuelto!'); onClose(); },
-        });
-    };
+function PointCard({ point }) {
+    const badge = TYPE_BADGE[point.type] || TYPE_BADGE.domestic;
+    const meta = 10;
+    const progress = Math.min(100, ((point.helpers_count || 0) / meta) * 100);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40" onClick={onClose}>
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl p-5 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-                <h3 className="font-bold text-slate-900 mb-1">Marcar como resuelto</h3>
-                <p className="text-sm text-slate-500 mb-4">Opcional: sube una foto del "despues" para mostrar el avance.</p>
-                <form onSubmit={submit} className="space-y-4">
-                    {preview ? (
-                        <img src={preview} className="w-full h-40 object-cover rounded-xl border border-slate-200" />
-                    ) : (
-                        <label className="flex flex-col items-center gap-2 border-2 border-dashed border-slate-200 rounded-xl py-8 cursor-pointer hover:border-green-400 transition-colors">
-                            <FiCamera className="w-6 h-6 text-slate-400" />
-                            <span className="text-sm text-slate-500">Foto del despues (opcional)</span>
-                            <input type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
-                        </label>
-                    )}
-                    <div className="flex gap-2">
-                        <button type="button" onClick={onClose}
-                            className="flex-1 border border-slate-200 text-slate-600 text-sm font-semibold py-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-                            Cancelar
-                        </button>
-                        <button type="submit" disabled={processing}
-                            className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-                            <FiCheckCircle className="w-4 h-4" /> Confirmar
-                        </button>
-                    </div>
-                </form>
-            </motion.div>
+        <div
+            style={{
+                background: '#fff',
+                borderRadius: 18,
+                padding: 15,
+                boxShadow: '0 10px 26px rgba(16,24,40,.06)',
+                fontFamily: "'Onest', system-ui, sans-serif",
+            }}
+        >
+            {/* Fila top: lugar + badge tipo */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                <span
+                    style={{
+                        fontSize: 14.5,
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        letterSpacing: '-0.2px',
+                        lineHeight: 1.3,
+                        flex: 1,
+                        minWidth: 0,
+                    }}
+                >
+                    {point.zone_name}
+                    {point.city ? `, ${point.city}` : ''}
+                </span>
+                <span
+                    style={{
+                        background: badge.bg,
+                        color: badge.color,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '4px 10px',
+                        borderRadius: 999,
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                    }}
+                >
+                    {badge.label}
+                </span>
+            </div>
+
+            {/* Fecha/hora */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
+                <Clock size={12} color="#94a3b8" />
+                <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
+                    {point.state || 'Venezuela'}
+                </span>
+            </div>
+
+            {/* Descripción */}
+            {point.notes && (
+                <p
+                    style={{
+                        fontSize: 12.5,
+                        color: '#475569',
+                        lineHeight: 1.5,
+                        marginTop: 9,
+                    }}
+                >
+                    {point.notes}
+                </p>
+            )}
+
+            {/* Avatares + conteo */}
+            <div style={{ marginTop: 13 }}>
+                <AvatarStack count={point.helpers_count} />
+            </div>
+
+            {/* Barra de progreso */}
+            <div
+                style={{
+                    marginTop: 11,
+                    height: 7,
+                    borderRadius: 999,
+                    background: '#eef0f3',
+                    overflow: 'hidden',
+                }}
+            >
+                <div
+                    style={{
+                        height: '100%',
+                        borderRadius: 999,
+                        background: '#4263ac',
+                        width: `${progress}%`,
+                        transition: 'width .4s ease',
+                    }}
+                />
+            </div>
+
+            {/* Botón Me apunto */}
+            <button
+                onClick={() => router.post(`/limpieza/${point.id}/voluntario`)}
+                style={{
+                    marginTop: 13,
+                    width: '100%',
+                    background: '#0f172a',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    padding: '12px 0',
+                    borderRadius: 13,
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: "'Onest', system-ui, sans-serif",
+                    letterSpacing: '-0.1px',
+                }}
+            >
+                Me apunto
+            </button>
+        </div>
+    );
+}
+
+function MapDecorativo({ activeCount }) {
+    return (
+        <div
+            style={{
+                marginTop: 13,
+                height: 138,
+                borderRadius: 18,
+                overflow: 'hidden',
+                position: 'relative',
+                background: 'linear-gradient(135deg, #dbe4f3, #eef2f8)',
+                border: '1px solid #e2e8f2',
+            }}
+        >
+            {/* SVG decorativo */}
+            <svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 360 140"
+                preserveAspectRatio="none"
+                style={{ position: 'absolute', inset: 0 }}
+            >
+                <path
+                    d="M0 90 Q90 60 180 92 T360 80"
+                    stroke="#c2cfe4"
+                    strokeWidth="2"
+                    fill="none"
+                />
+                <path
+                    d="M-10 40 Q120 70 200 30 T380 55"
+                    stroke="#cdd9eb"
+                    strokeWidth="1.5"
+                    fill="none"
+                />
+            </svg>
+
+            {/* Pin 1 */}
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 64,
+                    top: 48,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50% 50% 50% 0',
+                    transform: 'rotate(-45deg)',
+                    background: '#4263ac',
+                    boxShadow: '0 0 0 4px rgba(29,78,216,.18)',
+                }}
+            />
+            {/* Pin 2 */}
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 188,
+                    top: 74,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50% 50% 50% 0',
+                    transform: 'rotate(-45deg)',
+                    background: '#f59e0b',
+                    boxShadow: '0 0 0 4px rgba(245,158,11,.2)',
+                }}
+            />
+            {/* Pin 3 */}
+            <div
+                style={{
+                    position: 'absolute',
+                    left: 264,
+                    top: 40,
+                    width: 14,
+                    height: 14,
+                    borderRadius: '50% 50% 50% 0',
+                    transform: 'rotate(-45deg)',
+                    background: '#4263ac',
+                    boxShadow: '0 0 0 4px rgba(29,78,216,.18)',
+                }}
+            />
+
+            {/* Label activos */}
+            <div
+                style={{
+                    position: 'absolute',
+                    bottom: 12,
+                    left: 12,
+                    background: '#fff',
+                    padding: '5px 10px',
+                    borderRadius: 8,
+                    boxShadow: '0 2px 8px rgba(16,24,40,.08)',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#475569',
+                }}
+            >
+                {activeCount} puntos activos cerca
+            </div>
         </div>
     );
 }
 
 export default function LimpiezaIndex({ points, filters, counts }) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [resolvePoint, setResolvePoint] = useState(null);
-
-    const go = (params) => {
-        router.get('/limpieza', { ...filters, ...params }, { preserveScroll: true, replace: true });
-    };
-
-    const volunteer = (id) => {
-        router.post(`/limpieza/${id}/voluntario`, {}, {
-            preserveScroll: true,
-            onSuccess: () => toast.success('¡Gracias! Tu ayuda queda registrada.'),
-        });
-    };
-
-    const total = counts.pending + counts.in_process + counts.resolved;
+    const activeCount = (counts.pending || 0) + (counts.in_process || 0);
 
     return (
         <MainLayout>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                <div>
-                    <h1 className="text-xl font-bold text-slate-900">Limpieza comunitaria</h1>
-                    <p className="text-slate-500 text-xs mt-0.5">Puntos de basura y escombros que necesitan atencion</p>
-                </div>
-                <Link href="/limpieza/reportar"
-                    className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                    <FiPlus className="w-4 h-4" /> Reportar punto
-                </Link>
-            </div>
+            <div
+                style={{
+                    padding: '6px 20px 100px',
+                    fontFamily: "'Onest', system-ui, sans-serif",
+                }}
+            >
+                {/* Header */}
+                <h1
+                    style={{
+                        fontSize: 21,
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        letterSpacing: '-0.4px',
+                        margin: 0,
+                    }}
+                >
+                    Limpieza comunitaria
+                </h1>
+                <p
+                    style={{
+                        fontSize: 12.5,
+                        color: '#94a3b8',
+                        fontWeight: 500,
+                        marginTop: 1,
+                        marginBottom: 0,
+                    }}
+                >
+                    Súmate a una jornada cerca de ti
+                </p>
 
-            {/* Filtros / stats */}
-            <div className="grid grid-cols-4 gap-2 mb-5">
-                {[
-                    { key: '',           label: 'Todos',       count: total,              active: !filters.status },
-                    { key: 'pending',    label: 'Pendiente',   count: counts.pending,     active: filters.status === 'pending' },
-                    { key: 'in_process', label: 'En proceso',  count: counts.in_process,  active: filters.status === 'in_process' },
-                    { key: 'resolved',   label: 'Resueltos',   count: counts.resolved,    active: filters.status === 'resolved' },
-                ].map(({ key, label, count, active }) => (
-                    <button key={key} onClick={() => go({ status: key })}
-                        className={`rounded-2xl p-3 text-center transition-all border ${
-                            active ? 'bg-blue-700 text-white border-blue-700' : 'bg-white border-slate-200 hover:border-slate-300'
-                        }`}>
-                        <p className={`text-xl font-bold ${active ? 'text-white' : 'text-slate-900'}`}>{count}</p>
-                        <p className={`text-[10px] mt-0.5 ${active ? 'text-blue-100' : 'text-slate-500'}`}>{label}</p>
-                    </button>
-                ))}
-            </div>
+                {/* Mapa decorativo */}
+                <MapDecorativo activeCount={activeCount} />
 
-            {/* Search */}
-            <form onSubmit={(e) => { e.preventDefault(); go({ search }); }} className="flex gap-2 mb-5">
-                <input value={search} onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar por zona, ciudad o estado..."
-                    className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-                <button type="submit"
-                    className="px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl transition-colors">
-                    Buscar
-                </button>
-            </form>
-
-            {points.data.length === 0 ? (
-                <div className="text-center py-14 text-slate-400">
-                    <FiTrash2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-medium text-slate-600 text-sm">No hay puntos reportados</p>
-                    <Link href="/limpieza/reportar"
-                        className="mt-3 inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                        <FiPlus className="w-4 h-4" /> Reportar el primero
-                    </Link>
-                </div>
-            ) : (
-                <div className="space-y-3 mb-6">
-                    {points.data.map((point, i) => {
-                        const cfg = STATUS_CFG[point.status] || STATUS_CFG.pending;
-                        return (
-                            <motion.div key={point.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4, ease: 'easeOut', delay: i * 0.06 }}
-                                className={`bg-white border rounded-2xl overflow-hidden ${cfg.card}`}>
-
-                                {/* Foto */}
-                                {point.photo_path && (
-                                    <img src={`/storage/${point.photo_path}`}
-                                        alt="Punto de limpieza"
-                                        className="w-full h-40 object-cover" />
-                                )}
-
-                                <div className="p-4">
-                                    <div className="flex items-start justify-between gap-2 mb-2">
-                                        <div className="min-w-0">
-                                            <h3 className="font-bold text-slate-900 leading-tight">{point.zone_name}</h3>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                                                <FiMapPin className="w-3 h-3" />
-                                                {point.city ? `${point.city}, ` : ''}{point.state}
-                                            </p>
-                                        </div>
-                                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${cfg.badge}`}>
-                                            {cfg.label}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2 mb-3">
-                                        <span className="text-xs bg-slate-50 border border-slate-200 text-slate-600 px-2.5 py-1 rounded-full">
-                                            {TYPE_LABEL[point.type] || point.type}
-                                        </span>
-                                        <span className={`text-xs font-semibold ${VOLUME_COLOR[point.volume]}`}>
-                                            Volumen: {VOLUME_LABEL[point.volume]}
-                                        </span>
-                                    </div>
-
-                                    {point.notes && (
-                                        <p className="text-sm text-slate-600 mb-3 leading-relaxed line-clamp-2">{point.notes}</p>
-                                    )}
-
-                                    <div className="flex items-center justify-between">
-                                        <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                                            <FiUsers className="w-3.5 h-3.5" />
-                                            {point.helpers_count} {point.helpers_count === 1 ? 'voluntario' : 'voluntarios'}
-                                        </span>
-
-                                        {point.status !== 'resolved' && (
-                                            <div className="flex gap-2">
-                                                <button onClick={() => volunteer(point.id)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold border border-blue-700 text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">
-                                                    <FiUsers className="w-3.5 h-3.5" /> Voy a ayudar
-                                                </button>
-                                                <button onClick={() => setResolvePoint(point)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg transition-colors">
-                                                    <FiCheckCircle className="w-3.5 h-3.5" /> Resuelto
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {point.status === 'resolved' && point.resolved_photo_path && (
-                                            <a href={`/storage/${point.resolved_photo_path}`} target="_blank"
-                                                className="text-xs text-green-700 hover:underline font-medium">
-                                                Ver foto del despues
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {/* Pagination */}
-            {points.links && (
-                <div className="flex justify-center gap-2 flex-wrap">
-                    {points.links.map((link, i) => (
-                        link.url ? (
-                            <Link key={i} href={link.url}
-                                className={`px-3 py-1.5 rounded-lg text-sm ${link.active ? 'bg-blue-700 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                                dangerouslySetInnerHTML={{ __html: link.label }} />
-                        ) : (
-                            <span key={i} className="px-3 py-1.5 rounded-lg text-sm text-slate-300"
-                                dangerouslySetInnerHTML={{ __html: link.label }} />
-                        )
-                    ))}
-                </div>
-            )}
-
-            {/* Modal resolver */}
-            <AnimatePresence>
-                {resolvePoint && (
-                    <ResolveModal point={resolvePoint} onClose={() => setResolvePoint(null)} />
+                {/* Lista de tarjetas */}
+                {points.data.length === 0 ? (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            paddingTop: 56,
+                            gap: 12,
+                        }}
+                    >
+                        <MapPin size={40} color="#cbd5e1" />
+                        <p style={{ fontSize: 14, color: '#64748b', fontWeight: 600, margin: 0 }}>
+                            No hay puntos reportados
+                        </p>
+                        <p style={{ fontSize: 12.5, color: '#94a3b8', margin: 0 }}>
+                            Se el primero en reportar un punto de limpieza
+                        </p>
+                        <Link
+                            href="/limpieza/reportar"
+                            style={{
+                                marginTop: 4,
+                                background: '#0f172a',
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: 14,
+                                padding: '12px 24px',
+                                borderRadius: 13,
+                                textDecoration: 'none',
+                                display: 'inline-block',
+                            }}
+                        >
+                            Reportar el primero
+                        </Link>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
+                        {points.data.map((point) => (
+                            <PointCard key={point.id} point={point} />
+                        ))}
+                    </div>
                 )}
-            </AnimatePresence>
+
+                {/* Paginación */}
+                {points.links && points.links.length > 3 && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            flexWrap: 'wrap',
+                            gap: 8,
+                            marginTop: 24,
+                        }}
+                    >
+                        {points.links.map((link, i) =>
+                            link.url ? (
+                                <Link
+                                    key={i}
+                                    href={link.url}
+                                    style={{
+                                        padding: '6px 14px',
+                                        borderRadius: 10,
+                                        fontSize: 13,
+                                        fontWeight: link.active ? 700 : 500,
+                                        background: link.active ? '#4263ac' : '#fff',
+                                        color: link.active ? '#fff' : '#475569',
+                                        border: link.active ? 'none' : '1px solid #e2e6ee',
+                                        textDecoration: 'none',
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            ) : (
+                                <span
+                                    key={i}
+                                    style={{
+                                        padding: '6px 14px',
+                                        borderRadius: 10,
+                                        fontSize: 13,
+                                        color: '#cbd5e1',
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                />
+                            )
+                        )}
+                    </div>
+                )}
+            </div>
         </MainLayout>
     );
 }
