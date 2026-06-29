@@ -115,9 +115,7 @@ export default function MainLayout({ children }) {
 
                     {/* Page content */}
                     <main className="flex-1 p-4 md:p-6 pb-24 md:pb-6">
-                        <div className="max-w-5xl mx-auto">
-                            {children}
-                        </div>
+                        {children}
                     </main>
                 </div>
             </div>

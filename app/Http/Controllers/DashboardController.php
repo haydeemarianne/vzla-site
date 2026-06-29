@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MissingChild;
-use App\Models\HospitalList;
-use App\Models\UnattendedZone;
+use App\Models\SupportCase;
+use App\Models\CaseVolunteer;
+use App\Models\CleaningPoint;
 use App\Models\DonorCompany;
 use App\Models\VolunteerEngineer;
 use App\Models\PrintableMaterial;
-use App\Models\InspectionRequest;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -17,32 +16,24 @@ class DashboardController extends Controller
     {
         return Inertia::render('Dashboard', [
             'stats' => [
-                'missing_children'    => MissingChild::where('type', 'child')->where('status', 'missing')->where('validation_status', 'approved')->count(),
-                'missing_adults'      => MissingChild::where('type', 'adult')->where('status', 'missing')->where('validation_status', 'approved')->count(),
-                'deceased'            => MissingChild::where('type', 'deceased')->where('validation_status', 'approved')->count(),
-                'found'               => MissingChild::whereIn('type', ['child', 'adult'])->where('status', 'found')->where('validation_status', 'approved')->count(),
-                'critical_zones'      => UnattendedZone::where('status', 'active')->where('urgency_level', 'critical')->where('validation_status', 'approved')->count(),
-                'unattended_zones'    => UnattendedZone::where('status', 'active')->where('validation_status', 'approved')->count(),
-                'hospital_lists'      => HospitalList::where('validation_status', 'approved')->count(),
-                'volunteer_engineers' => VolunteerEngineer::where('validation_status', 'approved')->count(),
-                'donor_companies'     => DonorCompany::where('validation_status', 'approved')->count(),
-                'materials'           => PrintableMaterial::where('validation_status', 'approved')->count(),
+                'cases_open'      => SupportCase::approved()->open()->count(),
+                'cases_adopted'   => SupportCase::approved()->adopted()->count(),
+                'cases_resolved'  => SupportCase::approved()->resolved()->count(),
+                'volunteers'      => CaseVolunteer::where('validation_status', 'approved')->count(),
+                'cleaning_points' => CleaningPoint::where('status', 'active')->count(),
+                'engineers'       => VolunteerEngineer::where('validation_status', 'approved')->count(),
+                'donors'          => DonorCompany::where('validation_status', 'approved')->count(),
+                'materials'       => PrintableMaterial::where('validation_status', 'approved')->count(),
             ],
-            'critical_zones' => UnattendedZone::where('status', 'active')
-                ->where('validation_status', 'approved')
-                ->orderByRaw("FIELD(urgency_level,'critical','high','normal')")
-                ->limit(5)
-                ->get(['id','zone_name','state','needs','urgency_level','estimated_people']),
-            'recent_missing' => MissingChild::whereIn('type', ['child', 'adult'])
-                ->where('status', 'missing')
-                ->where('validation_status', 'approved')
+            'recent_cases' => SupportCase::approved()
+                ->whereIn('status', ['open', 'adopted'])
                 ->latest()
                 ->limit(6)
-                ->get(['id','name','age','type','zone','photo_path','created_at']),
-            'recent_hospitals' => HospitalList::where('validation_status', 'approved')
+                ->get(['id', 'family_name', 'is_anonymous', 'needs', 'zone', 'state', 'people_count', 'status', 'has_children', 'has_elderly']),
+            'recent_cleaning' => CleaningPoint::where('status', 'active')
                 ->latest()
                 ->limit(4)
-                ->get(['id','hospital_name','zone','patient_count_approx','created_at']),
+                ->get(['id', 'zone_name', 'state', 'volunteers_count', 'created_at']),
         ]);
     }
 }
