@@ -1,28 +1,28 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    FiHome, FiUsers, FiActivity, FiMapPin, FiTool,
+    FiHome, FiUsers, FiTool,
     FiFileText, FiGift, FiAlertTriangle, FiGrid, FiTrash2, FiTruck,
+    FiHeart, FiUserCheck,
 } from 'react-icons/fi';
 import { useState } from 'react';
 
 const NAV_ITEMS = [
-    { href: '/',           label: 'Inicio',       icon: FiHome },
-    { href: '/personas',   label: 'Personas',     icon: FiUsers },
-    { href: '/hospitales', label: 'Hospitales',   icon: FiActivity },
-    { href: '/zonas',      label: 'Zonas',        icon: FiMapPin },
-    { href: '/ingenieros', label: 'Ingenieros',   icon: FiTool },
-    { href: '/materiales', label: 'Materiales',   icon: FiFileText },
-    { href: '/donantes',   label: 'Donantes',     icon: FiGift },
-    { href: '/limpieza',   label: 'Limpieza',     icon: FiTrash2 },
-    { href: '/transporte', label: 'Transporte',   icon: FiTruck },
+    { href: '/',                    label: 'Inicio',         icon: FiHome },
+    { href: '/casos',               label: 'Casos',          icon: FiHeart },
+    { href: '/ingenieros',          label: 'Ingenieros',     icon: FiTool },
+    { href: '/materiales',          label: 'Materiales',     icon: FiFileText },
+    { href: '/donantes',            label: 'Donantes',       icon: FiGift },
+    { href: '/limpieza',            label: 'Limpieza',       icon: FiTrash2 },
+    { href: '/transporte',          label: 'Transporte',     icon: FiTruck },
+    { href: '/voluntarios/registrar', label: 'Ser voluntario', icon: FiUserCheck },
 ];
 
 // Bottom nav muestra solo 4 + "Mas"
 const BOTTOM_NAV = [
-    { href: '/',           label: 'Inicio',       icon: FiHome },
-    { href: '/personas',   label: 'Personas',     icon: FiUsers },
-    { href: '/hospitales', label: 'Hospitales',   icon: FiActivity },
-    { href: '/zonas',      label: 'Zonas',        icon: FiMapPin },
+    { href: '/',          label: 'Inicio',     icon: FiHome },
+    { href: '/casos',     label: 'Casos',      icon: FiHeart },
+    { href: '/limpieza',  label: 'Limpieza',   icon: FiTrash2 },
+    { href: '/materiales', label: 'Materiales', icon: FiFileText },
 ];
 
 const isActive = (href, url) =>

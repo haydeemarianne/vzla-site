@@ -5,6 +5,8 @@ use App\Models\Validator;
 use App\Models\MissingChild;
 use App\Models\UnattendedZone;
 use App\Models\VolunteerEngineer;
+use App\Models\SupportCase;
+use App\Models\CaseVolunteer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -22,11 +24,13 @@ class ValidatorController extends Controller
         $validator = $this->findValidator($token);
 
         return Inertia::render('Validar/Dashboard', [
-            'validator'         => $validator,
-            'token'             => $token,
-            'pending_children'  => MissingChild::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_engineers' => VolunteerEngineer::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_zones'     => UnattendedZone::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'validator'           => $validator,
+            'token'               => $token,
+            'pending_children'    => MissingChild::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_engineers'   => VolunteerEngineer::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_zones'       => UnattendedZone::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_cases'       => SupportCase::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_volunteers'  => CaseVolunteer::where('validation_status', 'pending')->latest()->limit(30)->get(),
         ]);
     }
 
@@ -57,10 +61,12 @@ class ValidatorController extends Controller
     private function resolveModel(string $type, int $id)
     {
         return match ($type) {
-            'child'    => MissingChild::findOrFail($id),
-            'engineer' => VolunteerEngineer::findOrFail($id),
-            'zone'     => UnattendedZone::findOrFail($id),
-            default    => abort(400),
+            'child'          => MissingChild::findOrFail($id),
+            'engineer'       => VolunteerEngineer::findOrFail($id),
+            'zone'           => UnattendedZone::findOrFail($id),
+            'support_case'   => SupportCase::findOrFail($id),
+            'case_volunteer' => CaseVolunteer::findOrFail($id),
+            default          => abort(400),
         };
     }
 }

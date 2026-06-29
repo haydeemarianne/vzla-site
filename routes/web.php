@@ -11,6 +11,8 @@ use App\Http\Controllers\VolunteerEngineerController;
 use App\Http\Controllers\CleaningPointController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\ValidatorController;
+use App\Http\Controllers\SupportCaseController;
+use App\Http\Controllers\CaseVolunteerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index']);
@@ -85,4 +87,18 @@ Route::prefix('validar')->group(function () {
     Route::post('/{token}/approve', [ValidatorController::class, 'approve']);
     Route::post('/{token}/reject', [ValidatorController::class, 'reject']);
     Route::post('/{token}/duplicate', [ValidatorController::class, 'markDuplicate']);
+});
+
+Route::prefix('casos')->group(function () {
+    Route::get('/', [SupportCaseController::class, 'index']);
+    Route::get('/publicar', [SupportCaseController::class, 'create']);
+    Route::post('/', [SupportCaseController::class, 'store']);
+    Route::get('/{supportCase}', [SupportCaseController::class, 'show']);
+    Route::post('/{supportCase}/apadrinar', [SupportCaseController::class, 'adopt']);
+    Route::post('/{supportCase}/actualizar', [SupportCaseController::class, 'addUpdate']);
+});
+
+Route::prefix('voluntarios')->group(function () {
+    Route::get('/registrar', [CaseVolunteerController::class, 'create']);
+    Route::post('/registrar', [CaseVolunteerController::class, 'store']);
 });

@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
-import { FiCheck, FiX, FiCopy, FiUser, FiMapPin, FiTool, FiShield } from 'react-icons/fi';
+import { FiCheck, FiX, FiCopy, FiUser, FiMapPin, FiTool, FiShield, FiHeart, FiUserCheck } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 const URGENCY_LABEL = { critical: 'Critico', high: 'Alto', normal: 'Normal' };
@@ -53,22 +53,43 @@ const ActionButtons = ({ type, id, token, duplicateOf, onAction }) => {
     );
 };
 
+const NEED_LABELS = {
+    food:       'Alimentacion',
+    water:      'Agua',
+    medicine:   'Medicamentos',
+    clothing:   'Ropa',
+    furniture:  'Mobiliario',
+    baby:       'Bebe',
+    tools:      'Herramientas',
+    documents:  'Documentos',
+    shelter:    'Refugio',
+    other:      'Otro',
+};
+
 const TABS = [
-    { key: 'children',  label: 'Personas',   icon: FiUser,   countKey: 'pending_children' },
-    { key: 'engineers', label: 'Ingenieros', icon: FiTool,   countKey: 'pending_engineers' },
-    { key: 'zones',     label: 'Zonas',      icon: FiMapPin, countKey: 'pending_zones' },
+    { key: 'children',   label: 'Personas',    icon: FiUser,       countKey: 'pending_children' },
+    { key: 'engineers',  label: 'Ingenieros',  icon: FiTool,       countKey: 'pending_engineers' },
+    { key: 'zones',      label: 'Zonas',       icon: FiMapPin,     countKey: 'pending_zones' },
+    { key: 'cases',      label: 'Casos',       icon: FiHeart,      countKey: 'pending_cases' },
+    { key: 'volunteers', label: 'Voluntarios', icon: FiUserCheck,  countKey: 'pending_volunteers' },
 ];
 
-export default function ValidarDashboard({ validator, token, pending_children, pending_engineers, pending_zones }) {
+export default function ValidarDashboard({ validator, token, pending_children, pending_engineers, pending_zones, pending_cases, pending_volunteers }) {
     const [activeTab, setActiveTab] = useState('children');
 
+    const safeCases      = pending_cases      ?? [];
+    const safeVolunteers = pending_volunteers ?? [];
+
     const counts = {
-        pending_children:  pending_children.length,
-        pending_engineers: pending_engineers.length,
-        pending_zones:     pending_zones.length,
+        pending_children:   pending_children.length,
+        pending_engineers:  pending_engineers.length,
+        pending_zones:      pending_zones.length,
+        pending_cases:      safeCases.length,
+        pending_volunteers: safeVolunteers.length,
     };
 
-    const total = counts.pending_children + counts.pending_engineers + counts.pending_zones;
+    const total = counts.pending_children + counts.pending_engineers + counts.pending_zones
+                + counts.pending_cases + counts.pending_volunteers;
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -228,6 +249,74 @@ export default function ValidarDashboard({ validator, token, pending_children, p
                                             </div>
                                         </div>
                                         <ActionButtons type="zone" id={zone.id} token={token} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Casos pendientes */}
+                        {activeTab === 'cases' && (
+                            <div className="space-y-3">
+                                {safeCases.length === 0 ? (
+                                    <p className="text-slate-400 text-center py-8 text-sm">Sin casos pendientes.</p>
+                                ) : safeCases.map((supportCase) => {
+                                    const needs = Array.isArray(supportCase.needs)
+                                        ? supportCase.needs
+                                        : (supportCase.needs ? JSON.parse(supportCase.needs) : []);
+                                    return (
+                                        <div key={supportCase.id} className="bg-white border border-slate-200 rounded-2xl p-4">
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                        <p className="font-semibold text-slate-900 text-sm">{supportCase.family_name}</p>
+                                                        <StatusBadge status={supportCase.validation_status} />
+                                                    </div>
+                                                    <p className="text-xs text-slate-500">{supportCase.zone}{supportCase.state ? `, ${supportCase.state}` : ''}</p>
+                                                    {needs.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mt-1.5">
+                                                            {needs.map((need) => (
+                                                                <span key={need}
+                                                                    className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-full font-semibold">
+                                                                    {NEED_LABELS[need] ?? need}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {supportCase.description && (
+                                                        <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">{supportCase.description}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <ActionButtons type="support_case" id={supportCase.id} token={token} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Voluntarios pendientes */}
+                        {activeTab === 'volunteers' && (
+                            <div className="space-y-3">
+                                {safeVolunteers.length === 0 ? (
+                                    <p className="text-slate-400 text-center py-8 text-sm">Sin voluntarios pendientes.</p>
+                                ) : safeVolunteers.map((volunteer) => (
+                                    <div key={volunteer.id} className="bg-white border border-slate-200 rounded-2xl p-4">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                    <p className="font-semibold text-slate-900 text-sm">{volunteer.name}</p>
+                                                    <StatusBadge status={volunteer.validation_status} />
+                                                </div>
+                                                {volunteer.cedula && (
+                                                    <p className="text-xs text-slate-500">Cedula: {volunteer.cedula}</p>
+                                                )}
+                                                <p className="text-xs text-slate-600 mt-0.5">{volunteer.phone}{volunteer.city ? ` · ${volunteer.city}` : ''}{volunteer.state ? `, ${volunteer.state}` : ''}</p>
+                                                {volunteer.motivation && (
+                                                    <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">{volunteer.motivation}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <ActionButtons type="case_volunteer" id={volunteer.id} token={token} />
                                     </div>
                                 ))}
                             </div>
