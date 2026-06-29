@@ -139,7 +139,7 @@ export default function CasosIndex({ cases, filters, counts }) {
                                 {/* Header row */}
                                 <div className="flex items-start justify-between gap-2">
                                     <p className="font-bold text-slate-900 text-base leading-snug flex-1 min-w-0">
-                                        {supportCase.family_name}
+                                        {supportCase.is_anonymous ? 'Familia que necesita apoyo' : supportCase.family_name}
                                     </p>
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${STATUS_BADGE[supportCase.status] ?? STATUS_BADGE.open}`}>
                                         {STATUS_LABEL[supportCase.status] ?? supportCase.status}

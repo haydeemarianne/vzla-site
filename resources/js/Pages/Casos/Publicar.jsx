@@ -31,6 +31,7 @@ export default function CasosPublicar() {
         people_count:  1,
         has_children:  false,
         has_elderly:   false,
+        is_anonymous:  false,
         description:   '',
         needs:         [],
         zone:          '',
@@ -104,32 +105,25 @@ export default function CasosPublicar() {
 
                     {/* Toggles */}
                     <div className="flex flex-col gap-3">
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                            <button
-                                type="button"
-                                onClick={() => setData('has_children', !data.has_children)}
-                                className={`w-10 h-6 rounded-full flex-shrink-0 transition-colors relative ${
-                                    data.has_children ? 'bg-blue-700' : 'bg-slate-200'
-                                }`}>
-                                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
-                                    data.has_children ? 'translate-x-5' : 'translate-x-1'
-                                }`} />
-                            </button>
-                            <span className="text-sm text-slate-700 leading-snug">Hay ninos en el grupo</span>
-                        </label>
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                            <button
-                                type="button"
-                                onClick={() => setData('has_elderly', !data.has_elderly)}
-                                className={`w-10 h-6 rounded-full flex-shrink-0 transition-colors relative ${
-                                    data.has_elderly ? 'bg-blue-700' : 'bg-slate-200'
-                                }`}>
-                                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
-                                    data.has_elderly ? 'translate-x-5' : 'translate-x-1'
-                                }`} />
-                            </button>
-                            <span className="text-sm text-slate-700 leading-snug">Hay adultos mayores en el grupo</span>
-                        </label>
+                        {[
+                            { key: 'has_children',  label: 'Hay ninos en el grupo' },
+                            { key: 'has_elderly',   label: 'Hay adultos mayores en el grupo' },
+                            { key: 'is_anonymous',  label: 'Publicar de forma anonima (el publico no vera mi nombre, pero los administradores si)' },
+                        ].map(({ key, label }) => (
+                            <label key={key} className="flex items-center gap-3 cursor-pointer select-none">
+                                <button
+                                    type="button"
+                                    onClick={() => setData(key, !data[key])}
+                                    className={`w-10 h-6 rounded-full flex-shrink-0 transition-colors relative ${
+                                        data[key] ? 'bg-blue-700' : 'bg-slate-200'
+                                    }`}>
+                                    <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${
+                                        data[key] ? 'translate-x-5' : 'translate-x-1'
+                                    }`} />
+                                </button>
+                                <span className="text-sm text-slate-700 leading-snug">{label}</span>
+                            </label>
+                        ))}
                     </div>
 
                     {/* description */}

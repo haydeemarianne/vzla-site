@@ -48,6 +48,7 @@ class SupportCaseController extends Controller
             'has_children'  => 'boolean',
             'has_elderly'   => 'boolean',
             'contact_phone' => 'required|string|max:30',
+            'is_anonymous'  => 'boolean',
             'photo_path'    => 'nullable|string|max:500',
         ]);
 
