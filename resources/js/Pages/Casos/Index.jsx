@@ -103,7 +103,7 @@ export default function CasosIndex({ cases, filters, counts }) {
             </div>
 
             {/* Cases grid */}
-            {cases.length === 0 ? (
+            {cases.data.length === 0 ? (
                 <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
                     <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <FiHeart className="w-7 h-7 text-blue-400" />
@@ -123,7 +123,7 @@ export default function CasosIndex({ cases, filters, counts }) {
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {cases.map((supportCase, i) => {
+                    {cases.data.map((supportCase, i) => {
                         const needs = Array.isArray(supportCase.needs)
                             ? supportCase.needs
                             : (supportCase.needs ? JSON.parse(supportCase.needs) : []);
