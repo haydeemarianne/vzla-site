@@ -1,6 +1,17 @@
 import { Link, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
-import { Search, ArrowRight, Heart, MapPin } from 'lucide-react';
+import { Search, ArrowRight, Heart, MapPin, Share2 } from 'lucide-react';
+
+function shareCase(supportCase) {
+    const url  = `${window.location.origin}/casos/${supportCase.id}`;
+    const name = supportCase.is_anonymous ? 'Una familia' : supportCase.family_name;
+    const text = `${name} necesita apoyo urgente. Apadrínalos directamente en Venezuela Ayuda — sin intermediarios.`;
+    if (navigator.share) {
+        navigator.share({ title: `${name} — Venezuela Ayuda`, text, url }).catch(() => {});
+    } else {
+        navigator.clipboard?.writeText(url).then(() => alert('¡Enlace copiado!')).catch(() => {});
+    }
+}
 
 // ── Constantes de diseño ────────────────────────────────────────────────────
 
@@ -255,22 +266,34 @@ function CaseCard({ supportCase, index }) {
                 <span style={{ fontSize: 11.5, fontWeight: 600, color: '#94a3b8' }}>
                     {days} {days === 1 ? 'día' : 'días'} sin ayuda
                 </span>
-                <Link
-                    href={`/casos/${supportCase.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: '#4263ac',
-                        textDecoration: 'none',
-                    }}
-                >
-                    Apadrinar
-                    <ArrowRight size={15} color="#4263ac" strokeWidth={2.5} />
-                </Link>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {/* Compartir */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); shareCase(supportCase); }}
+                        title="Compartir caso"
+                        style={{
+                            width: 30, height: 30, borderRadius: '50%',
+                            background: '#f1f4f9', border: 'none',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer', flexShrink: 0,
+                        }}
+                    >
+                        <Share2 size={14} color="#64748b" strokeWidth={2} />
+                    </button>
+                    {/* Apadrinar */}
+                    <Link
+                        href={`/casos/${supportCase.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 4,
+                            fontSize: 13, fontWeight: 700,
+                            color: '#4263ac', textDecoration: 'none',
+                        }}
+                    >
+                        Apadrinar
+                        <ArrowRight size={15} color="#4263ac" strokeWidth={2.5} />
+                    </Link>
+                </div>
             </div>
         </div>
     );

@@ -52,9 +52,12 @@ class SupportCaseController extends Controller
             'photo_path'    => 'nullable|string|max:500',
         ]);
 
-        SupportCase::create(array_merge($request->all(), ['validation_status' => 'pending']));
+        SupportCase::create(array_merge($request->all(), [
+            'validation_status' => 'approved',
+            'status'            => 'open',
+        ]));
 
-        return redirect('/')->with('success', 'Caso publicado. Sera revisado y publicado en breve. Gracias por compartir.');
+        return redirect('/casos')->with('success', '¡Caso publicado! Ya está visible para los voluntarios.');
     }
 
     public function show(SupportCase $supportCase)

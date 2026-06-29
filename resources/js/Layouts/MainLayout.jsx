@@ -59,7 +59,9 @@ export default function MainLayout({ children }) {
 
             {/* Page content */}
             <main style={{ paddingBottom: '72px' }}>
-                {children}
+                <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+                    {children}
+                </div>
             </main>
 
             {/* Bottom tab bar */}
