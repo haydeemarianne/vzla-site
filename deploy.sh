@@ -12,6 +12,9 @@ composer install --no-dev --optimize-autoloader --no-interaction
 echo "==> Migrations..."
 php artisan migrate --force
 
+echo "==> Validator seeder..."
+php artisan db:seed --class=ValidatorSeeder --force
+
 echo "==> Caches..."
 php artisan config:cache
 php artisan route:cache

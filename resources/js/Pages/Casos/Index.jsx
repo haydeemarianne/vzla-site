@@ -1,10 +1,43 @@
 import { Link, router } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
-import { Search, ArrowRight, Heart, MapPin, Share2 } from 'lucide-react';
+import { ArrowRight, Heart, MapPin, Share2, Plus } from 'lucide-react';
 
-function shareCase(supportCase) {
-    const url  = `${window.location.origin}/casos/${supportCase.id}`;
-    const name = supportCase.is_anonymous ? 'Una familia' : supportCase.family_name;
+// ─── Config ───────────────────────────────────────────────────────────────────
+
+const NEED_LABELS = {
+    food: 'Alimentación', water: 'Agua', medicine: 'Medicamentos',
+    clothing: 'Ropa', furniture: 'Mobiliario', baby: 'Bebé',
+    tools: 'Herramientas', documents: 'Documentos', shelter: 'Refugio', other: 'Otro',
+};
+
+const PASTEL = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#fde68a'];
+
+const COLUMNS = [
+    { key: 'open',     label: 'Sin apadrinar', color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
+    { key: 'adopted',  label: 'Apadrinados',   color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
+    { key: 'resolved', label: 'Resueltos',      color: '#64748b', bg: '#f1f5f9', dot: '#94a3b8' },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function initials(name, anon) {
+    if (anon) return 'FA';
+    return (name ?? '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
+}
+
+function daysSince(date) {
+    if (!date) return 1;
+    return Math.max(1, Math.floor((Date.now() - new Date(date)) / 86400000));
+}
+
+function parseNeeds(raw) {
+    if (Array.isArray(raw)) return raw;
+    try { return JSON.parse(raw); } catch { return []; }
+}
+
+function shareCase(c) {
+    const url  = `${window.location.origin}/casos/${c.id}`;
+    const name = c.is_anonymous ? 'Una familia' : c.family_name;
     const text = `${name} necesita apoyo urgente. Apadrínalos directamente en Venezuela Ayuda — sin intermediarios.`;
     if (navigator.share) {
         navigator.share({ title: `${name} — Venezuela Ayuda`, text, url }).catch(() => {});
@@ -13,242 +46,78 @@ function shareCase(supportCase) {
     }
 }
 
-// ── Constantes de diseño ────────────────────────────────────────────────────
+// ─── Tarjeta ──────────────────────────────────────────────────────────────────
 
-const NEED_LABELS = {
-    food:       'Alimentación',
-    water:      'Agua',
-    medicine:   'Medicamentos',
-    clothing:   'Ropa',
-    furniture:  'Mobiliario',
-    baby:       'Bebé',
-    tools:      'Herramientas',
-    documents:  'Documentos',
-    shelter:    'Refugio',
-    other:      'Otro',
-};
-
-const FILTER_CHIPS = [
-    { value: '',         label: 'Todos' },
-    { value: 'critical', label: 'Críticos' },
-    { value: 'children', label: 'Con niños' },
-    { value: 'elderly',  label: 'Con adultos mayores' },
-];
-
-const AVATAR_PASTELS = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#fde68a'];
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function getInitials(familyName, isAnonymous) {
-    if (isAnonymous) return 'FA';
-    if (!familyName) return '?';
-    return familyName
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? '')
-        .join('');
-}
-
-function getDaysSince(createdAt, fallbackIndex) {
-    if (createdAt) {
-        return Math.max(1, Math.floor((Date.now() - new Date(createdAt)) / 86400000));
-    }
-    return fallbackIndex * 3 + 1;
-}
-
-function parseNeeds(rawNeeds) {
-    if (Array.isArray(rawNeeds)) return rawNeeds;
-    if (typeof rawNeeds === 'string' && rawNeeds.trim()) {
-        try { return JSON.parse(rawNeeds); } catch { return []; }
-    }
-    return [];
-}
-
-// ── Badge de urgencia ────────────────────────────────────────────────────────
-
-function UrgencyBadge({ status, hasChildren }) {
-    if (status === 'adopted') {
-        return (
-            <span style={{
-                background: '#dcfce7',
-                color: '#15803d',
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '3px 10px',
-                borderRadius: 999,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-            }}>
-                Apadrinado
-            </span>
-        );
-    }
-    if (status === 'open') {
-        return (
-            <span style={{
-                background: '#fef3e2',
-                color: '#b45309',
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '3px 10px',
-                borderRadius: 999,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-            }}>
-                Crítica
-            </span>
-        );
-    }
-    if (hasChildren) {
-        return (
-            <span style={{
-                background: '#fef9c3',
-                color: '#92600e',
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '3px 10px',
-                borderRadius: 999,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-            }}>
-                Alta
-            </span>
-        );
-    }
-    return (
-        <span style={{
-            background: '#eef2f6',
-            color: '#475569',
-            fontSize: 11,
-            fontWeight: 700,
-            padding: '3px 10px',
-            borderRadius: 999,
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-        }}>
-            Media
-        </span>
-    );
-}
-
-// ── Tarjeta de caso ──────────────────────────────────────────────────────────
-
-function CaseCard({ supportCase, index }) {
-    const needs      = parseNeeds(supportCase.needs);
-    const initials   = getInitials(supportCase.family_name, supportCase.is_anonymous);
-    const avatarBg   = AVATAR_PASTELS[index % AVATAR_PASTELS.length];
-    const days       = getDaysSince(supportCase.created_at, index);
-    const displayName = supportCase.is_anonymous ? 'Familia anónima' : (supportCase.family_name ?? 'Familia');
+function CaseCard({ c, idx }) {
+    const needs    = parseNeeds(c.needs);
+    const days     = daysSince(c.created_at);
+    const name     = c.is_anonymous ? 'Familia anónima' : (c.family_name ?? 'Familia');
+    const isOpen   = c.status === 'open';
 
     return (
         <div
-            onClick={() => router.visit(`/casos/${supportCase.id}`)}
+            onClick={() => router.visit(`/casos/${c.id}`)}
             style={{
-                background: '#ffffff',
-                borderRadius: 20,
-                boxShadow: '0 10px 26px rgba(16,24,40,.06)',
-                padding: 15,
+                background: '#fff',
+                borderRadius: 14,
+                boxShadow: '0 4px 14px rgba(16,24,40,.07)',
+                padding: '12px 13px',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
-                opacity: 0,
-                animation: `fadeUp 0.4s ease-out ${index * 0.07}s forwards`,
+                gap: 8,
+                opacity: isOpen ? 1 : 0.72,
             }}
         >
-            {/* Fila top: avatar + nombre + zona */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                {/* Avatar */}
+            {/* Avatar + nombre */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '50%',
-                    background: avatarBg,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
+                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                    background: PASTEL[idx % PASTEL.length],
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: '#3a4250' }}>
-                        {initials}
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#3a4250' }}>
+                        {initials(c.family_name, c.is_anonymous)}
                     </span>
                 </div>
-
-                {/* Nombre + badge + zona */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                        <span style={{
-                            fontSize: 14.5,
-                            fontWeight: 700,
-                            color: '#1e293b',
-                            lineHeight: 1.2,
-                            wordBreak: 'break-word',
-                        }}>
-                            {displayName}
-                        </span>
-                        <UrgencyBadge status={supportCase.status} hasChildren={supportCase.has_children} />
-                    </div>
-
-                    {/* Zona · personas */}
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        marginTop: 4,
+                        fontSize: 13, fontWeight: 700, color: '#1e293b',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }}>
-                        <MapPin size={12} color="#94a3b8" strokeWidth={2} />
-                        <span style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1 }}>
-                            {[supportCase.zone, supportCase.state].filter(Boolean).join(', ')}
-                            {supportCase.people_count ? ` · ${supportCase.people_count} personas` : ''}
+                        {name}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 1 }}>
+                        <MapPin size={10} color="#94a3b8" strokeWidth={2} />
+                        <span style={{
+                            fontSize: 11, color: '#94a3b8',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                            {[c.zone, c.state].filter(Boolean).join(', ')}
+                            {c.people_count ? ` · ${c.people_count}p` : ''}
                         </span>
                     </div>
                 </div>
             </div>
 
-            {/* Chips de necesidades */}
+            {/* Necesidades (max 3) */}
             {needs.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {needs.map((need) => (
-                        <span key={need} style={{
-                            background: '#f1f4f9',
-                            color: '#334155',
-                            fontSize: 11.5,
-                            fontWeight: 600,
-                            padding: '4px 10px',
-                            borderRadius: 8,
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                    {needs.slice(0, 3).map(n => (
+                        <span key={n} style={{
+                            background: '#f1f4f9', color: '#334155',
+                            fontSize: 10, fontWeight: 600,
+                            padding: '2px 7px', borderRadius: 5,
                         }}>
-                            {NEED_LABELS[need] ?? need}
+                            {NEED_LABELS[n] ?? n}
                         </span>
                     ))}
-                </div>
-            )}
-
-            {/* Chips especiales niños / adultos mayores */}
-            {(supportCase.has_children || supportCase.has_elderly) && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {supportCase.has_children && (
+                    {needs.length > 3 && (
                         <span style={{
-                            background: '#fef9c3',
-                            color: '#92600e',
-                            fontSize: 11.5,
-                            fontWeight: 600,
-                            padding: '4px 10px',
-                            borderRadius: 8,
+                            background: '#f1f4f9', color: '#94a3b8',
+                            fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 5,
                         }}>
-                            Con niños
-                        </span>
-                    )}
-                    {supportCase.has_elderly && (
-                        <span style={{
-                            background: '#fef3e2',
-                            color: '#b45309',
-                            fontSize: 11.5,
-                            fontWeight: 600,
-                            padding: '4px 10px',
-                            borderRadius: 8,
-                        }}>
-                            Con adultos mayores
+                            +{needs.length - 3}
                         </span>
                     )}
                 </div>
@@ -256,225 +125,147 @@ function CaseCard({ supportCase, index }) {
 
             {/* Footer */}
             <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderTop: '1px solid #f1f4f9',
-                paddingTop: 10,
-                marginTop: 2,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                borderTop: '1px solid #f1f4f9', paddingTop: 7, marginTop: 1,
             }}>
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#94a3b8' }}>
-                    {days} {days === 1 ? 'día' : 'días'} sin ayuda
+                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#94a3b8' }}>
+                    {days}d sin ayuda
                 </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    {/* Compartir */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                     <button
-                        onClick={(e) => { e.stopPropagation(); shareCase(supportCase); }}
-                        title="Compartir caso"
+                        onClick={e => { e.stopPropagation(); shareCase(c); }}
                         style={{
-                            width: 30, height: 30, borderRadius: '50%',
-                            background: '#f1f4f9', border: 'none',
+                            width: 24, height: 24, borderRadius: '50%',
+                            background: '#f1f4f9', border: 'none', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer', flexShrink: 0,
                         }}
                     >
-                        <Share2 size={14} color="#64748b" strokeWidth={2} />
+                        <Share2 size={11} color="#64748b" strokeWidth={2} />
                     </button>
-                    {/* Apadrinar */}
-                    <Link
-                        href={`/casos/${supportCase.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 4,
-                            fontSize: 13, fontWeight: 700,
-                            color: '#4263ac', textDecoration: 'none',
-                        }}
-                    >
-                        Apadrinar
-                        <ArrowRight size={15} color="#4263ac" strokeWidth={2.5} />
-                    </Link>
+                    {isOpen && (
+                        <Link
+                            href={`/casos/${c.id}`}
+                            onClick={e => e.stopPropagation()}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 2,
+                                fontSize: 11.5, fontWeight: 700,
+                                color: '#4263ac', textDecoration: 'none',
+                            }}
+                        >
+                            Apadrinar <ArrowRight size={12} color="#4263ac" strokeWidth={2.5} />
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
     );
 }
 
-// ── Estado vacío ─────────────────────────────────────────────────────────────
+// ─── Columna ──────────────────────────────────────────────────────────────────
 
-function EmptyState({ activeFilter }) {
+function Column({ col, cases }) {
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '60px 20px',
-            gap: 12,
-            textAlign: 'center',
-        }}>
+        <div style={{ minWidth: 258, maxWidth: 258, display: 'flex', flexDirection: 'column', gap: 9 }}>
+            {/* Cabecera */}
             <div style={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                background: '#eef2fa',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 4,
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '9px 11px', background: col.bg, borderRadius: 11,
             }}>
-                <Heart size={28} color="#4263ac" strokeWidth={2} />
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: col.dot, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: col.color, flex: 1 }}>
+                    {col.label}
+                </span>
+                <span style={{
+                    fontSize: 11, fontWeight: 700, color: '#fff',
+                    background: col.color,
+                    minWidth: 20, height: 20, borderRadius: '50%', padding: '0 4px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                    {cases.length}
+                </span>
             </div>
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', margin: 0 }}>
-                No hay casos
-            </p>
-            <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, maxWidth: 260, lineHeight: 1.5 }}>
-                {activeFilter
-                    ? 'No hay casos con ese filtro en este momento.'
-                    : 'Aún no hay casos publicados.'}
-            </p>
-            <Link
-                href="/casos/publicar"
-                style={{
-                    marginTop: 8,
-                    background: '#4263ac',
-                    color: '#ffffff',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    padding: '10px 22px',
-                    borderRadius: 12,
-                    textDecoration: 'none',
-                    display: 'inline-block',
-                }}
-            >
-                Publicar el primer caso
-            </Link>
+
+            {/* Tarjetas */}
+            {cases.length === 0 ? (
+                <div style={{
+                    background: '#fff', borderRadius: 14,
+                    padding: '20px 13px', textAlign: 'center',
+                    boxShadow: '0 2px 8px rgba(16,24,40,.04)',
+                }}>
+                    <Heart size={20} color="#e2e8f0" strokeWidth={2} style={{ display: 'block', margin: '0 auto 5px' }} />
+                    <p style={{ fontSize: 11.5, color: '#cbd5e1', margin: 0, fontWeight: 500 }}>
+                        Ningún caso
+                    </p>
+                </div>
+            ) : (
+                cases.map((c, i) => <CaseCard key={c.id} c={c} idx={i} />)
+            )}
         </div>
     );
 }
 
-// ── Componente principal ─────────────────────────────────────────────────────
+// ─── Página principal ─────────────────────────────────────────────────────────
 
-export default function CasosIndex({ cases, filters, counts }) {
-    const activeFilter = filters?.need ?? '';
-
-    const handleFilter = (value) => {
-        router.get('/casos', value ? { need: value } : {}, { preserveScroll: false });
-    };
+export default function CasosIndex({ by_status }) {
+    const open     = by_status?.open     ?? [];
+    const adopted  = by_status?.adopted  ?? [];
+    const resolved = by_status?.resolved ?? [];
+    const total    = open.length + adopted.length + resolved.length;
 
     return (
         <MainLayout>
-            <div style={{
-                padding: '6px 20px 100px',
-                fontFamily: "'Onest', system-ui, sans-serif",
-            }}>
-                {/* ── Header ── */}
+            <div style={{ padding: '16px 0 100px', fontFamily: "'Onest', system-ui, sans-serif" }}>
+                {/* ── Encabezado ── */}
                 <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                    marginBottom: 18,
+                    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
+                    padding: '0 20px', marginBottom: 14,
                 }}>
                     <div>
                         <h1 style={{
-                            margin: 0,
-                            fontSize: 21,
-                            fontWeight: 700,
-                            letterSpacing: '-0.4px',
-                            color: '#1e293b',
-                            lineHeight: 1.2,
+                            margin: 0, fontSize: 20, fontWeight: 700,
+                            letterSpacing: '-0.4px', color: '#1e293b',
                         }}>
-                            Casos apadrinados
+                            Tablero de casos
                         </h1>
-                        <p style={{
-                            margin: '4px 0 0',
-                            fontSize: 12.5,
-                            fontWeight: 500,
-                            color: '#94a3b8',
-                            lineHeight: 1.3,
-                        }}>
-                            {counts?.open ?? 0} familias esperan apoyo 1:1
+                        <p style={{ margin: '3px 0 0', fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
+                            {open.length} sin apadrinar · {total} en total
                         </p>
                     </div>
-
-                    {/* Botón buscar */}
-                    <button
-                        aria-label="Buscar casos"
+                    <Link
+                        href="/casos/publicar"
                         style={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: '50%',
-                            background: '#ffffff',
-                            border: 'none',
-                            boxShadow: '0 4px 12px rgba(16,24,40,.08)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            flexShrink: 0,
+                            display: 'flex', alignItems: 'center', gap: 4,
+                            background: '#4263ac', color: '#fff',
+                            fontSize: 12, fontWeight: 700,
+                            padding: '8px 13px', borderRadius: 11,
+                            textDecoration: 'none', flexShrink: 0,
                         }}
                     >
-                        <Search size={18} color="#475569" strokeWidth={2} />
-                    </button>
+                        <Plus size={13} color="#fff" strokeWidth={2.5} />
+                        Publicar
+                    </Link>
                 </div>
 
-                {/* ── Filtros (scroll horizontal) ── */}
+                {/* ── Kanban (scroll horizontal con snap) ── */}
                 <div style={{
-                    display: 'flex',
-                    gap: 8,
+                    display: 'flex', gap: 10,
                     overflowX: 'auto',
-                    paddingBottom: 4,
-                    marginBottom: 18,
+                    padding: '2px 20px 6px',
+                    scrollSnapType: 'x mandatory',
                     scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
                 }}>
-                    {FILTER_CHIPS.map(({ value, label }) => {
-                        const isActive = activeFilter === value;
-                        return (
-                            <button
-                                key={value}
-                                onClick={() => handleFilter(value)}
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: 999,
-                                    fontSize: 13,
-                                    fontWeight: 600,
-                                    whiteSpace: 'nowrap',
-                                    flexShrink: 0,
-                                    cursor: 'pointer',
-                                    border: isActive ? 'none' : '1px solid #e2e6ee',
-                                    background: isActive ? '#4263ac' : '#ffffff',
-                                    color: isActive ? '#ffffff' : '#334155',
-                                    transition: 'background 0.15s, color 0.15s',
-                                    fontFamily: 'inherit',
-                                }}
-                            >
-                                {label}
-                            </button>
-                        );
-                    })}
+                    {COLUMNS.map(col => (
+                        <div key={col.key} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
+                            <Column
+                                col={col}
+                                cases={col.key === 'open' ? open : col.key === 'adopted' ? adopted : resolved}
+                            />
+                        </div>
+                    ))}
                 </div>
-
-                {/* ── Listado / vacío ── */}
-                {cases.data.length === 0 ? (
-                    <EmptyState activeFilter={activeFilter} />
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                        {cases.data.map((supportCase, i) => (
-                            <CaseCard key={supportCase.id} supportCase={supportCase} index={i} />
-                        ))}
-                    </div>
-                )}
             </div>
 
-            {/* ── Animación fadeUp ── */}
-            <style>{`
-                @keyframes fadeUp {
-                    from { opacity: 0; transform: translateY(18px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                /* Ocultar scrollbar en filtros (webkit) */
-                div::-webkit-scrollbar { display: none; }
-            `}</style>
+            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
         </MainLayout>
     );
 }

@@ -12,21 +12,14 @@ class SupportCaseController extends Controller
 {
     public function index(Request $request)
     {
-        $query = SupportCase::approved()
-            ->whereIn('status', ['open', 'adopted'])
-            ->when($request->need, fn($q) => $q->whereJsonContains('needs', $request->need))
-            ->latest();
-
-        $counts = [
-            'open'     => SupportCase::approved()->open()->count(),
-            'adopted'  => SupportCase::approved()->adopted()->count(),
-            'resolved' => SupportCase::approved()->resolved()->count(),
-        ];
+        $base = SupportCase::approved()->latest();
 
         return Inertia::render('Casos/Index', [
-            'cases'   => $query->paginate(12)->withQueryString(),
-            'filters' => $request->only(['need']),
-            'counts'  => $counts,
+            'by_status' => [
+                'open'     => (clone $base)->open()->get(),
+                'adopted'  => (clone $base)->adopted()->get(),
+                'resolved' => (clone $base)->resolved()->get(),
+            ],
         ]);
     }
 
