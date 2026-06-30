@@ -52,6 +52,11 @@
         gap: 12px;
         flex-shrink: 0;
         width: 48px;
+        /* Sticky — se queda visible al hacer scroll */
+        position: sticky;
+        top: 20px;
+        align-self: flex-start;
+        max-height: calc(100vh - 56px);
         /* SIN background, SIN border — solo círculos flotantes */
     }
 }
@@ -111,24 +116,22 @@
 }
 
 /* ── Header ────────────────────────────────────── */
-/* Mobile: barra blanca simple */
+/* Mobile y Desktop: SIN barra — solo círculos flotantes */
 .va-header {
     display: flex;
     align-items: center;
     gap: 10px;
     height: 56px;
     padding: 0 16px;
-    background: #fff;
-    border-bottom: 1px solid #eef0f3;
+    background: transparent;
+    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: 30;
 }
-/* Desktop: TRANSPARENTE, sin barra — integrado en la página */
+/* Desktop: estático, padding inferior para separar del contenido */
 @media (min-width: 768px) {
     .va-header {
-        background: transparent;
-        border-bottom: none;
         position: static;
         height: auto;
         padding: 0 0 20px 0;
@@ -288,17 +291,27 @@
     .va-acciones-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Dashboard — 3 columnas de contenido (Casos | Jornadas | Materiales) */
-.va-dash-3col {
+/* Dashboard — Row 1: KPIs compactos | Materiales */
+.va-dash-row1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+@media (min-width: 900px) {
+    .va-dash-row1 { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+/* Dashboard — Row 2: 4 columnas (Casos|Jornadas|Ingenieros|Transporte) */
+.va-dash-4col {
     display: grid;
     grid-template-columns: 1fr;
     gap: 14px;
 }
 @media (min-width: 700px) {
-    .va-dash-3col { grid-template-columns: 1fr 1fr; align-items: start; }
+    .va-dash-4col { grid-template-columns: 1fr 1fr; align-items: start; }
 }
-@media (min-width: 1050px) {
-    .va-dash-3col { grid-template-columns: repeat(3, 1fr); align-items: start; }
+@media (min-width: 1200px) {
+    .va-dash-4col { grid-template-columns: repeat(4, 1fr); align-items: start; }
 }
 
 /* Dashboard — layout 2 columnas en desktop */

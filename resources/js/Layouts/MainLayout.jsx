@@ -2,7 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import {
     Heart, Sparkles, Wrench, Home, Truck,
     ArrowLeft, Share2, Plus, Users, ShieldCheck, Settings,
-    Search, Bell,
+    Search, RotateCw,
 } from 'lucide-react';
 
 /* ─── Navegación ──────────────────────────────── */
@@ -87,7 +87,7 @@ function HeaderCircle({ onClick, title, children, href, notif = false }) {
 }
 
 /* ─── Layout principal ─────────────────────────── */
-export default function MainLayout({ children }) {
+export default function MainLayout({ children, stats }) {
     const { url } = usePage();
 
     return (
@@ -132,6 +132,7 @@ export default function MainLayout({ children }) {
                         <div style={{
                             width: 32, height: 32, borderRadius: 10, background: '#4263ac',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(66,99,172,.30)',
                         }}>
                             <Heart size={15} color="#fff" fill="#fff" />
                         </div>
@@ -140,7 +141,7 @@ export default function MainLayout({ children }) {
                         </span>
                     </Link>
 
-                    {/* Logo — desktop (igual que ValidarDashboard) */}
+                    {/* Logo — desktop */}
                     <div className="va-desktop-only" style={{ alignItems: 'center', gap: 10, flexShrink: 0 }}>
                         <div style={{
                             width: 34, height: 34, borderRadius: 10, background: '#83A2DB',
@@ -153,37 +154,35 @@ export default function MainLayout({ children }) {
                         </span>
                     </div>
 
-                    {/* Nav pills — desktop (mismo estilo que ValidarDashboard) */}
-                    <nav className="va-desktop-only" style={{ alignItems: 'center', gap: 2, marginLeft: 8 }}>
-                        {TOP_NAV.map(({ href, label }) => {
-                            const active = isActive(href, url);
-                            return (
-                                <Link key={href} href={href} style={{
-                                    textDecoration: 'none',
-                                    fontSize: 12, fontWeight: 600,
-                                    padding: '8px 14px', borderRadius: 999,
-                                    border: 'none',
-                                    background: active ? '#0f172a' : 'transparent',
-                                    color: active ? '#fff' : '#5b6677',
-                                    boxShadow: active ? '0 18px 34px -10px rgba(2,6,23,.45)' : 'none',
-                                    whiteSpace: 'nowrap',
-                                    cursor: 'pointer',
-                                    transition: 'all .15s',
-                                }}>
-                                    {label}
-                                </Link>
-                            );
-                        })}
-                    </nav>
+                    {/* Métricas rápidas — desktop, solo cuando hay stats */}
+                    {stats && (
+                        <div className="va-desktop-only" style={{ alignItems: 'center', gap: 6, marginLeft: 16, flex: 1 }}>
+                            {[
+                                { v: stats.cases_open,      label: 'sin apadrinar', color: '#CE6969', bg: '#fbeaea' },
+                                { v: stats.cleaning_points, label: 'jornadas',       color: '#16a34a', bg: '#dcfce7' },
+                                { v: stats.engineers,       label: 'ingenieros',    color: '#7c3aed', bg: '#f3eeff' },
+                            ].map(({ v, label, color, bg }) => (
+                                <div key={label} style={{ background: bg, borderRadius: 999, padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                    <span style={{ fontSize: 13, fontWeight: 800, color }}>{v ?? 0}</span>
+                                    <span style={{ fontSize: 11, color: '#7b8595', fontWeight: 600 }}>{label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <div style={{ flex: 1 }} />
 
-                    {/* Acciones del header — círculos iguales que sidebar */}
+                    {/* Acciones del header */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
+
+                        {/* Actualizar */}
+                        <HeaderCircle title="Actualizar" onClick={() => router.reload()}>
+                            <RotateCw size={16} color="#5b6677" strokeWidth={1.9} />
+                        </HeaderCircle>
 
                         {/* Búsqueda */}
                         <HeaderCircle
-                            title="Buscar"
+                            title="Buscar casos"
                             onClick={() => {
                                 const q = prompt('Buscar:');
                                 if (q) router.visit(`/casos?search=${encodeURIComponent(q)}`);
@@ -192,33 +191,6 @@ export default function MainLayout({ children }) {
                             <Search size={17} color="#5b6677" strokeWidth={1.9} />
                         </HeaderCircle>
 
-                        {/* Alertas — solo mobile */}
-                        <div className="va-mobile-only">
-                            <HeaderCircle href="/validar" title="Validación" notif>
-                                <Bell size={17} color="#5b6677" strokeWidth={1.9} />
-                            </HeaderCircle>
-                        </div>
-
-                        {/* Admin — solo mobile (desktop lo tiene el sidebar) */}
-                        <div className="va-mobile-only">
-                            <HeaderCircle onClick={() => router.visit('/admin/login')} title="Admin">
-                                <Settings size={17} color="#5b6677" strokeWidth={1.9} />
-                            </HeaderCircle>
-                        </div>
-
-                        {/* Avatar */}
-                        <div
-                            onClick={() => router.visit('/admin/login')}
-                            title="Administración"
-                            style={{
-                                ...CIRCLE,
-                                background: '#e7dcf2',
-                                fontSize: 13, fontWeight: 700, color: '#3a4250',
-                                userSelect: 'none',
-                            }}
-                        >
-                            VA
-                        </div>
                     </div>
 
                 </header>

@@ -8,6 +8,8 @@ use App\Models\CleaningPoint;
 use App\Models\DonorCompany;
 use App\Models\VolunteerEngineer;
 use App\Models\PrintableMaterial;
+use App\Models\InspectionRequest;
+use App\Models\TransportRequest;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -38,6 +40,14 @@ class DashboardController extends Controller
                 ->orderByDesc('download_count')
                 ->limit(5)
                 ->get(['id', 'title', 'category', 'file_type', 'download_count']),
+            'recent_inspections' => InspectionRequest::where('status', 'open')
+                ->latest()
+                ->limit(4)
+                ->get(['id', 'zone', 'state', 'urgency', 'structure_type']),
+            'recent_transport' => TransportRequest::where('status', 'open')
+                ->latest()
+                ->limit(4)
+                ->get(['id', 'cargo_type', 'origin_state', 'destination_state', 'urgency']),
         ]);
     }
 }
