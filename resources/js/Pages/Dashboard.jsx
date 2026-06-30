@@ -222,9 +222,14 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning, top_ma
                                                     <FileText size={11} color="#92600e" strokeWidth={2}/>
                                                 </div>
 
-                                                {/* Título — crece más */}
+                                                {/* Título */}
                                                 <span style={{ flex:2, minWidth:0, fontSize:11.5, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                                                     {m.title}
+                                                </span>
+
+                                                {/* Instagram */}
+                                                <span style={{ flex:1, minWidth:0, fontSize:10.5, color:'#7c3aed', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                    {m.contributor_instagram ? `@${m.contributor_instagram.replace(/^@/,'')}` : '—'}
                                                 </span>
 
                                                 {/* Categoría */}
@@ -232,29 +237,20 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning, top_ma
                                                     {m.category ?? '—'}
                                                 </span>
 
-                                                {/* Tipo de archivo */}
-                                                <span style={{ fontSize:9, fontWeight:700, background:ft.bg, color:ft.color, padding:'2px 6px', borderRadius:4, flexShrink:0 }}>
-                                                    {ftUpper}
-                                                </span>
-
                                                 {/* Organización */}
                                                 <span style={{ flex:1.2, minWidth:0, fontSize:10.5, color:'#5b6677', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                                                     {m.organization || m.uploaded_by || '—'}
                                                 </span>
 
-                                                {/* Instagram */}
-                                                {m.contributor_instagram ? (
-                                                    <span style={{ fontSize:10, color:'#7c3aed', whiteSpace:'nowrap', flexShrink:0 }}>
-                                                        @{m.contributor_instagram.replace(/^@/, '')}
-                                                    </span>
-                                                ) : <span style={{ fontSize:10, color:'#d0d6e4', flexShrink:0 }}>—</span>}
+                                                {/* Tipo de archivo */}
+                                                <span style={{ fontSize:9, fontWeight:700, background:ft.bg, color:ft.color, padding:'2px 6px', borderRadius:4, flexShrink:0 }}>
+                                                    {ftUpper}
+                                                </span>
 
                                                 {/* Teléfono */}
-                                                {m.contributor_phone ? (
-                                                    <span style={{ fontSize:10, color:'#5b6677', whiteSpace:'nowrap', flexShrink:0 }}>
-                                                        {m.contributor_phone}
-                                                    </span>
-                                                ) : <span style={{ fontSize:10, color:'#d0d6e4', flexShrink:0 }}>—</span>}
+                                                <span style={{ fontSize:10, color:'#5b6677', whiteSpace:'nowrap', flexShrink:0 }}>
+                                                    {m.contributor_phone || '—'}
+                                                </span>
 
                                                 {/* Descargas */}
                                                 <span style={{ display:'flex', alignItems:'center', gap:2, fontSize:10, color:'#92600e', flexShrink:0, fontWeight:700 }}>
