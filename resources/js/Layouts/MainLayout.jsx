@@ -62,7 +62,7 @@ export default function MainLayout({ children }) {
 
             {/* Page content */}
             <main style={{ paddingBottom: '72px' }}>
-                <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+                <div className="va-content">
                     {children}
                 </div>
             </main>

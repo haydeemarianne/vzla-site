@@ -1,6 +1,6 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { Link, router } from '@inertiajs/react';
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin, ArrowRight } from 'lucide-react';
 
 const TYPE_BADGE = {
     debris:   { bg: '#fef3e2', color: '#b45309', label: 'Escombros' },
@@ -142,9 +142,9 @@ function PointCard({ point }) {
                 />
             </div>
 
-            {/* Botón Me apunto */}
-            <button
-                onClick={() => router.post(`/limpieza/${point.id}/voluntario`)}
+            {/* Botón Ver jornada */}
+            <Link
+                href={`/limpieza/${point.id}`}
                 style={{
                     marginTop: 13,
                     width: '100%',
@@ -158,10 +158,16 @@ function PointCard({ point }) {
                     cursor: 'pointer',
                     fontFamily: "'Onest', system-ui, sans-serif",
                     letterSpacing: '-0.1px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    textDecoration: 'none',
+                    boxSizing: 'border-box',
                 }}
             >
-                Me apunto
-            </button>
+                Ver jornada y apuntarme <ArrowRight size={14} color="#fff" strokeWidth={2.5} />
+            </Link>
         </div>
     );
 }

@@ -79,7 +79,9 @@ Route::prefix('limpieza')->group(function () {
     Route::get('/', [CleaningPointController::class, 'index']);
     Route::get('/reportar', [CleaningPointController::class, 'create']);
     Route::post('/', [CleaningPointController::class, 'store']);
+    Route::get('/{cleaningPoint}', [CleaningPointController::class, 'show']);
     Route::post('/{cleaningPoint}/voluntario', [CleaningPointController::class, 'volunteer']);
+    Route::patch('/{cleaningPoint}/voluntario/{volunteer}/status', [CleaningPointController::class, 'volunteerStatus']);
     Route::post('/{cleaningPoint}/resolver', [CleaningPointController::class, 'resolve']);
 });
 

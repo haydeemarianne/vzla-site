@@ -3,8 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\Models\CleaningPoint;
+use App\Models\CleaningPointVolunteer;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
+// Tareas predefinidas por tipo de punto
+const CLEANING_TASKS = [
+    'domestic' => [
+        'Identificar zonas de acumulación',
+        'Reunir bolsas y herramientas',
+        'Recolectar desechos',
+        'Transportar a punto de recolección',
+        'Limpiar y desinfectar área',
+        'Verificar y cerrar jornada',
+    ],
+    'debris' => [
+        'Evaluar seguridad estructural',
+        'Separar materiales reutilizables',
+        'Retirar escombros pesados',
+        'Limpiar perímetro',
+        'Verificar acceso seguro',
+        'Fotografiar resultado y cerrar',
+    ],
+    'both' => [
+        'Evaluar área y dividir equipo',
+        'Equipo A: retirar escombros',
+        'Equipo B: recolectar desechos',
+        'Transporte de material',
+        'Limpieza y desinfección',
+        'Verificar y cerrar jornada',
+    ],
+];
 
 class CleaningPointController extends Controller
 {
@@ -31,6 +60,18 @@ class CleaningPointController extends Controller
                 'in_process' => CleaningPoint::inProcess()->count(),
                 'resolved'   => CleaningPoint::resolved()->count(),
             ],
+        ]);
+    }
+
+    public function show(CleaningPoint $cleaningPoint)
+    {
+        $cleaningPoint->load('volunteers');
+        $tasks = CLEANING_TASKS[$cleaningPoint->type] ?? CLEANING_TASKS['domestic'];
+
+        return Inertia::render('Limpieza/Show', [
+            'point'      => $cleaningPoint,
+            'volunteers' => $cleaningPoint->volunteers()->latest()->get(),
+            'tasks'      => $tasks,
         ]);
     }
 
@@ -61,19 +102,37 @@ class CleaningPointController extends Controller
         return redirect('/limpieza')->with('success', 'Punto de limpieza reportado. Gracias.');
     }
 
-    public function volunteer(CleaningPoint $cleaningPoint)
+    public function volunteer(Request $request, CleaningPoint $cleaningPoint)
     {
         if ($cleaningPoint->status === 'resolved') {
             return back()->with('error', 'Este punto ya fue resuelto.');
         }
 
+        $data = $request->validate([
+            'name'  => 'required|string|max:100',
+            'phone' => 'required|string|max:30',
+        ]);
+
+        $volunteer = $cleaningPoint->volunteers()->create($data);
         $cleaningPoint->increment('helpers_count');
 
         if ($cleaningPoint->status === 'pending') {
             $cleaningPoint->update(['status' => 'in_process']);
         }
 
-        return back()->with('success', '¡Gracias! Tu ayuda queda registrada.');
+        return redirect("/limpieza/{$cleaningPoint->id}")
+            ->with('success', "¡Apuntado! Tu token: {$volunteer->token}");
+    }
+
+    public function volunteerStatus(Request $request, CleaningPoint $cleaningPoint, CleaningPointVolunteer $volunteer)
+    {
+        $request->validate([
+            'status' => 'required|in:confirmed,on_the_way,arrived,done',
+        ]);
+
+        $volunteer->update(['status' => $request->status]);
+
+        return redirect("/limpieza/{$cleaningPoint->id}")->with('success', 'Estado actualizado.');
     }
 
     public function resolve(Request $request, CleaningPoint $cleaningPoint)

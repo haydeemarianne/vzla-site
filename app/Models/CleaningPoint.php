@@ -19,4 +19,9 @@ class CleaningPoint extends Model
     public function scopePending($query)    { return $query->where('status', 'pending'); }
     public function scopeInProcess($query)  { return $query->where('status', 'in_process'); }
     public function scopeResolved($query)   { return $query->where('status', 'resolved'); }
+
+    public function volunteers()
+    {
+        return $this->hasMany(CleaningPointVolunteer::class);
+    }
 }
