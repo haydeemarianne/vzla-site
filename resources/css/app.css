@@ -29,13 +29,42 @@
     margin: 0 auto;
 }
 @media (min-width: 900px) {
-    .va-content {
-        max-width: 780px;
-    }
+    .va-content { max-width: 780px; }
 }
 @media (min-width: 1200px) {
-    .va-content {
-        max-width: 960px;
+    .va-content { max-width: 960px; }
+}
+
+/* Dashboard — grids responsivos */
+.va-kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+@media (min-width: 540px) {
+    .va-kpi-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.va-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+}
+@media (min-width: 540px) {
+    .va-action-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* Dashboard — layout 2 columnas en desktop */
+@media (min-width: 900px) {
+    .va-dashboard-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+    .va-dashboard-full {
+        grid-column: 1 / -1;
     }
 }
 
