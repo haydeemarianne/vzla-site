@@ -1,21 +1,13 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { Heart, Trash2, Wrench, Home, Settings, Plus, Truck } from 'lucide-react';
+import { Heart, Trash2, Wrench, Home, Settings, Plus, Truck, ShieldCheck } from 'lucide-react';
 
-const TOP_NAV = [
-    { href: '/',           label: 'Inicio' },
-    { href: '/casos',      label: 'Casos' },
-    { href: '/limpieza',   label: 'Limpieza' },
-    { href: '/ingenieros', label: 'Ingenieros' },
-    { href: '/transporte', label: 'Transporte' },
-    { href: '/validar',    label: 'Validación' },
-];
-
-const BOTTOM_NAV = [
-    { href: '/',           label: 'Inicio',      Icon: Home },
-    { href: '/casos',      label: 'Casos',       Icon: Heart },
-    { href: '/limpieza',   label: 'Limpieza',    Icon: Trash2 },
-    { href: '/ingenieros', label: 'Ingenieros',  Icon: Wrench },
-    { href: '/transporte', label: 'Transporte',  Icon: Truck },
+const NAV = [
+    { href: '/',           Icon: Home,         label: 'Inicio' },
+    { href: '/casos',      Icon: Heart,        label: 'Casos' },
+    { href: '/limpieza',   Icon: Trash2,       label: 'Limpieza' },
+    { href: '/ingenieros', Icon: Wrench,       label: 'Ingenieros' },
+    { href: '/transporte', Icon: Truck,        label: 'Transporte' },
+    { href: '/validar',    Icon: ShieldCheck,  label: 'Validación' },
 ];
 
 const isActive = (href, url) =>
@@ -25,48 +17,83 @@ export default function MainLayout({ children }) {
     const { url } = usePage();
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            background: 'linear-gradient(180deg,#eef0f4 0%,#e3e6ee 100%)',
-            fontFamily: "'Onest', system-ui, sans-serif",
-            color: '#0f172a',
-        }}>
-            {/* ── Header ── */}
-            <header style={{
-                position: 'sticky', top: 0, zIndex: 30,
-                background: '#fff',
-                borderBottom: '1px solid #eef0f3',
-            }}>
-                <div style={{
-                    height: 56,
-                    padding: '0 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    maxWidth: 1280,
-                    margin: '0 auto',
-                }}>
-                    {/* Logo */}
-                    <Link href="/" style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        textDecoration: 'none', flexShrink: 0,
-                    }}>
+        <div className="va-app">
+
+            {/* ── Sidebar (desktop) ── */}
+            <aside className="va-sidebar">
+                {/* Logo */}
+                <Link href="/" className="va-sidebar-logo" title="Venezuela Site">
+                    <Heart size={17} color="#fff" fill="#fff" />
+                </Link>
+
+                {/* Nav */}
+                <nav className="va-sidebar-nav">
+                    {NAV.map(({ href, Icon, label }) => {
+                        const active = isActive(href, url);
+                        return (
+                            <Link
+                                key={href}
+                                href={href}
+                                title={label}
+                                className={`va-sidebar-btn${active ? ' va-sidebar-btn--active' : ''}`}
+                            >
+                                <Icon size={19} strokeWidth={active ? 2.2 : 1.8} />
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                {/* Admin al fondo */}
+                <button
+                    onClick={() => router.visit('/admin/login')}
+                    className="va-sidebar-btn"
+                    title="Panel de administración"
+                >
+                    <Settings size={19} strokeWidth={1.8} />
+                </button>
+            </aside>
+
+            {/* ── Área principal ── */}
+            <div className="va-main-area">
+
+                {/* Header */}
+                <header className="va-header">
+
+                    {/* Logo — solo mobile */}
+                    <Link
+                        href="/"
+                        className="va-mobile-only"
+                        style={{
+                            alignItems: 'center', gap: 8,
+                            textDecoration: 'none', flexShrink: 0,
+                        }}
+                    >
                         <div style={{
                             width: 30, height: 30, borderRadius: 9,
                             background: '#4263ac',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                            <Heart size={15} color="#fff" fill="#fff" />
+                            <Heart size={14} color="#fff" fill="#fff" />
                         </div>
-                        <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-.3px' }}>
-                            <span style={{ color: '#4263ac' }}>Venezuela</span>{' '}
-                            <span style={{ color: '#0f172a' }}>Site</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-.3px', color: '#0f172a' }}>
+                            <span style={{ color: '#4263ac' }}>Venezuela</span> Site
                         </span>
                     </Link>
 
-                    {/* ── Nav desktop (píldoras) ── */}
-                    <nav className="va-topnav">
-                        {TOP_NAV.map(({ href, label }) => {
+                    {/* Título sección — solo desktop */}
+                    <span
+                        className="va-desktop-only"
+                        style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-.2px' }}
+                    >
+                        <span style={{ color: '#4263ac' }}>Venezuela</span> Site
+                    </span>
+
+                    {/* Tabs desktop — muestra sección activa */}
+                    <nav
+                        className="va-desktop-only"
+                        style={{ alignItems: 'center', gap: 2, marginLeft: 8 }}
+                    >
+                        {NAV.filter(n => n.href !== '/validar').map(({ href, label }) => {
                             const active = isActive(href, url);
                             return (
                                 <Link
@@ -76,12 +103,12 @@ export default function MainLayout({ children }) {
                                         textDecoration: 'none',
                                         fontSize: 13,
                                         fontWeight: active ? 700 : 500,
-                                        padding: '5px 13px',
+                                        padding: '5px 12px',
                                         borderRadius: 999,
                                         background: active ? '#0f172a' : 'transparent',
                                         color: active ? '#fff' : '#64748b',
                                         whiteSpace: 'nowrap',
-                                        transition: 'background .15s, color .15s',
+                                        transition: 'background .13s, color .13s',
                                     }}
                                 >
                                     {label}
@@ -90,55 +117,33 @@ export default function MainLayout({ children }) {
                         })}
                     </nav>
 
-                    {/* Spacer */}
                     <div style={{ flex: 1 }} />
 
-                    {/* ── Acciones ── */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                        {/* + Publicar */}
-                        <Link
-                            href="/casos/publicar"
-                            title="Publicar caso"
-                            style={{
-                                width: 32, height: 32, borderRadius: '50%',
-                                border: '1.5px solid #e2e8f0',
-                                background: '#fff',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                textDecoration: 'none',
-                                flexShrink: 0,
-                            }}
-                        >
-                            <Plus size={15} color="#475569" strokeWidth={2.5} />
-                        </Link>
+                    {/* Acciones */}
+                    <Link href="/casos/publicar" className="va-icon-btn" title="Publicar caso">
+                        <Plus size={15} color="#475569" strokeWidth={2.5} />
+                    </Link>
+                    <button
+                        onClick={() => router.visit('/admin/login')}
+                        className="va-icon-btn va-mobile-only"
+                        title="Admin"
+                        style={{ border: 'none' }}
+                    >
+                        <Settings size={15} color="#475569" />
+                    </button>
+                </header>
 
-                        {/* Validar / Admin */}
-                        <button
-                            onClick={() => router.visit('/admin/login')}
-                            title="Panel de administración"
-                            style={{
-                                width: 32, height: 32, borderRadius: '50%',
-                                border: '1.5px solid #e2e8f0',
-                                background: '#fff', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                flexShrink: 0,
-                            }}
-                        >
-                            <Settings size={15} color="#475569" />
-                        </button>
+                {/* Contenido */}
+                <main>
+                    <div className="va-content">
+                        {children}
                     </div>
-                </div>
-            </header>
+                </main>
+            </div>
 
-            {/* ── Contenido ── */}
-            <main className="va-main">
-                <div className="va-content">
-                    {children}
-                </div>
-            </main>
-
-            {/* ── Bottom tabs (mobile) ── */}
+            {/* ── Bottom nav (mobile) ── */}
             <nav className="va-bottomnav">
-                {BOTTOM_NAV.map(({ href, label, Icon }) => {
+                {NAV.slice(0, 5).map(({ href, Icon, label }) => {
                     const active = isActive(href, url);
                     return (
                         <Link
@@ -159,6 +164,7 @@ export default function MainLayout({ children }) {
                     );
                 })}
             </nav>
+
         </div>
     );
 }
