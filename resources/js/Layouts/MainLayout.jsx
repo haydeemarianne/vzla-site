@@ -1,17 +1,50 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { Heart, Trash2, Wrench, Home, Settings, Plus, Truck, ShieldCheck } from 'lucide-react';
+import {
+    Heart, Trash2, Wrench, Home, Truck,
+    ArrowLeft, Share2, Plus, ClipboardList, Calendar, Bell,
+    Search, Settings,
+} from 'lucide-react';
 
-const NAV = [
-    { href: '/',           Icon: Home,         label: 'Inicio' },
-    { href: '/casos',      Icon: Heart,        label: 'Casos' },
-    { href: '/limpieza',   Icon: Trash2,       label: 'Limpieza' },
-    { href: '/ingenieros', Icon: Wrench,       label: 'Ingenieros' },
-    { href: '/transporte', Icon: Truck,        label: 'Transporte' },
-    { href: '/validar',    Icon: ShieldCheck,  label: 'Validación' },
+const TOP_NAV = [
+    { href: '/',           label: 'Inicio' },
+    { href: '/casos',      label: 'Casos' },
+    { href: '/limpieza',   label: 'Limpieza' },
+    { href: '/ingenieros', label: 'Ingenieros' },
+    { href: '/transporte', label: 'Transporte' },
+    { href: '/validar',    label: 'Validación' },
+];
+
+const BOTTOM_NAV = [
+    { href: '/',           Icon: Home,    label: 'Inicio' },
+    { href: '/casos',      Icon: Heart,   label: 'Casos' },
+    { href: '/limpieza',   Icon: Trash2,  label: 'Limpieza' },
+    { href: '/ingenieros', Icon: Wrench,  label: 'Ingenieros' },
+    { href: '/transporte', Icon: Truck,   label: 'Transporte' },
 ];
 
 const isActive = (href, url) =>
     href === '/' ? url === '/' : url.startsWith(href);
+
+function sharePage() {
+    const url  = window.location.href;
+    const text = 'Venezuela Ayuda — respuesta al terremoto M7.5';
+    if (navigator.share) {
+        navigator.share({ url, title: text }).catch(() => {});
+    } else {
+        navigator.clipboard?.writeText(url)
+            .then(() => alert('Enlace copiado'))
+            .catch(() => {});
+    }
+}
+
+/* Botón del sidebar — puede ser <Link> o <button> */
+function SideBtn({ href, onClick, title, children }) {
+    const cls = 'va-sidebar-btn';
+    if (href) {
+        return <Link href={href} className={cls} title={title}>{children}</Link>;
+    }
+    return <button onClick={onClick} className={cls} title={title}>{children}</button>;
+}
 
 export default function MainLayout({ children }) {
     const { url } = usePage();
@@ -19,58 +52,62 @@ export default function MainLayout({ children }) {
     return (
         <div className="va-app">
 
-            {/* ── Sidebar (desktop) ── */}
+            {/* ══ SIDEBAR — acciones rápidas (desktop) ══ */}
             <aside className="va-sidebar">
+
                 {/* Logo */}
-                <Link href="/" className="va-sidebar-logo" title="Venezuela Site">
+                <Link href="/" className="va-sidebar-logo" title="Inicio — Venezuela Site">
                     <Heart size={17} color="#fff" fill="#fff" />
                 </Link>
 
-                {/* Nav */}
+                {/* Acciones */}
                 <nav className="va-sidebar-nav">
-                    {NAV.map(({ href, Icon, label }) => {
-                        const active = isActive(href, url);
-                        return (
-                            <Link
-                                key={href}
-                                href={href}
-                                title={label}
-                                className={`va-sidebar-btn${active ? ' va-sidebar-btn--active' : ''}`}
-                            >
-                                <Icon size={19} strokeWidth={active ? 2.2 : 1.8} />
-                            </Link>
-                        );
-                    })}
+                    <SideBtn onClick={() => window.history.back()} title="Volver atrás">
+                        <ArrowLeft size={19} strokeWidth={1.8} />
+                    </SideBtn>
+
+                    <SideBtn onClick={sharePage} title="Compartir esta página">
+                        <Share2 size={19} strokeWidth={1.8} />
+                    </SideBtn>
+
+                    <SideBtn href="/casos/publicar" title="Publicar nuevo caso">
+                        <Plus size={19} strokeWidth={1.8} />
+                    </SideBtn>
+
+                    <SideBtn href="/casos" title="Ver todos los casos">
+                        <ClipboardList size={19} strokeWidth={1.8} />
+                    </SideBtn>
+
+                    <SideBtn href="/limpieza" title="Jornadas de limpieza">
+                        <Calendar size={19} strokeWidth={1.8} />
+                    </SideBtn>
+
+                    <SideBtn href="/validar" title="Validación y alertas">
+                        <Bell size={19} strokeWidth={1.8} />
+                    </SideBtn>
                 </nav>
 
-                {/* Admin al fondo */}
-                <button
-                    onClick={() => router.visit('/admin/login')}
-                    className="va-sidebar-btn"
-                    title="Panel de administración"
-                >
+                {/* Admin — al fondo */}
+                <SideBtn onClick={() => router.visit('/admin/login')} title="Panel de administración">
                     <Settings size={19} strokeWidth={1.8} />
-                </button>
+                </SideBtn>
+
             </aside>
 
-            {/* ── Área principal ── */}
+            {/* ══ ÁREA PRINCIPAL ══ */}
             <div className="va-main-area">
 
-                {/* Header */}
+                {/* ── Header ── */}
                 <header className="va-header">
 
-                    {/* Logo — solo mobile */}
+                    {/* Logo + nombre — mobile */}
                     <Link
                         href="/"
                         className="va-mobile-only"
-                        style={{
-                            alignItems: 'center', gap: 8,
-                            textDecoration: 'none', flexShrink: 0,
-                        }}
+                        style={{ alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}
                     >
                         <div style={{
-                            width: 30, height: 30, borderRadius: 9,
-                            background: '#4263ac',
+                            width: 30, height: 30, borderRadius: 9, background: '#4263ac',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                             <Heart size={14} color="#fff" fill="#fff" />
@@ -80,20 +117,23 @@ export default function MainLayout({ children }) {
                         </span>
                     </Link>
 
-                    {/* Título sección — solo desktop */}
-                    <span
+                    {/* Logo — desktop */}
+                    <Link
+                        href="/"
                         className="va-desktop-only"
-                        style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-.2px' }}
+                        style={{ alignItems: 'center', gap: 7, textDecoration: 'none', flexShrink: 0 }}
                     >
-                        <span style={{ color: '#4263ac' }}>Venezuela</span> Site
-                    </span>
+                        <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '-.3px', color: '#0f172a' }}>
+                            <span style={{ color: '#4263ac' }}>Venezuela</span> Site
+                        </span>
+                    </Link>
 
-                    {/* Tabs desktop — muestra sección activa */}
+                    {/* Nav tabs — desktop */}
                     <nav
                         className="va-desktop-only"
-                        style={{ alignItems: 'center', gap: 2, marginLeft: 8 }}
+                        style={{ alignItems: 'center', gap: 2, marginLeft: 10 }}
                     >
-                        {NAV.filter(n => n.href !== '/validar').map(({ href, label }) => {
+                        {TOP_NAV.map(({ href, label }) => {
                             const active = isActive(href, url);
                             return (
                                 <Link
@@ -119,31 +159,62 @@ export default function MainLayout({ children }) {
 
                     <div style={{ flex: 1 }} />
 
-                    {/* Acciones */}
-                    <Link href="/casos/publicar" className="va-icon-btn" title="Publicar caso">
-                        <Plus size={15} color="#475569" strokeWidth={2.5} />
-                    </Link>
-                    <button
-                        onClick={() => router.visit('/admin/login')}
-                        className="va-icon-btn va-mobile-only"
-                        title="Admin"
-                        style={{ border: 'none' }}
-                    >
-                        <Settings size={15} color="#475569" />
-                    </button>
+                    {/* Acciones del header */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {/* Búsqueda */}
+                        <button
+                            className="va-icon-btn"
+                            title="Buscar"
+                            style={{ border: 'none' }}
+                            onClick={() => {
+                                const q = prompt('Buscar en Venezuela Ayuda:');
+                                if (q) router.visit(`/casos?search=${encodeURIComponent(q)}`);
+                            }}
+                        >
+                            <Search size={15} color="#475569" />
+                        </button>
+
+                        {/* Admin — solo mobile (en desktop está en el sidebar) */}
+                        <button
+                            onClick={() => router.visit('/admin/login')}
+                            className="va-icon-btn va-mobile-only"
+                            title="Admin"
+                            style={{ border: 'none' }}
+                        >
+                            <Settings size={15} color="#475569" />
+                        </button>
+
+                        {/* Avatar VA */}
+                        <div
+                            onClick={() => router.visit('/admin/login')}
+                            title="Administración"
+                            style={{
+                                width: 32, height: 32, borderRadius: '50%',
+                                background: '#4263ac',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', flexShrink: 0,
+                                fontSize: 11, fontWeight: 800, color: '#fff',
+                                userSelect: 'none',
+                            }}
+                        >
+                            VA
+                        </div>
+                    </div>
+
                 </header>
 
-                {/* Contenido */}
+                {/* ── Contenido ── */}
                 <main>
                     <div className="va-content">
                         {children}
                     </div>
                 </main>
+
             </div>
 
-            {/* ── Bottom nav (mobile) ── */}
+            {/* ══ BOTTOM NAV (mobile) ══ */}
             <nav className="va-bottomnav">
-                {NAV.slice(0, 5).map(({ href, Icon, label }) => {
+                {BOTTOM_NAV.map(({ href, Icon, label }) => {
                     const active = isActive(href, url);
                     return (
                         <Link
