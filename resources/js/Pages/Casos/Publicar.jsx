@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Check, MapPin, Phone, Users, Baby, AlertCircle, Heart } from 'lucide-react';
+import { Check, MapPin, Phone, Users, Baby, AlertCircle, Heart, Camera, X, ShieldAlert, Users2 } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
 import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 
@@ -23,29 +24,42 @@ const NEEDS = [
     { value: 'other',     label: 'Otro'          },
 ];
 
-const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:20, padding:'20px', display:'flex', flexDirection:'column', gap:14 };
+const CARD = {
+    background:'white', border:'1px solid #e9ebf1', borderRadius:20, padding:'20px',
+    display:'flex', flexDirection:'column', gap:14,
+};
 const SEC  = { margin:0, fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' };
-const DIV  = { height:1, background:'#f3f4f8' };
+const DIV  = { height:1, background:'#f3f4f8', flexShrink:0 };
 
 export default function CasosPublicar() {
+    const [photoPreview, setPhotoPreview] = useState(null);
+
     const { data, setData, post, processing, errors } = useForm({
         family_name:   '',
         people_count:  1,
+        case_type:     'familiar',
         has_children:  false,
         has_elderly:   false,
-        is_anonymous:  false,
+        has_risk:      false,
         description:   '',
         needs:         [],
         zone:          '',
         state:         '',
         contact_phone: '',
-        photo_path:    '',
+        photo:         null,
     });
 
     const toggleNeed = (v) =>
         setData('needs', data.needs.includes(v)
             ? data.needs.filter(n => n !== v)
             : [...data.needs, v]);
+
+    const handlePhoto = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setData('photo', file);
+        setPhotoPreview(URL.createObjectURL(file));
+    };
 
     return (
         <MainLayout>
@@ -74,11 +88,37 @@ export default function CasosPublicar() {
                     {/* ─── 3 cards en fila (desktop) ─── */}
                     <div className="va-publish-grid">
 
-                        {/* Familia */}
+                        {/* Card 1 — Familia */}
                         <div style={CARD}>
-                            <p style={SEC}>Datos de la familia</p>
+                            <p style={SEC}>Datos del caso</p>
+
+                            {/* Tipo de caso */}
+                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                                {[
+                                    { val:'familiar', label:'Familiar',  Icon: Users2 },
+                                    { val:'personal', label:'Personal',  Icon: Users  },
+                                ].map(({ val, label, Icon }) => {
+                                    const sel = data.case_type === val;
+                                    return (
+                                        <button key={val} type="button" onClick={() => setData('case_type', val)} style={{
+                                            padding:'9px 10px', borderRadius:11,
+                                            border: sel ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
+                                            background: sel ? '#eef1fa' : '#fafbfd',
+                                            color: sel ? '#4263ac' : '#64748b',
+                                            fontSize:12, fontWeight:700,
+                                            display:'flex', alignItems:'center', gap:6,
+                                            cursor:'pointer', fontFamily:'inherit',
+                                        }}>
+                                            <Icon size={13} strokeWidth={2}/>
+                                            {label}
+                                            {sel && <Check size={11} color="#4263ac" strokeWidth={2.5} style={{ marginLeft:'auto' }}/>}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
                             <FloatInput
-                                label="Nombre de la familia *"
+                                label="Nombre de la familia o persona *"
                                 value={data.family_name}
                                 onChange={e => setData('family_name', e.target.value)}
                                 error={errors.family_name}
@@ -92,23 +132,26 @@ export default function CasosPublicar() {
                                 icon={Users}
                                 min={1} max={50}
                             />
+
                             <div style={DIV}/>
+
+                            {/* Condiciones especiales */}
                             <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                                 {[
-                                    { key:'has_children', label:'Hay niños'        },
-                                    { key:'has_elderly',  label:'Adultos mayores'  },
-                                    { key:'is_anonymous', label:'Publicar anónimo' },
-                                ].map(({ key, label }) => (
+                                    { key:'has_children', label:'Hay niños',          Icon: Baby         },
+                                    { key:'has_elderly',  label:'Adultos mayores',    Icon: Users        },
+                                    { key:'has_risk',     label:'Situación de riesgo', Icon: ShieldAlert },
+                                ].map(({ key, label, Icon }) => (
                                     <button key={key} type="button" onClick={() => setData(key, !data[key])} style={{
                                         padding:'9px 12px', borderRadius:11,
                                         fontSize:12, fontWeight:700, cursor:'pointer',
                                         border: data[key] ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
                                         background: data[key] ? '#eef1fa' : '#fafbfd',
                                         color: data[key] ? '#4263ac' : '#64748b',
-                                        display:'flex', alignItems:'center', gap:6,
+                                        display:'flex', alignItems:'center', gap:7,
                                         fontFamily:'inherit', transition:'all .13s', textAlign:'left',
                                     }}>
-                                        <Baby size={12} strokeWidth={2}/>
+                                        <Icon size={13} strokeWidth={2}/>
                                         <span style={{ flex:1 }}>{label}</span>
                                         {data[key] && <Check size={11} color="#4263ac" strokeWidth={2.5}/>}
                                     </button>
@@ -116,7 +159,7 @@ export default function CasosPublicar() {
                             </div>
                         </div>
 
-                        {/* Situación */}
+                        {/* Card 2 — Situación */}
                         <div style={CARD}>
                             <p style={SEC}>Situación y necesidades</p>
                             <FloatTextarea
@@ -124,7 +167,7 @@ export default function CasosPublicar() {
                                 value={data.description}
                                 onChange={e => setData('description', e.target.value)}
                                 error={errors.description}
-                                rows={4}
+                                rows={5}
                             />
                             <div style={DIV}/>
                             <div>
@@ -152,7 +195,7 @@ export default function CasosPublicar() {
                             </div>
                         </div>
 
-                        {/* Ubicación y contacto */}
+                        {/* Card 3 — Ubicación y foto */}
                         <div style={CARD}>
                             <p style={SEC}>Ubicación y contacto</p>
                             <FloatInput
@@ -171,7 +214,6 @@ export default function CasosPublicar() {
                                 <option value="">— Selecciona —</option>
                                 {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                             </FloatSelect>
-                            <div style={DIV}/>
                             <FloatInput
                                 label="Tu teléfono (privado) *"
                                 type="tel"
@@ -180,13 +222,30 @@ export default function CasosPublicar() {
                                 error={errors.contact_phone}
                                 icon={Phone}
                             />
-                            <FloatInput
-                                label="Foto (URL, opcional)"
-                                type="url"
-                                value={data.photo_path}
-                                onChange={e => setData('photo_path', e.target.value)}
-                                error={errors.photo_path}
-                            />
+
+                            <div style={DIV}/>
+
+                            {/* Foto */}
+                            <div>
+                                <p style={{ ...SEC, marginBottom:10 }}>Foto (opcional)</p>
+                                {photoPreview ? (
+                                    <div style={{ position:'relative' }}>
+                                        <img src={photoPreview} alt="preview" style={{ width:'100%', height:150, objectFit:'cover', borderRadius:12, border:'1px solid #e9ebf1' }}/>
+                                        <button type="button"
+                                            onClick={() => { setPhotoPreview(null); setData('photo', null); }}
+                                            style={{ position:'absolute', top:7, right:7, width:26, height:26, borderRadius:'50%', background:'rgba(15,23,42,.7)', border:'none', color:'white', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                                            <X size={13} strokeWidth={2.5}/>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <label style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7, border:'2px dashed #e2e8f0', borderRadius:12, padding:'22px 16px', cursor:'pointer' }}>
+                                        <Camera size={24} color="#94a3b8" strokeWidth={1.5}/>
+                                        <span style={{ fontSize:12, color:'#64748b', fontWeight:500 }}>Toca para subir una foto</span>
+                                        <input type="file" accept="image/*" capture="environment" style={{ display:'none' }} onChange={handlePhoto}/>
+                                    </label>
+                                )}
+                                {errors.photo && <p style={{ margin:'5px 0 0', fontSize:11, color:'#CE6969', fontWeight:500 }}>{errors.photo}</p>}
+                            </div>
                         </div>
                     </div>
 

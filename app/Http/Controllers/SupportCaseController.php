@@ -50,17 +50,36 @@ class SupportCaseController extends Controller
             'zone'          => 'required|string|max:200',
             'state'         => 'required|string|max:100',
             'people_count'  => 'required|integer|min:1|max:50',
+            'case_type'     => 'in:familiar,personal',
             'has_children'  => 'boolean',
             'has_elderly'   => 'boolean',
+            'has_risk'      => 'boolean',
             'contact_phone' => 'required|string|max:30',
-            'photo_path'    => 'nullable|string|max:500',
+            'photo'         => 'nullable|image|max:5120',
         ]);
 
-        $case = SupportCase::create(array_merge($request->all(), [
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('cases', 'public');
+        }
+
+        $case = SupportCase::create([
+            'family_name'       => $request->family_name,
+            'description'       => $request->description,
+            'needs'             => $request->needs,
+            'zone'              => $request->zone,
+            'state'             => $request->state,
+            'people_count'      => $request->people_count,
+            'case_type'         => $request->case_type ?? 'familiar',
+            'has_children'      => $request->boolean('has_children'),
+            'has_elderly'       => $request->boolean('has_elderly'),
+            'has_risk'          => $request->boolean('has_risk'),
+            'contact_phone'     => $request->contact_phone,
+            'photo_path'        => $photoPath,
             'validation_status' => 'approved',
             'status'            => 'open',
             'is_anonymous'      => false,
-        ]));
+        ]);
 
         // Auto-create one task per need
         foreach ($request->needs as $need) {

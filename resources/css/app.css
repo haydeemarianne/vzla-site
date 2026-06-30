@@ -337,15 +337,15 @@
     .va-validar-bottom { grid-template-columns: 1.55fr 1fr; align-items: start; }
 }
 
-/* Casos/Publicar — 3 cards en fila en desktop */
+/* Casos/Publicar — 3 cards en fila en desktop, igual altura */
 .va-publish-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
-    align-items: start;
+    align-items: stretch;
 }
 @media (min-width: 860px) {
-    .va-publish-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .va-publish-grid { grid-template-columns: 1fr 1fr 1fr; align-items: stretch; }
 }
 
 /* Estadísticas — grid 2→3 cols */

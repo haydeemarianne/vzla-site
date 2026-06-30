@@ -7,7 +7,8 @@ class SupportCase extends Model
 {
     protected $fillable = [
         'family_name', 'description', 'needs', 'zone', 'state',
-        'people_count', 'has_children', 'has_elderly', 'contact_phone', 'is_anonymous',
+        'people_count', 'has_children', 'has_elderly', 'has_risk', 'case_type',
+        'contact_phone', 'is_anonymous',
         'photo_path', 'validation_status', 'status', 'adopted_at', 'resolved_at',
     ];
 
