@@ -1,396 +1,194 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { Link, router } from '@inertiajs/react';
-import { Clock, MapPin, ArrowRight } from 'lucide-react';
+import { MapPin, Plus, Users, Trash2 } from 'lucide-react';
 
 const TYPE_BADGE = {
     debris:   { bg: '#fef3e2', color: '#b45309', label: 'Escombros' },
-    domestic: { bg: '#f1f4f9', color: '#334155', label: 'Basura' },
-    both:     { bg: '#eef2fa', color: '#4263ac', label: 'Drenaje' },
+    domestic: { bg: '#f1f4f9', color: '#475569', label: 'Basura'    },
+    both:     { bg: '#eef2fa', color: '#4263ac', label: 'Mixto'     },
 };
 
-const PASTEL_AVATARS = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf'];
+const VOL_DOT = {
+    low:    '#16a34a',
+    medium: '#b45309',
+    high:   '#CE6969',
+};
 
-function AvatarStack({ count }) {
-    const shown = Math.min(count || 0, 4);
-    const initials = ['JR', 'ML', 'CA', 'PS'];
-    return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex' }}>
-                {Array.from({ length: shown }).map((_, i) => (
-                    <div
-                        key={i}
-                        style={{
-                            width: 26,
-                            height: 26,
-                            borderRadius: '50%',
-                            background: PASTEL_AVATARS[i % PASTEL_AVATARS.length],
-                            border: '2px solid #fff',
-                            marginLeft: i === 0 ? 0 : -8,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 9,
-                            fontWeight: 700,
-                            color: '#475569',
-                            zIndex: shown - i,
-                            position: 'relative',
-                        }}
-                    >
-                        {initials[i] || '?'}
-                    </div>
-                ))}
-            </div>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>
-                {count || 0}/10 voluntarios
-            </span>
-        </div>
-    );
-}
+const STATUS_CFG = {
+    pending:    { bg: '#eef1fa', color: '#4263ac', label: 'Sin equipo'  },
+    in_process: { bg: '#fef3e2', color: '#b45309', label: 'En proceso'  },
+    resolved:   { bg: '#dcfce7', color: '#15803d', label: 'Completado'  },
+};
+
+const CARD  = { background: 'white', border: '1px solid #e9ebf1', borderRadius: 18, padding: '16px' };
+const SEC   = { margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: '#7b8595' };
 
 function PointCard({ point }) {
-    const badge = TYPE_BADGE[point.type] || TYPE_BADGE.domestic;
-    const meta = 10;
-    const progress = Math.min(100, ((point.helpers_count || 0) / meta) * 100);
+    const badge  = TYPE_BADGE[point.type]   || TYPE_BADGE.domestic;
+    const dotCol = VOL_DOT[point.volume]    || VOL_DOT.medium;
+    const status = STATUS_CFG[point.status] || STATUS_CFG.pending;
+    const pct    = Math.min(100, ((point.helpers_count || 0) / 10) * 100);
 
     return (
-        <div
-            style={{
-                background: '#fff',
-                borderRadius: 18,
-                padding: 15,
-                boxShadow: '0 10px 26px rgba(16,24,40,.06)',
-                fontFamily: "'Onest', system-ui, sans-serif",
-            }}
-        >
-            {/* Fila top: lugar + badge tipo */}
+        <div style={{ ...CARD, display: 'flex', flexDirection: 'column', gap: 10, cursor: 'pointer' }}
+            onClick={() => router.visit(`/limpieza/${point.id}`)}>
+
+            {/* Top: nombre + status */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                <span
-                    style={{
-                        fontSize: 14.5,
-                        fontWeight: 700,
-                        color: '#0f172a',
-                        letterSpacing: '-0.2px',
-                        lineHeight: 1.3,
-                        flex: 1,
-                        minWidth: 0,
-                    }}
-                >
-                    {point.zone_name}
-                    {point.city ? `, ${point.city}` : ''}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 800, color: '#0f172a', letterSpacing: '-.3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {point.zone_name}{point.city ? `, ${point.city}` : ''}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 3 }}>
+                        <MapPin size={10} color="#94a3b8" strokeWidth={2}/>
+                        <span style={{ fontSize: 11.5, color: '#94a3b8', fontWeight: 500 }}>{point.state || 'Venezuela'}</span>
+                    </div>
+                </div>
+                <span style={{ ...status, fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {status.label}
                 </span>
-                <span
-                    style={{
-                        background: badge.bg,
-                        color: badge.color,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        padding: '4px 10px',
-                        borderRadius: 999,
-                        whiteSpace: 'nowrap',
-                        flexShrink: 0,
-                    }}
-                >
+            </div>
+
+            {/* Chips: tipo + volumen */}
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <span style={{ background: badge.bg, color: badge.color, fontSize: 10.5, fontWeight: 700, padding: '2px 9px', borderRadius: 999 }}>
                     {badge.label}
                 </span>
-            </div>
-
-            {/* Fecha/hora */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                <Clock size={12} color="#94a3b8" />
-                <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
-                    {point.state || 'Venezuela'}
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, fontWeight: 700, color: dotCol }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotCol, display: 'inline-block' }}/>
+                    {point.volume === 'low' ? 'Poco' : point.volume === 'high' ? 'Mucho' : 'Bastante'}
                 </span>
             </div>
 
-            {/* Descripción */}
+            {/* Notas */}
             {point.notes && (
-                <p
-                    style={{
-                        fontSize: 12.5,
-                        color: '#475569',
-                        lineHeight: 1.5,
-                        marginTop: 9,
-                    }}
-                >
+                <p style={{ margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.5,
+                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {point.notes}
                 </p>
             )}
 
-            {/* Avatares + conteo */}
-            <div style={{ marginTop: 13 }}>
-                <AvatarStack count={point.helpers_count} />
+            {/* Voluntarios */}
+            <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                        <Users size={11} color="#94a3b8" strokeWidth={2}/>
+                        {point.helpers_count || 0}/10 voluntarios
+                    </span>
+                </div>
+                <div style={{ height: 5, borderRadius: 999, background: '#f1f4f9', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: pct >= 100 ? '#16a34a' : '#4263ac', borderRadius: 999, width: `${pct}%`, transition: 'width .4s' }}/>
+                </div>
             </div>
 
-            {/* Barra de progreso */}
-            <div
-                style={{
-                    marginTop: 11,
-                    height: 7,
-                    borderRadius: 999,
-                    background: '#eef0f3',
-                    overflow: 'hidden',
-                }}
-            >
-                <div
-                    style={{
-                        height: '100%',
-                        borderRadius: 999,
-                        background: '#4263ac',
-                        width: `${progress}%`,
-                        transition: 'width .4s ease',
-                    }}
-                />
-            </div>
-
-            {/* Botón Ver jornada */}
-            <Link
-                href={`/limpieza/${point.id}`}
-                style={{
-                    marginTop: 13,
-                    width: '100%',
-                    background: '#0f172a',
-                    color: '#fff',
-                    fontWeight: 700,
-                    fontSize: 14,
-                    padding: '12px 0',
-                    borderRadius: 13,
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontFamily: "'Onest', system-ui, sans-serif",
-                    letterSpacing: '-0.1px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6,
-                    textDecoration: 'none',
-                    boxSizing: 'border-box',
-                }}
-            >
-                Ver jornada y apuntarme <ArrowRight size={14} color="#fff" strokeWidth={2.5} />
+            {/* CTA */}
+            <Link href={`/limpieza/${point.id}`} onClick={e => e.stopPropagation()}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '10px', borderRadius: 12, background: '#0f172a', color: 'white', fontWeight: 700, fontSize: 13, textDecoration: 'none', marginTop: 2 }}>
+                Ver jornada y apuntarme
             </Link>
         </div>
     );
 }
 
-function MapDecorativo({ activeCount }) {
+const FILTER_TABS = [
+    { key: null,         label: 'Todos'       },
+    { key: 'pending',    label: 'Sin equipo'  },
+    { key: 'in_process', label: 'En proceso'  },
+    { key: 'resolved',   label: 'Completados' },
+];
+
+function MapDecorativo({ points }) {
+    const active = points.filter(p => p.status !== 'resolved');
     return (
-        <div
-            style={{
-                marginTop: 13,
-                height: 138,
-                borderRadius: 18,
-                overflow: 'hidden',
-                position: 'relative',
-                background: 'linear-gradient(135deg, #dbe4f3, #eef2f8)',
-                border: '1px solid #e2e8f2',
-            }}
-        >
-            {/* SVG decorativo */}
-            <svg
-                width="100%"
-                height="100%"
-                viewBox="0 0 360 140"
-                preserveAspectRatio="none"
-                style={{ position: 'absolute', inset: 0 }}
-            >
-                <path
-                    d="M0 90 Q90 60 180 92 T360 80"
-                    stroke="#c2cfe4"
-                    strokeWidth="2"
-                    fill="none"
-                />
-                <path
-                    d="M-10 40 Q120 70 200 30 T380 55"
-                    stroke="#cdd9eb"
-                    strokeWidth="1.5"
-                    fill="none"
-                />
+        <div style={{ height: 140, borderRadius: 20, overflow: 'hidden', position: 'relative',
+            background: 'linear-gradient(135deg,#dbe4f3,#eef2f8)', border: '1px solid #e2e8f2' }}>
+            <svg width="100%" height="100%" viewBox="0 0 360 140" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0 }}>
+                <path d="M0 90 Q90 60 180 92 T360 80" stroke="#c2cfe4" strokeWidth="2" fill="none"/>
+                <path d="M-10 40 Q120 70 200 30 T380 55" stroke="#cdd9eb" strokeWidth="1.5" fill="none"/>
             </svg>
-
-            {/* Pin 1 */}
-            <div
-                style={{
-                    position: 'absolute',
-                    left: 64,
-                    top: 48,
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50% 50% 50% 0',
-                    transform: 'rotate(-45deg)',
-                    background: '#4263ac',
-                    boxShadow: '0 0 0 4px rgba(29,78,216,.18)',
-                }}
-            />
-            {/* Pin 2 */}
-            <div
-                style={{
-                    position: 'absolute',
-                    left: 188,
-                    top: 74,
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50% 50% 50% 0',
-                    transform: 'rotate(-45deg)',
-                    background: '#f59e0b',
-                    boxShadow: '0 0 0 4px rgba(245,158,11,.2)',
-                }}
-            />
-            {/* Pin 3 */}
-            <div
-                style={{
-                    position: 'absolute',
-                    left: 264,
-                    top: 40,
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50% 50% 50% 0',
-                    transform: 'rotate(-45deg)',
-                    background: '#4263ac',
-                    boxShadow: '0 0 0 4px rgba(29,78,216,.18)',
-                }}
-            />
-
-            {/* Label activos */}
-            <div
-                style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    left: 12,
-                    background: '#fff',
-                    padding: '5px 10px',
-                    borderRadius: 8,
-                    boxShadow: '0 2px 8px rgba(16,24,40,.08)',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: '#475569',
-                }}
-            >
-                {activeCount} puntos activos cerca
+            <div style={{ position: 'absolute', left: 64,  top: 48, width: 14, height: 14, borderRadius: '50% 50% 50% 0', transform: 'rotate(-45deg)', background: '#4263ac', boxShadow: '0 0 0 4px rgba(66,99,172,.18)' }}/>
+            <div style={{ position: 'absolute', left: 188, top: 74, width: 14, height: 14, borderRadius: '50% 50% 50% 0', transform: 'rotate(-45deg)', background: '#f59e0b', boxShadow: '0 0 0 4px rgba(245,158,11,.2)' }}/>
+            <div style={{ position: 'absolute', left: 264, top: 40, width: 14, height: 14, borderRadius: '50% 50% 50% 0', transform: 'rotate(-45deg)', background: '#4263ac', boxShadow: '0 0 0 4px rgba(66,99,172,.18)' }}/>
+            <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'white', padding: '5px 11px', borderRadius: 9, boxShadow: '0 2px 8px rgba(16,24,40,.08)', fontSize: 11, fontWeight: 700, color: '#475569' }}>
+                {active.length} punto{active.length !== 1 ? 's' : ''} activo{active.length !== 1 ? 's' : ''}
             </div>
         </div>
     );
 }
 
 export default function LimpiezaIndex({ points, filters, counts }) {
-    const activeCount = (counts.pending || 0) + (counts.in_process || 0);
+    const activeStatus = filters?.status ?? null;
 
     return (
         <MainLayout>
-            <div
-                style={{
-                    padding: '6px 20px 100px',
-                    fontFamily: "'Onest', system-ui, sans-serif",
-                }}
-            >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
                 {/* Header */}
-                <h1
-                    style={{
-                        fontSize: 21,
-                        fontWeight: 700,
-                        color: '#0f172a',
-                        letterSpacing: '-0.4px',
-                        margin: 0,
-                    }}
-                >
-                    Limpieza comunitaria
-                </h1>
-                <p
-                    style={{
-                        fontSize: 12.5,
-                        color: '#94a3b8',
-                        fontWeight: 500,
-                        marginTop: 1,
-                        marginBottom: 0,
-                    }}
-                >
-                    Súmate a una jornada cerca de ti
-                </p>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1a2230', letterSpacing: '-.5px' }}>Limpieza comunitaria</h1>
+                        <p style={{ margin: '3px 0 0', fontSize: 12.5, color: '#7b8595' }}>
+                            {counts.pending || 0} sin equipo · {counts.in_process || 0} en proceso · {counts.resolved || 0} completados
+                        </p>
+                    </div>
+                    <Link href="/limpieza/reportar" style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#4263ac', color: 'white', padding: '9px 16px', borderRadius: 12, fontSize: 13, fontWeight: 700, textDecoration: 'none', flexShrink: 0 }}>
+                        <Plus size={14} color="white" strokeWidth={2.5}/> Reportar punto
+                    </Link>
+                </div>
 
                 {/* Mapa decorativo */}
-                <MapDecorativo activeCount={activeCount} />
+                <MapDecorativo points={points.data}/>
 
-                {/* Lista de tarjetas */}
+                {/* Filtros */}
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                    {FILTER_TABS.map(tab => {
+                        const isA = activeStatus === tab.key;
+                        const cnt = tab.key ? (counts[tab.key] || 0) : null;
+                        return (
+                            <button key={String(tab.key)}
+                                onClick={() => router.get('/limpieza', tab.key ? { status: tab.key } : {}, { preserveState: true })}
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 13px', borderRadius: 999, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
+                                    background: isA ? '#0f172a' : '#f3f4f8',
+                                    color:      isA ? 'white'   : '#64748b' }}>
+                                {tab.label}
+                                {cnt !== null && cnt > 0 && (
+                                    <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 5px', borderRadius: 999,
+                                        background: isA ? 'rgba(255,255,255,.2)' : '#e2e8f0',
+                                        color:      isA ? 'white' : '#64748b' }}>
+                                        {cnt}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Grid de cards */}
                 {points.data.length === 0 ? (
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            paddingTop: 56,
-                            gap: 12,
-                        }}
-                    >
-                        <MapPin size={40} color="#cbd5e1" />
-                        <p style={{ fontSize: 14, color: '#64748b', fontWeight: 600, margin: 0 }}>
-                            No hay puntos reportados
-                        </p>
-                        <p style={{ fontSize: 12.5, color: '#94a3b8', margin: 0 }}>
-                            Se el primero en reportar un punto de limpieza
-                        </p>
-                        <Link
-                            href="/limpieza/reportar"
-                            style={{
-                                marginTop: 4,
-                                background: '#0f172a',
-                                color: '#fff',
-                                fontWeight: 700,
-                                fontSize: 14,
-                                padding: '12px 24px',
-                                borderRadius: 13,
-                                textDecoration: 'none',
-                                display: 'inline-block',
-                            }}
-                        >
+                    <div style={{ textAlign: 'center', padding: '56px 0' }}>
+                        <Trash2 size={40} color="#cbd5e1" strokeWidth={1.5} style={{ display: 'block', margin: '0 auto 10px' }}/>
+                        <p style={{ fontSize: 14, color: '#64748b', fontWeight: 600, margin: '0 0 4px' }}>No hay puntos reportados</p>
+                        <p style={{ fontSize: 12.5, color: '#94a3b8', margin: '0 0 14px' }}>Sé el primero en reportar un punto de limpieza</p>
+                        <Link href="/limpieza/reportar" style={{ background: '#0f172a', color: 'white', fontWeight: 700, fontSize: 13, padding: '11px 22px', borderRadius: 12, textDecoration: 'none' }}>
                             Reportar el primero
                         </Link>
                     </div>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
-                        {points.data.map((point) => (
-                            <PointCard key={point.id} point={point} />
-                        ))}
+                    <div className="va-limpieza-grid">
+                        {points.data.map(point => <PointCard key={point.id} point={point}/>)}
                     </div>
                 )}
 
                 {/* Paginación */}
                 {points.links && points.links.length > 3 && (
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            flexWrap: 'wrap',
-                            gap: 8,
-                            marginTop: 24,
-                        }}
-                    >
+                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 8 }}>
                         {points.links.map((link, i) =>
                             link.url ? (
-                                <Link
-                                    key={i}
-                                    href={link.url}
-                                    style={{
-                                        padding: '6px 14px',
-                                        borderRadius: 10,
-                                        fontSize: 13,
-                                        fontWeight: link.active ? 700 : 500,
-                                        background: link.active ? '#4263ac' : '#fff',
-                                        color: link.active ? '#fff' : '#475569',
-                                        border: link.active ? 'none' : '1px solid #e2e6ee',
-                                        textDecoration: 'none',
-                                    }}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
+                                <Link key={i} href={link.url} style={{ padding: '6px 14px', borderRadius: 10, fontSize: 13, fontWeight: link.active ? 700 : 500, background: link.active ? '#4263ac' : 'white', color: link.active ? 'white' : '#475569', border: link.active ? 'none' : '1px solid #e2e6ee', textDecoration: 'none' }}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}/>
                             ) : (
-                                <span
-                                    key={i}
-                                    style={{
-                                        padding: '6px 14px',
-                                        borderRadius: 10,
-                                        fontSize: 13,
-                                        color: '#cbd5e1',
-                                    }}
-                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                />
+                                <span key={i} style={{ padding: '6px 14px', borderRadius: 10, fontSize: 13, color: '#cbd5e1' }}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}/>
                             )
                         )}
                     </div>

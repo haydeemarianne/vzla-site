@@ -370,6 +370,20 @@
     .va-publish-grid { grid-template-columns: 1fr 1fr 1fr; align-items: stretch; }
 }
 
+/* Limpieza/Index — grid de cards */
+.va-limpieza-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: start;
+}
+@media (min-width: 680px) {
+    .va-limpieza-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1060px) {
+    .va-limpieza-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
 /* Estadísticas — grid 2→3 cols */
 .va-stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
