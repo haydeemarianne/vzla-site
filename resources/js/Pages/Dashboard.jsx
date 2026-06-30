@@ -206,26 +206,43 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning, top_ma
                                 DOC:{ bg:'#f1f4f9', color:'#475569' },
                             };
                             return (
-                                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
-                                    {materials.map((m) => {
+                                <div>
+                                    {materials.map((m, i) => {
                                         const ftUpper = (m.file_type ?? 'doc').toUpperCase();
                                         const ft = FT_COLORS[ftUpper] ?? FT_COLORS.DOC;
                                         return (
-                                            <Link key={m.id} href="/materiales" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:8, padding:'9px 10px', background:'#fafbfd', borderRadius:12, border:'1px solid #f0f2f7' }}>
-                                                <div style={{ width:30, height:30, borderRadius:8, background:'#fef9c3', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                                                    <FileText size={13} color="#92600e" strokeWidth={2}/>
+                                            <Link key={m.id} href="/materiales" style={{
+                                                textDecoration:'none',
+                                                display:'flex', alignItems:'center', gap:10,
+                                                padding:'9px 0',
+                                                borderTop: i === 0 ? 'none' : '1px solid #f3f4f8',
+                                            }}>
+                                                {/* Ícono */}
+                                                <div style={{ width:28, height:28, borderRadius:7, background:'#fef9c3', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                                    <FileText size={12} color="#92600e" strokeWidth={2}/>
                                                 </div>
-                                                <div style={{ flex:1, minWidth:0 }}>
-                                                    <div style={{ fontSize:11.5, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                                                        {m.title}
-                                                    </div>
-                                                    <div style={{ display:'flex', alignItems:'center', gap:4, marginTop:3 }}>
-                                                        <span style={{ fontSize:9, fontWeight:700, background:ft.bg, color:ft.color, padding:'1px 5px', borderRadius:3 }}>{ftUpper}</span>
-                                                        <span style={{ fontSize:9.5, color:'#94a3b8', display:'flex', alignItems:'center', gap:1.5 }}>
-                                                            <Download size={8} color="#94a3b8" strokeWidth={2}/> {m.download_count ?? 0}
-                                                        </span>
-                                                    </div>
-                                                </div>
+
+                                                {/* Título */}
+                                                <span style={{ flex:1, minWidth:0, fontSize:12, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                    {m.title}
+                                                </span>
+
+                                                {/* Categoría */}
+                                                {m.category && (
+                                                    <span style={{ fontSize:10.5, color:'#7b8595', whiteSpace:'nowrap', flexShrink:0 }}>
+                                                        {m.category}
+                                                    </span>
+                                                )}
+
+                                                {/* Tipo */}
+                                                <span style={{ fontSize:9, fontWeight:700, background:ft.bg, color:ft.color, padding:'2px 6px', borderRadius:4, flexShrink:0 }}>
+                                                    {ftUpper}
+                                                </span>
+
+                                                {/* Descargas */}
+                                                <span style={{ display:'flex', alignItems:'center', gap:2, fontSize:10.5, color:'#94a3b8', flexShrink:0 }}>
+                                                    <Download size={9} color="#94a3b8" strokeWidth={2}/>{m.download_count ?? 0}
+                                                </span>
                                             </Link>
                                         );
                                     })}
