@@ -35,62 +35,72 @@
     font-family: 'Onest', system-ui, sans-serif;
     color: #0f172a;
 }
+@media (min-width: 768px) {
+    /* Outer padding igual que ValidarDashboard */
+    .va-app { padding: 20px 26px 36px 20px; gap: 16px; }
+}
 
-/* ── Sidebar (desktop) ─────────────────────────── */
+/* ── Sidebar — círculos flotantes, SIN panel ni barra ── */
 .va-sidebar {
-    display: none;
+    display: none; /* oculto en mobile */
 }
 @media (min-width: 768px) {
     .va-sidebar {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 64px;
-        min-height: 100vh;
-        height: 100%;
-        position: sticky;
-        top: 0;
-        background: #fff;
-        border-right: 1px solid #eef0f3;
-        padding: 14px 0;
-        z-index: 40;
+        gap: 12px;
         flex-shrink: 0;
+        width: 48px;
+        /* SIN background, SIN border — solo círculos flotantes */
     }
 }
 
 .va-sidebar-logo {
-    width: 36px; height: 36px;
-    border-radius: 10px;
+    width: 42px; height: 42px;
+    border-radius: 13px;
     background: #4263ac;
     display: flex; align-items: center; justify-content: center;
     text-decoration: none;
-    margin-bottom: 18px;
+    box-shadow: 0 6px 18px rgba(66,99,172,.28);
     flex-shrink: 0;
+    margin-bottom: 4px;
 }
 
 .va-sidebar-nav {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 12px;
     flex: 1;
 }
 
+/* Cada botón del sidebar = círculo blanco con sombra suave */
 .va-sidebar-btn {
-    width: 40px; height: 40px;
-    border-radius: 11px;
+    width: 42px; height: 42px;
+    border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    color: #94a3b8;
+    color: #5b6677;
     border: none;
-    background: transparent;
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(16,24,40,.06);
     cursor: pointer;
     text-decoration: none;
-    transition: background .13s, color .13s;
+    transition: box-shadow .15s, transform .15s;
     flex-shrink: 0;
+    position: relative;
 }
-.va-sidebar-btn:hover          { background: #f1f4f9; color: #334155; }
-.va-sidebar-btn--active        { background: #eef1fa; color: #4263ac; }
-.va-sidebar-btn--active:hover  { background: #dde6f5; color: #4263ac; }
+.va-sidebar-btn:hover {
+    box-shadow: 0 6px 18px rgba(16,24,40,.12);
+    transform: translateY(-1px);
+}
+/* Botón de admin — círculo negro */
+.va-sidebar-btn--dark {
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(2,6,23,.30);
+}
+.va-sidebar-btn--dark:hover { background: #1e293b; transform: translateY(-1px); }
 
 /* ── Main area ─────────────────────────────────── */
 .va-main-area {
@@ -101,28 +111,38 @@
 }
 
 /* ── Header ────────────────────────────────────── */
+/* Mobile: barra blanca simple */
 .va-header {
-    position: sticky;
-    top: 0; z-index: 30;
-    background: #fff;
-    border-bottom: 1px solid #eef0f3;
-    height: 56px;
-    padding: 0 16px;
     display: flex;
     align-items: center;
     gap: 10px;
+    height: 56px;
+    padding: 0 16px;
+    background: #fff;
+    border-bottom: 1px solid #eef0f3;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+/* Desktop: TRANSPARENTE, sin barra — integrado en la página */
+@media (min-width: 768px) {
+    .va-header {
+        background: transparent;
+        border-bottom: none;
+        position: static;
+        height: auto;
+        padding: 0 0 20px 0;
+        z-index: auto;
+    }
 }
 
 /* ── Content area ──────────────────────────────── */
 .va-content {
-    max-width: 680px;
-    padding-bottom: 72px;
+    padding: 16px 20px 80px;
 }
 @media (min-width: 768px) {
-    .va-content { max-width: 860px; padding-bottom: 24px; }
-}
-@media (min-width: 1100px) {
-    .va-content { max-width: 1020px; }
+    /* En desktop el padding viene de .va-app */
+    .va-content { padding: 0; }
 }
 
 /* ── Bottom nav (mobile only) ──────────────────── */
