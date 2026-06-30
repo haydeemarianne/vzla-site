@@ -345,7 +345,18 @@
     align-items: start;
 }
 @media (min-width: 780px) {
-    .va-show-grid { grid-template-columns: 340px 1fr; gap: 16px; }
+    .va-show-grid { grid-template-columns: 320px 1fr; gap: 16px; }
+}
+
+/* Tareas en 2 columnas */
+.va-tasks-2col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: start;
+}
+@media (min-width: 900px) {
+    .va-tasks-2col { grid-template-columns: 1fr 1fr; }
 }
 
 /* Casos/Publicar — 3 cards en fila en desktop, igual altura */

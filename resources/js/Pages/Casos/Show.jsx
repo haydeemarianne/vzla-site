@@ -314,6 +314,7 @@ export default function CasosShow({ supportCase, tasks }) {
 
                     {/* Columna derecha — Tareas */}
                     <div>
+                        {/* Header */}
                         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
                             <span style={{ fontSize:15, fontWeight:700, color:'#1e293b' }}>
                                 Tareas ({takenTasks}/{totalTasks} tomadas)
@@ -321,12 +322,39 @@ export default function CasosShow({ supportCase, tasks }) {
                             <span style={{ fontSize:11.5, color:'#94a3b8', fontWeight:600 }}>{progress}% cubierto</span>
                         </div>
 
+                        {/* Mini estado — 3 chips */}
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginBottom:14 }}>
+                            {[
+                                { key:'pending', label:'Sin hacer',  color:'#64748b', bg:'#f1f5f9', dot:'#94a3b8' },
+                                { key:'claimed', label:'Haciendo',   color:'#4263ac', bg:'#eef1fa', dot:'#4263ac' },
+                                { key:'done',    label:'Terminadas', color:'#16a34a', bg:'#dcfce7', dot:'#16a34a' },
+                            ].map(({ key, label, color, bg, dot }) => {
+                                const count = taskList.filter(t => t.status === key).length;
+                                const items = taskList.filter(t => t.status === key);
+                                return (
+                                    <div key={key} style={{ background:bg, borderRadius:14, padding:'12px 13px' }}>
+                                        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom: items.length ? 8 : 0 }}>
+                                            <div style={{ width:7, height:7, borderRadius:'50%', background:dot, flexShrink:0 }}/>
+                                            <span style={{ fontSize:11, fontWeight:700, color, flex:1, textTransform:'uppercase', letterSpacing:'.4px' }}>{label}</span>
+                                            <span style={{ fontSize:13, fontWeight:800, color }}>{count}</span>
+                                        </div>
+                                        {items.map(t => (
+                                            <div key={t.id} style={{ fontSize:11, fontWeight:600, color, padding:'4px 8px', background:'rgba(255,255,255,.6)', borderRadius:7, marginTop:4, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                {t.title}
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Tarjetas — 2 columnas */}
                         {taskList.length === 0 ? (
                             <div style={{ ...CARD, textAlign:'center', color:'#94a3b8', fontSize:13 }}>
                                 No hay tareas aún.
                             </div>
                         ) : (
-                            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                            <div className="va-tasks-2col">
                                 {taskList.map((task, i) => (
                                     <TaskCard key={task.id} task={task} caseId={supportCase.id} familyPhone={familyPhone} idx={i}/>
                                 ))}
