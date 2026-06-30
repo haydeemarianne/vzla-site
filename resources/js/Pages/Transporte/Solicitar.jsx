@@ -1,19 +1,29 @@
 import MainLayout from '@/Layouts/MainLayout';
+import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 import { useForm } from '@inertiajs/react';
+import { Truck, TriangleAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATES = [
     'La Guaira (Vargas)', 'Distrito Capital', 'Miranda', 'Aragua', 'Carabobo',
-    'Anzoategui', 'Bolivar', 'Falcon', 'Guarico', 'Lara', 'Merida',
-    'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Tachira', 'Trujillo',
+    'Anzoátegui', 'Bolívar', 'Falcón', 'Guárico', 'Lara', 'Mérida',
+    'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Táchira', 'Trujillo',
     'Yaracuy', 'Zulia', 'Amazonas', 'Apure', 'Barinas', 'Cojedes', 'Delta Amacuro',
 ];
 
 const CARGO_OPTIONS = [
     { value: 'supplies', label: 'Insumos',   desc: 'Agua, comida, medicamentos, ropa' },
-    { value: 'debris',   label: 'Escombros', desc: 'Materiales de construccion pequeños' },
-    { value: 'people',   label: 'Personas',  desc: 'Evacuacion o traslado (no es rescate de emergencia)' },
+    { value: 'debris',   label: 'Escombros', desc: 'Materiales pequeños de construcción' },
+    { value: 'people',   label: 'Personas',  desc: 'Evacuación o traslado no urgente' },
 ];
+
+const URGENCY_OPTIONS = [
+    { value: 'normal', label: 'Normal',  desc: 'Puede esperar horas' },
+    { value: 'urgent', label: 'Urgente', desc: 'Lo necesito hoy' },
+];
+
+const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:24, padding:'24px 22px' };
+const SECTION = { fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595', marginBottom:12 };
 
 export default function SolicitarTransporte() {
     const { data, setData, post, processing, errors } = useForm({
@@ -32,147 +42,164 @@ export default function SolicitarTransporte() {
     const submit = (e) => {
         e.preventDefault();
         post('/transporte/solicitar', {
-            onSuccess: () => toast.success('Solicitud publicada. Un conductor se pondra en contacto.'),
+            onSuccess: () => toast.success('Solicitud publicada. Un conductor se pondrá en contacto.'),
         });
     };
 
-    const inputClass = 'w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white';
-    const labelClass = 'block text-sm font-semibold text-slate-700 mb-1';
-
     return (
         <MainLayout>
-            <div className="max-w-2xl mx-auto">
-                <div className="mb-5">
-                    <h1 className="text-2xl font-bold text-slate-900">Necesito transporte</h1>
-                    <p className="text-slate-500 text-sm mt-1">
-                        Publica tu solicitud y un conductor voluntario se pondra en contacto contigo.
+            <div style={{ maxWidth:640, margin:'0 auto', display:'flex', flexDirection:'column', gap:16 }}>
+
+                {/* Encabezado */}
+                <div>
+                    <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
+                        <div style={{ width:36, height:36, borderRadius:11, background:'#fef3e2', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                            <Truck size={18} color="#b45309" strokeWidth={2}/>
+                        </div>
+                        <div>
+                            <h1 style={{ margin:0, fontSize:22, fontWeight:800, color:'#1a2230', letterSpacing:'-.5px' }}>
+                                Necesito transporte
+                            </h1>
+                            <p style={{ margin:0, fontSize:12.5, color:'#7b8595' }}>
+                                Publica tu solicitud y un conductor voluntario se pondrá en contacto contigo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Aviso */}
+                <div style={{ background:'#fef3e2', border:'1px solid #fed7aa', borderRadius:14, padding:'10px 14px', display:'flex', gap:10, alignItems:'flex-start' }}>
+                    <TriangleAlert size={15} color="#b45309" strokeWidth={2} style={{ flexShrink:0, marginTop:1 }}/>
+                    <p style={{ margin:0, fontSize:12, color:'#92400e', lineHeight:1.5 }}>
+                        <strong>Para emergencias médicas</strong> llama al 171 o 112 — este módulo es para traslado de insumos y evacuación no urgente.
                     </p>
                 </div>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-5">
-                    <p className="text-xs text-amber-800">
-                        <strong>Para emergencias medicas</strong> llama al 171 o 112 — este modulo es para traslado de insumos y evacuacion no urgente.
-                    </p>
-                </div>
-
-                <form onSubmit={submit} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-5">
+                <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:14 }}>
 
                     {/* Tipo de carga */}
-                    <div>
-                        <label className={labelClass}>Que necesitas transportar *</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {CARGO_OPTIONS.map(({ value, label, desc }) => (
-                                <button type="button" key={value} onClick={() => setData('cargo_type', value)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${
-                                        data.cargo_type === value
-                                            ? 'bg-blue-700 text-white border-blue-700'
-                                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
-                                    }`}>
-                                    <p className="font-semibold text-xs">{label}</p>
-                                    <p className={`text-[10px] mt-0.5 leading-tight ${data.cargo_type === value ? 'text-blue-100' : 'text-slate-400'}`}>{desc}</p>
-                                </button>
-                            ))}
+                    <div style={CARD}>
+                        <p style={SECTION}>¿Qué necesitas transportar? *</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:8 }}>
+                            {CARGO_OPTIONS.map(({ value, label, desc }) => {
+                                const sel = data.cargo_type === value;
+                                return (
+                                    <button type="button" key={value} onClick={() => setData('cargo_type', value)} style={{
+                                        padding:'10px 8px', borderRadius:12, border:`1.5px solid ${sel ? '#4263ac' : '#e2e8f0'}`,
+                                        background: sel ? '#4263ac' : 'white', textAlign:'left',
+                                        cursor:'pointer', transition:'all .13s', fontFamily:'inherit',
+                                    }}>
+                                        <p style={{ margin:0, fontSize:12.5, fontWeight:700, color: sel?'white':'#2b3340' }}>{label}</p>
+                                        <p style={{ margin:'3px 0 0', fontSize:10.5, lineHeight:1.3, color: sel?'rgba(255,255,255,.75)':'#7b8595' }}>{desc}</p>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    {/* Descripcion */}
-                    <div>
-                        <label className={labelClass}>Describe lo que necesitas mover *</label>
-                        <textarea className={`${inputClass} resize-none`} rows={2}
+                    {/* Descripción */}
+                    <div style={CARD}>
+                        <p style={SECTION}>Descripción *</p>
+                        <FloatTextarea
+                            label="¿Qué necesitas mover? Ej: 4 cajas de agua, 2 adultos..."
                             value={data.description}
+                            error={errors.description}
+                            rows={3}
                             onChange={(e) => setData('description', e.target.value)}
-                            placeholder="Ej: 4 cajas de agua, 2 personas adultas, escombros de una pared..." />
-                        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+                        />
                     </div>
 
-                    {/* Origen */}
-                    <div>
-                        <label className={labelClass}>Punto de origen *</label>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                            <div>
-                                <input className={inputClass} value={data.origin_zone}
-                                    onChange={(e) => setData('origin_zone', e.target.value)}
-                                    placeholder="Zona / sector de origen" />
-                                {errors.origin_zone && <p className="text-red-500 text-xs mt-1">{errors.origin_zone}</p>}
-                            </div>
-                            <select className={inputClass} value={data.origin_state}
-                                onChange={(e) => setData('origin_state', e.target.value)}>
+                    {/* Origen y destino */}
+                    <div style={CARD}>
+                        <p style={SECTION}>Punto de origen *</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                            <FloatInput
+                                label="Zona / sector de origen"
+                                value={data.origin_zone}
+                                error={errors.origin_zone}
+                                onChange={(e) => setData('origin_zone', e.target.value)}
+                            />
+                            <FloatSelect
+                                label="Estado de origen"
+                                value={data.origin_state}
+                                onChange={(e) => setData('origin_state', e.target.value)}
+                            >
                                 {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                            </select>
+                            </FloatSelect>
                         </div>
-                    </div>
 
-                    {/* Destino */}
-                    <div>
-                        <label className={labelClass}>Punto de destino *</label>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                            <div>
-                                <input className={inputClass} value={data.destination_zone}
-                                    onChange={(e) => setData('destination_zone', e.target.value)}
-                                    placeholder="Zona / sector de destino" />
-                                {errors.destination_zone && <p className="text-red-500 text-xs mt-1">{errors.destination_zone}</p>}
-                            </div>
-                            <select className={inputClass} value={data.destination_state}
-                                onChange={(e) => setData('destination_state', e.target.value)}>
+                        <p style={{ ...SECTION, marginTop:20 }}>Punto de destino *</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                            <FloatInput
+                                label="Zona / sector de destino"
+                                value={data.destination_zone}
+                                error={errors.destination_zone}
+                                onChange={(e) => setData('destination_zone', e.target.value)}
+                            />
+                            <FloatSelect
+                                label="Estado de destino"
+                                value={data.destination_state}
+                                onChange={(e) => setData('destination_state', e.target.value)}
+                            >
                                 {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                            </select>
+                            </FloatSelect>
                         </div>
                     </div>
 
                     {/* Urgencia */}
-                    <div>
-                        <label className={labelClass}>Urgencia</label>
-                        <div className="grid grid-cols-2 gap-2">
-                            {[
-                                { value: 'normal', label: 'Normal', desc: 'Puede esperar horas' },
-                                { value: 'urgent', label: 'Urgente', desc: 'Lo necesito hoy' },
-                            ].map(({ value, label, desc }) => (
-                                <button type="button" key={value} onClick={() => setData('urgency', value)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${
-                                        data.urgency === value
-                                            ? value === 'urgent'
-                                                ? 'bg-amber-500 text-white border-amber-500'
-                                                : 'bg-blue-700 text-white border-blue-700'
-                                            : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                                    }`}>
-                                    <p className="font-semibold text-sm">{label}</p>
-                                    <p className={`text-xs mt-0.5 ${data.urgency === value ? 'text-white/80' : 'text-slate-400'}`}>{desc}</p>
-                                </button>
-                            ))}
+                    <div style={CARD}>
+                        <p style={SECTION}>Urgencia</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                            {URGENCY_OPTIONS.map(({ value, label, desc }) => {
+                                const sel = data.urgency === value;
+                                const color = value === 'urgent' ? '#b45309' : '#4263ac';
+                                const bg    = value === 'urgent' ? '#b45309' : '#4263ac';
+                                return (
+                                    <button type="button" key={value} onClick={() => setData('urgency', value)} style={{
+                                        padding:'10px 12px', borderRadius:12, border:`1.5px solid ${sel ? bg : '#e2e8f0'}`,
+                                        background: sel ? bg : 'white', textAlign:'left',
+                                        cursor:'pointer', transition:'all .13s', fontFamily:'inherit',
+                                    }}>
+                                        <p style={{ margin:0, fontSize:13, fontWeight:700, color: sel?'white':'#2b3340' }}>{label}</p>
+                                        <p style={{ margin:'3px 0 0', fontSize:11, color: sel?'rgba(255,255,255,.75)':'#7b8595' }}>{desc}</p>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
                     {/* Notas */}
-                    <div>
-                        <label className={labelClass}>Informacion adicional</label>
-                        <textarea className={`${inputClass} resize-none`} rows={2}
+                    <div style={CARD}>
+                        <p style={SECTION}>Información adicional</p>
+                        <FloatTextarea
+                            label="Peso aproximado, acceso al lugar, horario disponible..."
                             value={data.notes}
+                            rows={3}
                             onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="Peso aproximado, acceso al lugar, horario disponible..." />
+                        />
                     </div>
 
                     {/* Contacto */}
-                    <div className="pt-4 border-t border-slate-100">
-                        <h3 className="font-semibold text-slate-900 mb-3">Tu contacto</h3>
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelClass}>Tu nombre *</label>
-                                <input className={inputClass} value={data.requester_name}
-                                    onChange={(e) => setData('requester_name', e.target.value)} />
-                                {errors.requester_name && <p className="text-red-500 text-xs mt-1">{errors.requester_name}</p>}
-                            </div>
-                            <div>
-                                <label className={labelClass}>Telefono *</label>
-                                <input className={inputClass} value={data.requester_phone}
-                                    onChange={(e) => setData('requester_phone', e.target.value)}
-                                    placeholder="+58 412 000 0000" />
-                                {errors.requester_phone && <p className="text-red-500 text-xs mt-1">{errors.requester_phone}</p>}
-                            </div>
+                    <div style={CARD}>
+                        <p style={SECTION}>Tu contacto</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                            <FloatInput
+                                label="Tu nombre *"
+                                value={data.requester_name}
+                                error={errors.requester_name}
+                                onChange={(e) => setData('requester_name', e.target.value)}
+                            />
+                            <FloatInput
+                                label="Teléfono *"
+                                type="tel"
+                                value={data.requester_phone}
+                                error={errors.requester_phone}
+                                onChange={(e) => setData('requester_phone', e.target.value)}
+                            />
                         </div>
                     </div>
 
-                    <button type="submit" disabled={processing}
-                        className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+                    <button type="submit" disabled={processing} className="va-btn va-btn--primary va-btn--full va-btn--lg">
                         {processing ? 'Publicando...' : 'Publicar solicitud de transporte'}
                     </button>
                 </form>

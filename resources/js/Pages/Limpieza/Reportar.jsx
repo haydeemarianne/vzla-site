@@ -1,27 +1,51 @@
 import MainLayout from '@/Layouts/MainLayout';
+import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { FiCamera, FiX } from 'react-icons/fi';
+import { Camera, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const STATES = [
     'La Guaira (Vargas)', 'Distrito Capital', 'Miranda', 'Aragua', 'Carabobo',
-    'Anzoategui', 'Bolivar', 'Falcon', 'Guarico', 'Lara', 'Merida',
-    'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Tachira', 'Trujillo',
+    'Anzoátegui', 'Bolívar', 'Falcón', 'Guárico', 'Lara', 'Mérida',
+    'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Táchira', 'Trujillo',
     'Yaracuy', 'Zulia', 'Amazonas', 'Apure', 'Barinas', 'Cojedes', 'Delta Amacuro',
 ];
 
 const TYPE_OPTIONS = [
-    { value: 'domestic', label: 'Basura domestica',     desc: 'Bolsas, desechos del hogar' },
-    { value: 'debris',   label: 'Escombros y basura',   desc: 'Materiales de construccion, ruinas' },
-    { value: 'both',     label: 'Ambos tipos',           desc: 'Mezcla de basura y escombros' },
+    { value: 'domestic', label: 'Basura doméstica',  desc: 'Bolsas, desechos del hogar' },
+    { value: 'debris',   label: 'Escombros',          desc: 'Materiales de construcción, ruinas' },
+    { value: 'both',     label: 'Ambos tipos',        desc: 'Mezcla de basura y escombros' },
 ];
 
 const VOLUME_OPTIONS = [
-    { value: 'low',    label: 'Poco',     desc: 'Un punto puntual, manejable' },
+    { value: 'low',    label: 'Poco',     desc: 'Manejable, puntual' },
     { value: 'medium', label: 'Bastante', desc: 'Requiere varios voluntarios' },
-    { value: 'high',   label: 'Mucho',    desc: 'Zona critica, urgente' },
+    { value: 'high',   label: 'Mucho',    desc: 'Zona crítica, urgente' },
 ];
+
+const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:24, padding:'24px 22px' };
+const SECTION = { fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595', marginBottom:12 };
+
+function ToggleGrid({ options, value, onChange, active = '#4263ac' }) {
+    return (
+        <div style={{ display:'grid', gridTemplateColumns:`repeat(${options.length}, 1fr)`, gap:8 }}>
+            {options.map(({ value: v, label, desc }) => {
+                const sel = value === v;
+                return (
+                    <button type="button" key={v} onClick={() => onChange(v)} style={{
+                        padding:'10px 8px', borderRadius:12, border:`1.5px solid ${sel ? active : '#e2e8f0'}`,
+                        background: sel ? active : 'white', textAlign:'left',
+                        cursor:'pointer', transition:'all .13s', fontFamily:'inherit',
+                    }}>
+                        <p style={{ margin:0, fontSize:12.5, fontWeight:700, color: sel?'white':'#2b3340' }}>{label}</p>
+                        <p style={{ margin:'3px 0 0', fontSize:10.5, lineHeight:1.3, color: sel?'rgba(255,255,255,.75)':'#7b8595' }}>{desc}</p>
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
 
 export default function ReportarLimpieza() {
     const [photoPreview, setPhotoPreview] = useState(null);
@@ -54,144 +78,119 @@ export default function ReportarLimpieza() {
         });
     };
 
-    const inputClass = 'w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white';
-    const labelClass = 'block text-sm font-semibold text-slate-700 mb-1';
-
     return (
         <MainLayout>
-            <div className="max-w-2xl mx-auto">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-slate-900">Reportar punto de limpieza</h1>
-                    <p className="text-slate-500 text-sm mt-1">
-                        La basura acumulada post-sismo es un riesgo sanitario. Reportala para coordinar la limpieza.
+            <div style={{ maxWidth:640, margin:'0 auto', display:'flex', flexDirection:'column', gap:16 }}>
+
+                {/* Encabezado */}
+                <div>
+                    <h1 style={{ margin:'0 0 4px', fontSize:22, fontWeight:800, color:'#1a2230', letterSpacing:'-.5px' }}>
+                        Reportar punto de limpieza
+                    </h1>
+                    <p style={{ margin:0, fontSize:12.5, color:'#7b8595' }}>
+                        La basura acumulada post-sismo es un riesgo sanitario. Repórtala para coordinar la limpieza.
                     </p>
                 </div>
 
-                <form onSubmit={submit} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-5">
+                <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:14 }}>
 
-                    {/* Ubicacion */}
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Nombre del sector / zona *</label>
-                            <input className={inputClass} value={data.zone_name}
+                    {/* Ubicación */}
+                    <div style={CARD}>
+                        <p style={SECTION}>Ubicación</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                            <FloatInput
+                                label="Nombre del sector / zona *"
+                                value={data.zone_name}
+                                error={errors.zone_name}
                                 onChange={(e) => setData('zone_name', e.target.value)}
-                                placeholder="Barrio El Carmen, Urb. Los Pinos..." />
-                            {errors.zone_name && <p className="text-red-500 text-xs mt-1">{errors.zone_name}</p>}
-                        </div>
-                        <div>
-                            <label className={labelClass}>Ciudad / Municipio</label>
-                            <input className={inputClass} value={data.city}
+                            />
+                            <FloatInput
+                                label="Ciudad / Municipio"
+                                value={data.city}
                                 onChange={(e) => setData('city', e.target.value)}
-                                placeholder="La Guaira, Maiquetia..." />
+                            />
                         </div>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Estado</label>
-                            <select className={inputClass} value={data.state}
-                                onChange={(e) => setData('state', e.target.value)}>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginTop:14 }}>
+                            <FloatSelect
+                                label="Estado"
+                                value={data.state}
+                                onChange={(e) => setData('state', e.target.value)}
+                            >
                                 {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelClass}>Direccion de referencia</label>
-                            <input className={inputClass} value={data.address}
+                            </FloatSelect>
+                            <FloatInput
+                                label="Dirección de referencia"
+                                value={data.address}
                                 onChange={(e) => setData('address', e.target.value)}
-                                placeholder="Frente al mercado, esquina..." />
+                            />
                         </div>
                     </div>
 
-                    {/* Tipo */}
-                    <div>
-                        <label className={labelClass}>Tipo de desecho *</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {TYPE_OPTIONS.map(({ value, label, desc }) => (
-                                <button type="button" key={value} onClick={() => setData('type', value)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${
-                                        data.type === value
-                                            ? 'bg-blue-700 text-white border-blue-700'
-                                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
-                                    }`}>
-                                    <p className="font-semibold text-xs">{label}</p>
-                                    <p className={`text-[10px] mt-0.5 leading-tight ${data.type === value ? 'text-blue-100' : 'text-slate-400'}`}>{desc}</p>
-                                </button>
-                            ))}
-                        </div>
+                    {/* Tipo y volumen */}
+                    <div style={CARD}>
+                        <p style={SECTION}>Tipo de desecho *</p>
+                        <ToggleGrid options={TYPE_OPTIONS} value={data.type} onChange={(v) => setData('type', v)}/>
+
+                        <p style={{ ...SECTION, marginTop:20 }}>Cantidad / volumen *</p>
+                        <ToggleGrid options={VOLUME_OPTIONS} value={data.volume} onChange={(v) => setData('volume', v)} active="#CE6969"/>
                     </div>
 
-                    {/* Volumen */}
-                    <div>
-                        <label className={labelClass}>Cantidad / volumen *</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {VOLUME_OPTIONS.map(({ value, label, desc }) => (
-                                <button type="button" key={value} onClick={() => setData('volume', value)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${
-                                        data.volume === value
-                                            ? 'bg-blue-700 text-white border-blue-700'
-                                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
-                                    }`}>
-                                    <p className="font-semibold text-xs">{label}</p>
-                                    <p className={`text-[10px] mt-0.5 leading-tight ${data.volume === value ? 'text-blue-100' : 'text-slate-400'}`}>{desc}</p>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Foto — obligatoria */}
-                    <div>
-                        <label className={labelClass}>Foto del punto *</label>
-                        <p className="text-xs text-slate-400 mb-2">Una foto es esencial para que los voluntarios puedan identificar el lugar.</p>
+                    {/* Foto */}
+                    <div style={CARD}>
+                        <p style={SECTION}>Foto del punto *</p>
+                        <p style={{ margin:'-4px 0 12px', fontSize:11.5, color:'#7b8595' }}>
+                            Una foto ayuda a los voluntarios a identificar el lugar.
+                        </p>
                         {photoPreview ? (
-                            <div className="relative">
-                                <img src={photoPreview} className="w-full h-48 object-cover rounded-xl border border-slate-200" />
-                                <button type="button"
-                                    onClick={() => { setPhotoPreview(null); setData('photo', null); }}
-                                    className="absolute top-2 right-2 w-7 h-7 bg-slate-800/80 text-white rounded-full flex items-center justify-center">
-                                    <FiX className="w-3.5 h-3.5" />
+                            <div style={{ position:'relative' }}>
+                                <img src={photoPreview} alt="preview" style={{ width:'100%', height:180, objectFit:'cover', borderRadius:14, border:'1px solid #e9ebf1' }}/>
+                                <button type="button" onClick={() => { setPhotoPreview(null); setData('photo', null); }}
+                                    style={{ position:'absolute', top:8, right:8, width:28, height:28, borderRadius:'50%', background:'rgba(15,23,42,.7)', border:'none', color:'white', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                                    <X size={14} strokeWidth={2.5}/>
                                 </button>
                             </div>
                         ) : (
-                            <label className="flex flex-col items-center gap-2 border-2 border-dashed border-slate-200 rounded-xl py-10 cursor-pointer hover:border-blue-400 transition-colors">
-                                <FiCamera className="w-7 h-7 text-slate-400" />
-                                <span className="text-sm text-slate-500">Toca para tomar o subir una foto</span>
-                                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhoto} />
+                            <label style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, border:'2px dashed #e2e8f0', borderRadius:14, padding:'32px 16px', cursor:'pointer' }}>
+                                <Camera size={28} color="#94a3b8" strokeWidth={1.5}/>
+                                <span style={{ fontSize:13, color:'#64748b', fontWeight:500 }}>Toca para tomar o subir una foto</span>
+                                <input type="file" accept="image/*" capture="environment" style={{ display:'none' }} onChange={handlePhoto}/>
                             </label>
                         )}
-                        {errors.photo && <p className="text-red-500 text-xs mt-1">{errors.photo}</p>}
+                        {errors.photo && <p style={{ margin:'6px 0 0', fontSize:11.5, color:'#CE6969', fontWeight:500 }}>{errors.photo}</p>}
                     </div>
 
-                    {/* Descripcion */}
-                    <div>
-                        <label className={labelClass}>Descripcion adicional</label>
-                        <textarea className={`${inputClass} resize-none`} rows={2}
+                    {/* Notas */}
+                    <div style={CARD}>
+                        <p style={SECTION}>Descripción adicional</p>
+                        <FloatTextarea
+                            label="Días acumulados, acceso al lugar, peligros..."
                             value={data.notes}
+                            rows={3}
                             onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="Dias que lleva acumulado, acceso al lugar, peligros..." />
+                        />
                     </div>
 
                     {/* Reportante */}
-                    <div className="pt-4 border-t border-slate-100">
-                        <h3 className="font-semibold text-slate-900 mb-3">Quien reporta</h3>
-                        <div className="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelClass}>Tu nombre *</label>
-                                <input className={inputClass} value={data.reporter_name}
-                                    onChange={(e) => setData('reporter_name', e.target.value)} />
-                                {errors.reporter_name && <p className="text-red-500 text-xs mt-1">{errors.reporter_name}</p>}
-                            </div>
-                            <div>
-                                <label className={labelClass}>Telefono *</label>
-                                <input className={inputClass} value={data.reporter_phone}
-                                    onChange={(e) => setData('reporter_phone', e.target.value)}
-                                    placeholder="+58 412 000 0000" />
-                                {errors.reporter_phone && <p className="text-red-500 text-xs mt-1">{errors.reporter_phone}</p>}
-                            </div>
+                    <div style={CARD}>
+                        <p style={SECTION}>Quién reporta</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                            <FloatInput
+                                label="Tu nombre *"
+                                value={data.reporter_name}
+                                error={errors.reporter_name}
+                                onChange={(e) => setData('reporter_name', e.target.value)}
+                            />
+                            <FloatInput
+                                label="Teléfono *"
+                                type="tel"
+                                value={data.reporter_phone}
+                                error={errors.reporter_phone}
+                                onChange={(e) => setData('reporter_phone', e.target.value)}
+                            />
                         </div>
                     </div>
 
-                    <button type="submit" disabled={processing}
-                        className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+                    <button type="submit" disabled={processing} className="va-btn va-btn--primary va-btn--full va-btn--lg">
                         {processing ? 'Enviando reporte...' : 'Reportar punto de limpieza'}
                     </button>
                 </form>
