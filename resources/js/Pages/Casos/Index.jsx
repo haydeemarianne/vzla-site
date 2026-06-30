@@ -4,6 +4,8 @@ import { ArrowRight, Heart, MapPin, Share2, Plus } from 'lucide-react';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
+const COLUMN_LIMIT = 8;
+
 const NEED_LABELS = {
     food: 'Alimentación', water: 'Agua', medicine: 'Medicamentos',
     clothing: 'Ropa', furniture: 'Mobiliario', baby: 'Bebé',
@@ -13,8 +15,9 @@ const NEED_LABELS = {
 const PASTEL = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#fde68a'];
 
 const COLUMNS = [
-    { key: 'open',    label: 'Sin apadrinar', color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
-    { key: 'adopted', label: 'Apadrinados',   color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
+    { key: 'open',     label: 'Sin apadrinar', color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
+    { key: 'adopted',  label: 'Apadrinados',   color: '#0e7490', bg: '#e0f2fe', dot: '#0e7490' },
+    { key: 'resolved', label: 'Cerrados',       color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -48,11 +51,11 @@ function shareCase(c) {
 // ─── Tarjeta ──────────────────────────────────────────────────────────────────
 
 function CaseCard({ c, idx }) {
-    const needs    = parseNeeds(c.needs);
-    const days     = daysSince(c.created_at);
-    const name     = c.is_anonymous ? 'Familia anónima' : (c.family_name ?? 'Familia');
-    const isOpen   = c.status === 'open';
-    const tasks    = c.tasks ?? [];
+    const needs       = parseNeeds(c.needs);
+    const days        = daysSince(c.created_at);
+    const name        = c.is_anonymous ? 'Familia anónima' : (c.family_name ?? 'Familia');
+    const isOpen      = c.status === 'open';
+    const tasks       = c.tasks ?? [];
     const tasksDone   = tasks.filter(t => t.status === 'done').length;
     const tasksTaken  = tasks.filter(t => t.status !== 'pending').length;
     const tasksTotal  = tasks.length;
@@ -69,7 +72,7 @@ function CaseCard({ c, idx }) {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 8,
-                opacity: isOpen ? 1 : 0.72,
+                opacity: isOpen ? 1 : 0.75,
             }}
         >
             {/* Avatar + nombre */}
@@ -80,29 +83,23 @@ function CaseCard({ c, idx }) {
                         objectFit: 'cover', flexShrink: 0,
                     }} />
                 ) : (
-                <div style={{
-                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                    background: PASTEL[idx % PASTEL.length],
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#3a4250' }}>
-                        {initials(c.family_name, c.is_anonymous)}
-                    </span>
-                </div>
+                    <div style={{
+                        width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                        background: PASTEL[idx % PASTEL.length],
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#3a4250' }}>
+                            {initials(c.family_name, c.is_anonymous)}
+                        </span>
+                    </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                        fontSize: 13, fontWeight: 700, color: '#1e293b',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {name}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 1 }}>
                         <MapPin size={10} color="#94a3b8" strokeWidth={2} />
-                        <span style={{
-                            fontSize: 11, color: '#94a3b8',
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
+                        <span style={{ fontSize: 11, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {[c.zone, c.state].filter(Boolean).join(', ')}
                             {c.people_count ? ` · ${c.people_count}p` : ''}
                         </span>
@@ -123,10 +120,7 @@ function CaseCard({ c, idx }) {
                         </span>
                     ))}
                     {needs.length > 3 && (
-                        <span style={{
-                            background: '#f1f4f9', color: '#94a3b8',
-                            fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 5,
-                        }}>
+                        <span style={{ background: '#f1f4f9', color: '#94a3b8', fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 5 }}>
                             +{needs.length - 3}
                         </span>
                     )}
@@ -135,7 +129,7 @@ function CaseCard({ c, idx }) {
 
             {/* Progreso de tareas */}
             {tasksTotal > 0 && (
-                <div style={{ marginTop: 6 }}>
+                <div style={{ marginTop: 2 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
                         <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>
                             {tasksTaken}/{tasksTotal} tareas tomadas
@@ -158,21 +152,14 @@ function CaseCard({ c, idx }) {
             )}
 
             {/* Footer */}
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                borderTop: '1px solid #f1f4f9', paddingTop: 7, marginTop: 6,
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f4f9', paddingTop: 7, marginTop: 2 }}>
                 <span style={{ fontSize: 10.5, fontWeight: 600, color: '#94a3b8' }}>
                     {days}d sin ayuda
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                     <button
                         onClick={e => { e.stopPropagation(); shareCase(c); }}
-                        style={{
-                            width: 24, height: 24, borderRadius: '50%',
-                            background: '#f1f4f9', border: 'none', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
+                        style={{ width: 24, height: 24, borderRadius: '50%', background: '#f1f4f9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         <Share2 size={11} color="#64748b" strokeWidth={2} />
                     </button>
@@ -180,11 +167,7 @@ function CaseCard({ c, idx }) {
                         <Link
                             href={`/casos/${c.id}`}
                             onClick={e => e.stopPropagation()}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: 2,
-                                fontSize: 11.5, fontWeight: 700,
-                                color: '#4263ac', textDecoration: 'none',
-                            }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 11.5, fontWeight: 700, color: '#4263ac', textDecoration: 'none' }}
                         >
                             Apadrinar <ArrowRight size={12} color="#4263ac" strokeWidth={2.5} />
                         </Link>
@@ -198,13 +181,14 @@ function CaseCard({ c, idx }) {
 // ─── Columna ──────────────────────────────────────────────────────────────────
 
 function Column({ col, cases }) {
+    const visible = cases.slice(0, COLUMN_LIMIT);
+    const hidden  = cases.length - visible.length;
+
     return (
-        <div style={{ minWidth: 258, maxWidth: 258, display: 'flex', flexDirection: 'column', gap: 9 }}>
+        <div style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+
             {/* Cabecera */}
-            <div style={{
-                display: 'flex', alignItems: 'center', gap: 7,
-                padding: '9px 11px', background: col.bg, borderRadius: 11,
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 11px', background: col.bg, borderRadius: 11 }}>
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: col.dot, flexShrink: 0 }} />
                 <span style={{ fontSize: 12, fontWeight: 700, color: col.color, flex: 1 }}>
                     {col.label}
@@ -220,19 +204,29 @@ function Column({ col, cases }) {
             </div>
 
             {/* Tarjetas */}
-            {cases.length === 0 ? (
-                <div style={{
-                    background: '#fff', borderRadius: 14,
-                    padding: '20px 13px', textAlign: 'center',
-                    boxShadow: '0 2px 8px rgba(16,24,40,.04)',
-                }}>
+            {visible.length === 0 ? (
+                <div style={{ background: '#fff', borderRadius: 14, padding: '20px 13px', textAlign: 'center', boxShadow: '0 2px 8px rgba(16,24,40,.04)' }}>
                     <Heart size={20} color="#e2e8f0" strokeWidth={2} style={{ display: 'block', margin: '0 auto 5px' }} />
-                    <p style={{ fontSize: 11.5, color: '#cbd5e1', margin: 0, fontWeight: 500 }}>
-                        Ningún caso
-                    </p>
+                    <p style={{ fontSize: 11.5, color: '#cbd5e1', margin: 0, fontWeight: 500 }}>Ningún caso</p>
                 </div>
             ) : (
-                cases.map((c, i) => <CaseCard key={c.id} c={c} idx={i} />)
+                visible.map((c, i) => <CaseCard key={c.id} c={c} idx={i} />)
+            )}
+
+            {/* Ver más */}
+            {hidden > 0 && (
+                <Link
+                    href={`/casos?status=${col.key}`}
+                    style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        gap: 4, padding: '8px', borderRadius: 10,
+                        background: col.bg, border: `1px solid ${col.color}22`,
+                        fontSize: 11.5, fontWeight: 700, color: col.color,
+                        textDecoration: 'none',
+                    }}
+                >
+                    Ver {hidden} más <ArrowRight size={11} strokeWidth={2.5}/>
+                </Link>
             )}
         </div>
     );
@@ -241,23 +235,19 @@ function Column({ col, cases }) {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function CasosIndex({ by_status }) {
-    const open    = by_status?.open    ?? [];
-    const adopted = by_status?.adopted ?? [];
-    const total   = open.length + adopted.length;
+    const open     = by_status?.open     ?? [];
+    const adopted  = by_status?.adopted  ?? [];
+    const resolved = by_status?.resolved ?? [];
+    const total    = open.length + adopted.length + resolved.length;
 
     return (
         <MainLayout>
-            <div style={{ padding: '16px 0 100px', fontFamily: "'Onest', system-ui, sans-serif" }}>
-                {/* ── Encabezado ── */}
-                <div style={{
-                    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                    padding: '0 20px', marginBottom: 14,
-                }}>
+            <div style={{ padding: '16px 0 80px', fontFamily: "'Onest', system-ui, sans-serif" }}>
+
+                {/* Encabezado */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0 20px', marginBottom: 14 }}>
                     <div>
-                        <h1 style={{
-                            margin: 0, fontSize: 20, fontWeight: 700,
-                            letterSpacing: '-0.4px', color: '#1e293b',
-                        }}>
+                        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px', color: '#1e293b' }}>
                             Tablero de casos
                         </h1>
                         <p style={{ margin: '3px 0 0', fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
@@ -279,21 +269,20 @@ export default function CasosIndex({ by_status }) {
                     </Link>
                 </div>
 
-                {/* ── Kanban (scroll horizontal con snap) ── */}
+                {/* Kanban — scroll horizontal sin snap, columnas fijas */}
                 <div style={{
                     display: 'flex', gap: 10,
                     overflowX: 'auto',
                     padding: '2px 20px 6px',
-                    scrollSnapType: 'x mandatory',
                     scrollbarWidth: 'none',
+                    alignItems: 'flex-start',
                 }}>
                     {COLUMNS.map(col => (
-                        <div key={col.key} style={{ scrollSnapAlign: 'start', flexShrink: 0 }}>
-                            <Column
-                                col={col}
-                                cases={col.key === 'open' ? open : adopted}
-                            />
-                        </div>
+                        <Column
+                            key={col.key}
+                            col={col}
+                            cases={col.key === 'open' ? open : col.key === 'adopted' ? adopted : resolved}
+                        />
                     ))}
                 </div>
             </div>

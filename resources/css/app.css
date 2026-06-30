@@ -337,6 +337,17 @@
     .va-validar-bottom { grid-template-columns: 1.55fr 1fr; align-items: start; }
 }
 
+/* Casos/Publicar — 3 cards en fila en desktop */
+.va-publish-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    align-items: start;
+}
+@media (min-width: 860px) {
+    .va-publish-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
 /* Estadísticas — grid 2→3 cols */
 .va-stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;

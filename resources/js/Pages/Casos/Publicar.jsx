@@ -23,8 +23,9 @@ const NEEDS = [
     { value: 'other',     label: 'Otro'          },
 ];
 
-const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:20, padding:'20px' };
-const DIV  = { height:1, background:'#f3f4f8', margin:'16px 0' };
+const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:20, padding:'20px', display:'flex', flexDirection:'column', gap:14 };
+const SEC  = { margin:0, fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' };
+const DIV  = { height:1, background:'#f3f4f8' };
 
 export default function CasosPublicar() {
     const { data, setData, post, processing, errors } = useForm({
@@ -48,10 +49,10 @@ export default function CasosPublicar() {
 
     return (
         <MainLayout>
-            <div style={{ maxWidth:780, margin:'0 auto', display:'grid', gap:14 }}>
+            <div style={{ padding:'0 4px' }}>
 
                 {/* Encabezado */}
-                <div>
+                <div style={{ marginBottom:14 }}>
                     <h1 style={{ margin:'0 0 3px', fontSize:22, fontWeight:800, letterSpacing:'-.5px', color:'#1a2230' }}>
                         Publicar caso
                     </h1>
@@ -61,21 +62,21 @@ export default function CasosPublicar() {
                 </div>
 
                 {/* Aviso */}
-                <div style={{ display:'flex', gap:10, alignItems:'flex-start', background:'#eef1fa', borderRadius:14, padding:'12px 14px', border:'1px solid #d0d9f0' }}>
+                <div style={{ display:'flex', gap:10, alignItems:'flex-start', background:'#eef1fa', borderRadius:14, padding:'11px 14px', border:'1px solid #d0d9f0', marginBottom:14 }}>
                     <AlertCircle size={15} color="#4263ac" strokeWidth={2} style={{ flexShrink:0, marginTop:1 }}/>
                     <p style={{ margin:0, fontSize:12, color:'#4263ac', lineHeight:1.55 }}>
                         Tu teléfono solo lo verá el voluntario que te apadrine. El caso aparece con nombre visible.
                     </p>
                 </div>
 
-                <form onSubmit={e => { e.preventDefault(); post('/casos', { forceFormData: true }); }} style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                <form onSubmit={e => { e.preventDefault(); post('/casos', { forceFormData: true }); }}>
 
-                    {/* Familia */}
-                    <div style={CARD}>
-                        <p style={{ margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>
-                            Datos de la familia
-                        </p>
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                    {/* ─── 3 cards en fila (desktop) ─── */}
+                    <div className="va-publish-grid">
+
+                        {/* Familia */}
+                        <div style={CARD}>
+                            <p style={SEC}>Datos de la familia</p>
                             <FloatInput
                                 label="Nombre de la familia *"
                                 value={data.family_name}
@@ -91,79 +92,69 @@ export default function CasosPublicar() {
                                 icon={Users}
                                 min={1} max={50}
                             />
-                        </div>
-
-                        <div style={DIV}/>
-
-                        <div style={{ display:'flex', gap:8 }}>
-                            {[
-                                { key:'has_children', label:'Hay niños'       },
-                                { key:'has_elderly',  label:'Adultos mayores' },
-                                { key:'is_anonymous', label:'Publicar anónimo'},
-                            ].map(({ key, label }) => (
-                                <button key={key} type="button" onClick={() => setData(key, !data[key])} style={{
-                                    flex:1, padding:'9px 8px', borderRadius:11,
-                                    fontSize:11.5, fontWeight:700, cursor:'pointer',
-                                    border: data[key] ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
-                                    background: data[key] ? '#eef1fa' : '#fafbfd',
-                                    color: data[key] ? '#4263ac' : '#64748b',
-                                    display:'flex', alignItems:'center', justifyContent:'center', gap:5,
-                                    fontFamily:'inherit', transition:'all .13s',
-                                }}>
-                                    <Baby size={12} strokeWidth={2}/>
-                                    {label}
-                                    {data[key] && <Check size={11} color="#4263ac" strokeWidth={2.5}/>}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Situación */}
-                    <div style={CARD}>
-                        <p style={{ margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>
-                            Situación y necesidades
-                        </p>
-                        <FloatTextarea
-                            label="Describe su situación *"
-                            value={data.description}
-                            onChange={e => setData('description', e.target.value)}
-                            error={errors.description}
-                            rows={3}
-                        />
-
-                        <div style={{ marginTop:14 }}>
-                            <p style={{ margin:'0 0 8px', fontSize:11, fontWeight:700, letterSpacing:'.4px', textTransform:'uppercase', color:'#7b8595' }}>
-                                ¿Qué necesitan? *
-                            </p>
-                            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-                                {NEEDS.map(({ value, label }) => {
-                                    const on = data.needs.includes(value);
-                                    return (
-                                        <button key={value} type="button" onClick={() => toggleNeed(value)} style={{
-                                            padding:'6px 12px', borderRadius:999,
-                                            fontSize:12, fontWeight:600, cursor:'pointer',
-                                            border: on ? 'none' : '1.5px solid #e2e8f0',
-                                            background: on ? '#4263ac' : '#f3f4f8',
-                                            color: on ? '#fff' : '#475569',
-                                            fontFamily:'inherit', display:'flex', alignItems:'center', gap:4,
-                                            transition:'all .13s',
-                                        }}>
-                                            {on && <Check size={10} color="#fff" strokeWidth={2.5}/>}
-                                            {label}
-                                        </button>
-                                    );
-                                })}
+                            <div style={DIV}/>
+                            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                                {[
+                                    { key:'has_children', label:'Hay niños'        },
+                                    { key:'has_elderly',  label:'Adultos mayores'  },
+                                    { key:'is_anonymous', label:'Publicar anónimo' },
+                                ].map(({ key, label }) => (
+                                    <button key={key} type="button" onClick={() => setData(key, !data[key])} style={{
+                                        padding:'9px 12px', borderRadius:11,
+                                        fontSize:12, fontWeight:700, cursor:'pointer',
+                                        border: data[key] ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
+                                        background: data[key] ? '#eef1fa' : '#fafbfd',
+                                        color: data[key] ? '#4263ac' : '#64748b',
+                                        display:'flex', alignItems:'center', gap:6,
+                                        fontFamily:'inherit', transition:'all .13s', textAlign:'left',
+                                    }}>
+                                        <Baby size={12} strokeWidth={2}/>
+                                        <span style={{ flex:1 }}>{label}</span>
+                                        {data[key] && <Check size={11} color="#4263ac" strokeWidth={2.5}/>}
+                                    </button>
+                                ))}
                             </div>
-                            {errors.needs && <p style={{ margin:'5px 0 0', fontSize:11, color:'#CE6969', fontWeight:500 }}>{errors.needs}</p>}
                         </div>
-                    </div>
 
-                    {/* Ubicación y contacto */}
-                    <div style={CARD}>
-                        <p style={{ margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>
-                            Ubicación y contacto
-                        </p>
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                        {/* Situación */}
+                        <div style={CARD}>
+                            <p style={SEC}>Situación y necesidades</p>
+                            <FloatTextarea
+                                label="Describe su situación *"
+                                value={data.description}
+                                onChange={e => setData('description', e.target.value)}
+                                error={errors.description}
+                                rows={4}
+                            />
+                            <div style={DIV}/>
+                            <div>
+                                <p style={{ ...SEC, marginBottom:10 }}>¿Qué necesitan? *</p>
+                                <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                                    {NEEDS.map(({ value, label }) => {
+                                        const on = data.needs.includes(value);
+                                        return (
+                                            <button key={value} type="button" onClick={() => toggleNeed(value)} style={{
+                                                padding:'5px 11px', borderRadius:999,
+                                                fontSize:11.5, fontWeight:600, cursor:'pointer',
+                                                border: on ? 'none' : '1.5px solid #e2e8f0',
+                                                background: on ? '#4263ac' : '#f3f4f8',
+                                                color: on ? '#fff' : '#475569',
+                                                fontFamily:'inherit', display:'flex', alignItems:'center', gap:4,
+                                                transition:'all .13s',
+                                            }}>
+                                                {on && <Check size={10} color="#fff" strokeWidth={2.5}/>}
+                                                {label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {errors.needs && <p style={{ margin:'5px 0 0', fontSize:11, color:'#CE6969', fontWeight:500 }}>{errors.needs}</p>}
+                            </div>
+                        </div>
+
+                        {/* Ubicación y contacto */}
+                        <div style={CARD}>
+                            <p style={SEC}>Ubicación y contacto</p>
                             <FloatInput
                                 label="Zona o sector *"
                                 value={data.zone}
@@ -177,11 +168,10 @@ export default function CasosPublicar() {
                                 onChange={e => setData('state', e.target.value)}
                                 error={errors.state}
                             >
-                                <option value="">—</option>
+                                <option value="">— Selecciona —</option>
                                 {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                             </FloatSelect>
-                        </div>
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:12 }}>
+                            <div style={DIV}/>
                             <FloatInput
                                 label="Tu teléfono (privado) *"
                                 type="tel"
@@ -201,7 +191,7 @@ export default function CasosPublicar() {
                     </div>
 
                     {/* Submit */}
-                    <div style={{ display:'flex', justifyContent:'flex-end', gap:10, paddingTop:2 }}>
+                    <div style={{ display:'flex', justifyContent:'flex-end', gap:10, paddingTop:14 }}>
                         <button type="button" onClick={() => window.history.back()} style={{
                             padding:'10px 20px', borderRadius:12, border:'1.5px solid #e2e8f0',
                             background:'white', color:'#475569', fontSize:13, fontWeight:600,
