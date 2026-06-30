@@ -278,6 +278,16 @@
     .va-action-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
+/* Grid de acciones con descripción — 2 cols mobile, 3 desktop */
+.va-acciones-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+@media (min-width: 600px) {
+    .va-acciones-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* Dashboard — layout 2 columnas en desktop */
 @media (min-width: 900px) {
     .va-dashboard-body {
