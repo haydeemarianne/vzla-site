@@ -1,7 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Heart, Sparkles, Wrench, Home, Truck,
-    ArrowLeft, Share2, Plus, Users, ShieldCheck, Settings,
+    ArrowLeft, Share2, Plus, Users, Settings,
     Search, RotateCw,
 } from 'lucide-react';
 
@@ -31,7 +31,6 @@ const SIDEBAR_ACTIONS = [
     { id: 'nuevo',    Icon: Plus,        label: 'Publicar caso nuevo',  href: '/casos/publicar',onClick: null                                   },
     { id: 'casos',    Icon: Users,       label: 'Ver todos los casos',  href: '/casos',        onClick: null                                     },
     { id: 'limpieza', Icon: Sparkles,    label: 'Jornadas de limpieza', href: '/limpieza',     onClick: null                                     },
-    { id: 'validar',  Icon: ShieldCheck, label: 'Panel de validación',  href: '/validar',      onClick: null                                     },
 ];
 
 /* ─── Estilos reutilizables ────────────────────── */
