@@ -34,6 +34,10 @@ class DashboardController extends Controller
                 ->latest()
                 ->limit(4)
                 ->get(['id', 'zone_name', 'state', 'helpers_count', 'created_at']),
+            'top_materials' => PrintableMaterial::approved()
+                ->orderByDesc('download_count')
+                ->limit(5)
+                ->get(['id', 'title', 'category', 'file_type', 'download_count']),
         ]);
     }
 }
