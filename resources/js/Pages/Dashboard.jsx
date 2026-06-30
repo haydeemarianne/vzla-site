@@ -197,46 +197,41 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning, top_ma
                                 </div>
                                 <span style={{ fontSize:12, color:'#92600e', fontWeight:600 }}>Ver recursos disponibles</span>
                             </Link>
-                        ) : materials.map((m,i) => {
-                            const ftUpper = (m.file_type ?? 'doc').toUpperCase();
-                            const ftColors = {
+                        ) : (() => {
+                            const FT_COLORS = {
                                 PDF:{ bg:'#fef2f2', color:'#b91c1c' },
                                 STL:{ bg:'#f3eeff', color:'#7c3aed' },
                                 SVG:{ bg:'#e0f2fe', color:'#0369a1' },
                                 PNG:{ bg:'#dcfce7', color:'#15803d' },
                                 DOC:{ bg:'#f1f4f9', color:'#475569' },
                             };
-                            const ft = ftColors[ftUpper] ?? ftColors.DOC;
                             return (
-                                <Link key={m.id} href={`/materiales/${m.id}`} style={{ textDecoration:'none', display:'flex', alignItems:'flex-start', gap:10, padding:'10px 0', borderTop: i===0?'none':'1px solid #f3f4f8' }}>
-                                    <div style={{ width:36, height:36, borderRadius:10, background:'#fef9c3', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                                        <FileText size={16} color="#92600e" strokeWidth={2}/>
-                                    </div>
-                                    <div style={{ flex:1, minWidth:0 }}>
-                                        <div style={{ fontSize:12.5, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                                            {m.title}
-                                        </div>
-                                        {m.description && (
-                                            <div style={{ fontSize:11, color:'#7b8595', marginTop:2, lineHeight:1.35, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-                                                {m.description}
-                                            </div>
-                                        )}
-                                        <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:5 }}>
-                                            <span style={{ fontSize:9.5, fontWeight:700, background:ft.bg, color:ft.color, padding:'2px 7px', borderRadius:4 }}>
-                                                {ftUpper}
-                                            </span>
-                                            {m.category && (
-                                                <span style={{ fontSize:10, color:'#7b8595' }}>{m.category}</span>
-                                            )}
-                                            <span style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:3 }}>
-                                                <Download size={10} color="#92600e" strokeWidth={2}/>
-                                                <span style={{ fontSize:11, fontWeight:700, color:'#92600e' }}>{m.download_count ?? 0}</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </Link>
+                                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
+                                    {materials.map((m) => {
+                                        const ftUpper = (m.file_type ?? 'doc').toUpperCase();
+                                        const ft = FT_COLORS[ftUpper] ?? FT_COLORS.DOC;
+                                        return (
+                                            <Link key={m.id} href="/materiales" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:8, padding:'9px 10px', background:'#fafbfd', borderRadius:12, border:'1px solid #f0f2f7' }}>
+                                                <div style={{ width:30, height:30, borderRadius:8, background:'#fef9c3', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                                    <FileText size={13} color="#92600e" strokeWidth={2}/>
+                                                </div>
+                                                <div style={{ flex:1, minWidth:0 }}>
+                                                    <div style={{ fontSize:11.5, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                        {m.title}
+                                                    </div>
+                                                    <div style={{ display:'flex', alignItems:'center', gap:4, marginTop:3 }}>
+                                                        <span style={{ fontSize:9, fontWeight:700, background:ft.bg, color:ft.color, padding:'1px 5px', borderRadius:3 }}>{ftUpper}</span>
+                                                        <span style={{ fontSize:9.5, color:'#94a3b8', display:'flex', alignItems:'center', gap:1.5 }}>
+                                                            <Download size={8} color="#94a3b8" strokeWidth={2}/> {m.download_count ?? 0}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
                             );
-                        })}
+                        })()}
                         <Link href="/materiales/subir" style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:5, marginTop:10, paddingTop:10, borderTop:'1px solid #f3f4f8', fontSize:12, fontWeight:600, color:'#92600e', textDecoration:'none' }}>
                             <Plus size={13} strokeWidth={2.5}/> Subir material
                         </Link>

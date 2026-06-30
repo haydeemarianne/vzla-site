@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { Check, MapPin, Phone, Users, Baby, AlertCircle } from 'lucide-react';
+import { Check, MapPin, Phone, Users, Baby, AlertCircle, Heart } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
 import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 
@@ -12,16 +12,19 @@ const STATES = [
 
 const NEEDS = [
     { value: 'food',      label: 'Alimentación' },
-    { value: 'water',     label: 'Agua' },
-    { value: 'medicine',  label: 'Medicamentos' },
-    { value: 'shelter',   label: 'Refugio' },
-    { value: 'clothing',  label: 'Ropa' },
-    { value: 'baby',      label: 'Bebé' },
-    { value: 'documents', label: 'Documentos' },
-    { value: 'tools',     label: 'Herramientas' },
-    { value: 'furniture', label: 'Mobiliario' },
-    { value: 'other',     label: 'Otro' },
+    { value: 'water',     label: 'Agua'          },
+    { value: 'medicine',  label: 'Medicamentos'  },
+    { value: 'shelter',   label: 'Refugio'       },
+    { value: 'clothing',  label: 'Ropa'          },
+    { value: 'baby',      label: 'Bebé'          },
+    { value: 'documents', label: 'Documentos'    },
+    { value: 'tools',     label: 'Herramientas'  },
+    { value: 'furniture', label: 'Mobiliario'    },
+    { value: 'other',     label: 'Otro'          },
 ];
+
+const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:20, padding:'20px' };
+const DIV  = { height:1, background:'#f3f4f8', margin:'16px 0' };
 
 export default function CasosPublicar() {
     const { data, setData, post, processing, errors } = useForm({
@@ -45,183 +48,179 @@ export default function CasosPublicar() {
 
     return (
         <MainLayout>
-            <div style={{ padding: '24px 20px 100px', fontFamily: "'Onest', system-ui, sans-serif" }}>
+            <div style={{ maxWidth:780, margin:'0 auto', display:'grid', gap:14 }}>
 
                 {/* Encabezado */}
-                <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, letterSpacing: '-.5px', color: '#1e293b' }}>
-                    Publicar caso
-                </h1>
-                <p style={{ margin: '0 0 24px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
-                    Conecta tu familia con un voluntario directo.
-                </p>
-
-                {/* Aviso privacidad */}
-                <div style={{
-                    display: 'flex', gap: 10, alignItems: 'flex-start',
-                    background: '#eef1fa', borderRadius: 13, padding: '13px 15px', marginBottom: 28,
-                    border: '1px solid #d0d9f0',
-                }}>
-                    <AlertCircle size={16} color="#4263ac" strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
-                    <p style={{ margin: 0, fontSize: 12.5, color: '#4263ac', lineHeight: 1.55 }}>
-                        Tu teléfono solo lo verá el voluntario que te apadrine.
-                        El caso aparece con nombre visible.
+                <div>
+                    <h1 style={{ margin:'0 0 3px', fontSize:22, fontWeight:800, letterSpacing:'-.5px', color:'#1a2230' }}>
+                        Publicar caso
+                    </h1>
+                    <p style={{ margin:0, fontSize:12.5, color:'#7b8595' }}>
+                        Conecta tu familia con un voluntario directo. Sin intermediarios.
                     </p>
                 </div>
 
-                <form
-                    onSubmit={e => { e.preventDefault(); post('/casos', { forceFormData: true }); }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: 22 }}
-                >
-                    {/* Nombre */}
-                    <FloatInput
-                        label="Nombre de la familia *"
-                        value={data.family_name}
-                        onChange={e => setData('family_name', e.target.value)}
-                        error={errors.family_name}
-                        placeholder=" "
-                    />
+                {/* Aviso */}
+                <div style={{ display:'flex', gap:10, alignItems:'flex-start', background:'#eef1fa', borderRadius:14, padding:'12px 14px', border:'1px solid #d0d9f0' }}>
+                    <AlertCircle size={15} color="#4263ac" strokeWidth={2} style={{ flexShrink:0, marginTop:1 }}/>
+                    <p style={{ margin:0, fontSize:12, color:'#4263ac', lineHeight:1.55 }}>
+                        Tu teléfono solo lo verá el voluntario que te apadrine. El caso aparece con nombre visible.
+                    </p>
+                </div>
 
-                    {/* Personas */}
-                    <FloatInput
-                        label="¿Cuántas personas son? *"
-                        type="number"
-                        value={data.people_count}
-                        onChange={e => setData('people_count', parseInt(e.target.value) || 1)}
-                        error={errors.people_count}
-                        icon={Users}
-                        min={1} max={50}
-                        placeholder=" "
-                    />
+                <form onSubmit={e => { e.preventDefault(); post('/casos', { forceFormData: true }); }} style={{ display:'flex', flexDirection:'column', gap:10 }}>
 
-                    {/* Niños / Adultos mayores */}
-                    <div style={{ display: 'flex', gap: 10 }}>
-                        {[
-                            { key: 'has_children', label: 'Hay niños' },
-                            { key: 'has_elderly',  label: 'Adultos mayores' },
-                        ].map(({ key, label }) => (
-                            <button
-                                key={key} type="button"
-                                onClick={() => setData(key, !data[key])}
-                                style={{
-                                    flex: 1, padding: '12px 10px',
-                                    borderRadius: 13, fontSize: 13,
-                                    fontWeight: 700, cursor: 'pointer',
-                                    border: data[key] ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
-                                    background: data[key] ? '#eef1fa' : '#fff',
-                                    color: data[key] ? '#4263ac' : '#64748b',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                                    fontFamily: 'inherit',
-                                    transition: 'all .15s',
-                                    boxShadow: data[key] ? '0 0 0 3px rgba(66,99,172,.09)' : 'none',
-                                }}
-                            >
-                                <Baby size={14} strokeWidth={2} />
-                                {label}
-                                {data[key] && <Check size={12} color="#4263ac" strokeWidth={2.5} />}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Descripción */}
-                    <FloatTextarea
-                        label="Describe su situación *"
-                        value={data.description}
-                        onChange={e => setData('description', e.target.value)}
-                        error={errors.description}
-                        rows={4}
-                        placeholder=" "
-                    />
-
-                    {/* Necesidades */}
-                    <div>
-                        <p style={{
-                            margin: '0 0 10px', fontSize: 12, fontWeight: 700,
-                            color: '#64748b', letterSpacing: '.4px', textTransform: 'uppercase',
-                        }}>
-                            ¿Qué necesitan? *
+                    {/* Familia */}
+                    <div style={CARD}>
+                        <p style={{ margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>
+                            Datos de la familia
                         </p>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-                            {NEEDS.map(({ value, label }) => {
-                                const on = data.needs.includes(value);
-                                return (
-                                    <button
-                                        key={value} type="button"
-                                        onClick={() => toggleNeed(value)}
-                                        style={{
-                                            padding: '8px 14px', borderRadius: 999,
-                                            fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-                                            border: on ? 'none' : '1.5px solid #e2e8f0',
-                                            background: on ? '#4263ac' : '#f8fafc',
-                                            color: on ? '#fff' : '#475569',
-                                            fontFamily: 'inherit',
-                                            display: 'flex', alignItems: 'center', gap: 5,
-                                            transition: 'all .13s',
-                                        }}
-                                    >
-                                        {on && <Check size={11} color="#fff" strokeWidth={2.5} />}
-                                        {label}
-                                    </button>
-                                );
-                            })}
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                            <FloatInput
+                                label="Nombre de la familia *"
+                                value={data.family_name}
+                                onChange={e => setData('family_name', e.target.value)}
+                                error={errors.family_name}
+                            />
+                            <FloatInput
+                                label="¿Cuántas personas? *"
+                                type="number"
+                                value={data.people_count}
+                                onChange={e => setData('people_count', parseInt(e.target.value) || 1)}
+                                error={errors.people_count}
+                                icon={Users}
+                                min={1} max={50}
+                            />
                         </div>
-                        {errors.needs && (
-                            <p style={{ margin: '6px 0 0', fontSize: 11.5, color: '#CE6969', fontWeight: 500 }}>
-                                {errors.needs}
-                            </p>
-                        )}
+
+                        <div style={DIV}/>
+
+                        <div style={{ display:'flex', gap:8 }}>
+                            {[
+                                { key:'has_children', label:'Hay niños'       },
+                                { key:'has_elderly',  label:'Adultos mayores' },
+                                { key:'is_anonymous', label:'Publicar anónimo'},
+                            ].map(({ key, label }) => (
+                                <button key={key} type="button" onClick={() => setData(key, !data[key])} style={{
+                                    flex:1, padding:'9px 8px', borderRadius:11,
+                                    fontSize:11.5, fontWeight:700, cursor:'pointer',
+                                    border: data[key] ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
+                                    background: data[key] ? '#eef1fa' : '#fafbfd',
+                                    color: data[key] ? '#4263ac' : '#64748b',
+                                    display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+                                    fontFamily:'inherit', transition:'all .13s',
+                                }}>
+                                    <Baby size={12} strokeWidth={2}/>
+                                    {label}
+                                    {data[key] && <Check size={11} color="#4263ac" strokeWidth={2.5}/>}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Zona */}
-                    <FloatInput
-                        label="Zona o sector donde están *"
-                        value={data.zone}
-                        onChange={e => setData('zone', e.target.value)}
-                        error={errors.zone}
-                        icon={MapPin}
-                        placeholder=" "
-                    />
+                    {/* Situación */}
+                    <div style={CARD}>
+                        <p style={{ margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>
+                            Situación y necesidades
+                        </p>
+                        <FloatTextarea
+                            label="Describe su situación *"
+                            value={data.description}
+                            onChange={e => setData('description', e.target.value)}
+                            error={errors.description}
+                            rows={3}
+                        />
 
-                    {/* Estado */}
-                    <FloatSelect
-                        label="Estado *"
-                        value={data.state}
-                        onChange={e => setData('state', e.target.value)}
-                        error={errors.state}
-                    >
-                        <option value="">—</option>
-                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </FloatSelect>
+                        <div style={{ marginTop:14 }}>
+                            <p style={{ margin:'0 0 8px', fontSize:11, fontWeight:700, letterSpacing:'.4px', textTransform:'uppercase', color:'#7b8595' }}>
+                                ¿Qué necesitan? *
+                            </p>
+                            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                                {NEEDS.map(({ value, label }) => {
+                                    const on = data.needs.includes(value);
+                                    return (
+                                        <button key={value} type="button" onClick={() => toggleNeed(value)} style={{
+                                            padding:'6px 12px', borderRadius:999,
+                                            fontSize:12, fontWeight:600, cursor:'pointer',
+                                            border: on ? 'none' : '1.5px solid #e2e8f0',
+                                            background: on ? '#4263ac' : '#f3f4f8',
+                                            color: on ? '#fff' : '#475569',
+                                            fontFamily:'inherit', display:'flex', alignItems:'center', gap:4,
+                                            transition:'all .13s',
+                                        }}>
+                                            {on && <Check size={10} color="#fff" strokeWidth={2.5}/>}
+                                            {label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {errors.needs && <p style={{ margin:'5px 0 0', fontSize:11, color:'#CE6969', fontWeight:500 }}>{errors.needs}</p>}
+                        </div>
+                    </div>
 
-                    {/* Teléfono */}
-                    <FloatInput
-                        label="Tu teléfono (privado) *"
-                        type="tel"
-                        value={data.contact_phone}
-                        onChange={e => setData('contact_phone', e.target.value)}
-                        error={errors.contact_phone}
-                        icon={Phone}
-                        placeholder=" "
-                    />
-
-                    {/* Foto URL */}
-                    <FloatInput
-                        label="Foto de la familia (URL, opcional)"
-                        type="url"
-                        value={data.photo_path}
-                        onChange={e => setData('photo_path', e.target.value)}
-                        error={errors.photo_path}
-                        placeholder=" "
-                    />
+                    {/* Ubicación y contacto */}
+                    <div style={CARD}>
+                        <p style={{ margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>
+                            Ubicación y contacto
+                        </p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                            <FloatInput
+                                label="Zona o sector *"
+                                value={data.zone}
+                                onChange={e => setData('zone', e.target.value)}
+                                error={errors.zone}
+                                icon={MapPin}
+                            />
+                            <FloatSelect
+                                label="Estado *"
+                                value={data.state}
+                                onChange={e => setData('state', e.target.value)}
+                                error={errors.state}
+                            >
+                                <option value="">—</option>
+                                {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                            </FloatSelect>
+                        </div>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:12 }}>
+                            <FloatInput
+                                label="Tu teléfono (privado) *"
+                                type="tel"
+                                value={data.contact_phone}
+                                onChange={e => setData('contact_phone', e.target.value)}
+                                error={errors.contact_phone}
+                                icon={Phone}
+                            />
+                            <FloatInput
+                                label="Foto (URL, opcional)"
+                                type="url"
+                                value={data.photo_path}
+                                onChange={e => setData('photo_path', e.target.value)}
+                                error={errors.photo_path}
+                            />
+                        </div>
+                    </div>
 
                     {/* Submit */}
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="va-btn va-btn--primary va-btn--full va-btn--lg"
-                        style={{ marginTop: 4 }}
-                    >
-                        {processing ? 'Publicando…' : 'Publicar caso'}
-                    </button>
+                    <div style={{ display:'flex', justifyContent:'flex-end', gap:10, paddingTop:2 }}>
+                        <button type="button" onClick={() => window.history.back()} style={{
+                            padding:'10px 20px', borderRadius:12, border:'1.5px solid #e2e8f0',
+                            background:'white', color:'#475569', fontSize:13, fontWeight:600,
+                            cursor:'pointer', fontFamily:'inherit',
+                        }}>
+                            Cancelar
+                        </button>
+                        <button type="submit" disabled={processing} style={{
+                            display:'flex', alignItems:'center', gap:6,
+                            padding:'10px 24px', borderRadius:12, border:'none',
+                            background:'#4263ac', color:'white', fontSize:13.5, fontWeight:700,
+                            cursor:'pointer', fontFamily:'inherit', opacity: processing ? .6 : 1,
+                            boxShadow:'0 4px 14px rgba(66,99,172,.30)',
+                        }}>
+                            <Heart size={14} fill="white" color="white" strokeWidth={0}/>
+                            {processing ? 'Publicando…' : 'Publicar caso'}
+                        </button>
+                    </div>
+
                 </form>
             </div>
         </MainLayout>
