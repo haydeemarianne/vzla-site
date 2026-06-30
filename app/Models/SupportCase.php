@@ -19,8 +19,10 @@ class SupportCase extends Model
     ];
 
     public function scopeOpen($query)     { return $query->where('status', 'open'); }
+    public function scopeInReview($query) { return $query->where('status', 'in_review'); }
     public function scopeAdopted($query)  { return $query->where('status', 'adopted'); }
     public function scopeResolved($query) { return $query->where('status', 'resolved'); }
+    public function scopeRejected($query) { return $query->where('status', 'rejected'); }
     public function scopeApproved($query) { return $query->where('validation_status', 'approved'); }
 
     public function adoption()

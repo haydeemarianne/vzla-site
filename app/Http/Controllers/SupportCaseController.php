@@ -28,9 +28,11 @@ class SupportCaseController extends Controller
 
         return Inertia::render('Casos/Index', [
             'by_status' => [
-                'open'     => (clone $base)->open()->get(),
-                'adopted'  => (clone $base)->adopted()->get(),
-                'resolved' => (clone $base)->resolved()->get(),
+                'open'      => (clone $base)->open()->get(),
+                'in_review' => (clone $base)->inReview()->get(),
+                'adopted'   => (clone $base)->adopted()->get(),
+                'resolved'  => (clone $base)->resolved()->get(),
+                'rejected'  => (clone $base)->rejected()->get(),
             ],
         ]);
     }
@@ -151,7 +153,7 @@ class SupportCaseController extends Controller
             'support_case_id' => $supportCase->id,
             'author_name'     => $request->author_name,
             'author_type'     => 'family',
-            'content'         => $request->content,
+            'content'         => $request->input('content'),
         ]);
 
         return back()->with('success', 'Actualización publicada.');
