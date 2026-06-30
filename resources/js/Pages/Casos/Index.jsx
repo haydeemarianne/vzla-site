@@ -52,6 +52,10 @@ function CaseCard({ c, idx }) {
     const days     = daysSince(c.created_at);
     const name     = c.is_anonymous ? 'Familia anónima' : (c.family_name ?? 'Familia');
     const isOpen   = c.status === 'open';
+    const tasks    = c.tasks ?? [];
+    const tasksDone   = tasks.filter(t => t.status === 'done').length;
+    const tasksTaken  = tasks.filter(t => t.status !== 'pending').length;
+    const tasksTotal  = tasks.length;
 
     return (
         <div
@@ -129,10 +133,34 @@ function CaseCard({ c, idx }) {
                 </div>
             )}
 
+            {/* Progreso de tareas */}
+            {tasksTotal > 0 && (
+                <div style={{ marginTop: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                        <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>
+                            {tasksTaken}/{tasksTotal} tareas tomadas
+                        </span>
+                        {tasksDone > 0 && (
+                            <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 700 }}>
+                                {tasksDone} completas
+                            </span>
+                        )}
+                    </div>
+                    <div style={{ height: 4, borderRadius: 999, background: '#f1f4f9', overflow: 'hidden' }}>
+                        <div style={{
+                            height: '100%', borderRadius: 999,
+                            background: tasksTaken === tasksTotal ? '#16a34a' : '#4263ac',
+                            width: tasksTotal ? `${Math.round((tasksTaken / tasksTotal) * 100)}%` : '0%',
+                            transition: 'width .3s',
+                        }} />
+                    </div>
+                </div>
+            )}
+
             {/* Footer */}
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                borderTop: '1px solid #f1f4f9', paddingTop: 7, marginTop: 1,
+                borderTop: '1px solid #f1f4f9', paddingTop: 7, marginTop: 6,
             }}>
                 <span style={{ fontSize: 10.5, fontWeight: 600, color: '#94a3b8' }}>
                     {days}d sin ayuda

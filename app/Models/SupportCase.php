@@ -31,4 +31,23 @@ class SupportCase extends Model
     {
         return $this->hasMany(CaseUpdate::class, 'support_case_id');
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(CaseTask::class, 'support_case_id');
+    }
+
+    public function syncStatusFromTasks(): void
+    {
+        $tasks = $this->tasks()->get();
+        if ($tasks->isEmpty()) return;
+
+        if ($tasks->every(fn($t) => $t->status === 'done')) {
+            $this->update(['status' => 'resolved', 'resolved_at' => now()]);
+        } elseif ($tasks->every(fn($t) => in_array($t->status, ['claimed', 'done']))) {
+            $this->update(['status' => 'adopted', 'adopted_at' => $this->adopted_at ?? now()]);
+        } else {
+            $this->update(['status' => 'open']);
+        }
+    }
 }

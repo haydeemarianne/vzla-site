@@ -2,17 +2,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupportCase;
-use App\Models\CaseVolunteer;
-use App\Models\CaseAdoption;
+use App\Models\CaseTask;
 use App\Models\CaseUpdate;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
+const NEED_TASK_TITLES = [
+    'food'      => 'Llevar alimentos',
+    'water'     => 'Proveer agua potable',
+    'medicine'  => 'Conseguir medicamentos',
+    'shelter'   => 'Apoyo con refugio',
+    'clothing'  => 'Llevar ropa y calzado',
+    'baby'      => 'Artículos para bebé',
+    'tools'     => 'Conseguir herramientas',
+    'documents' => 'Apoyo con documentos',
+    'furniture' => 'Conseguir mobiliario',
+    'other'     => 'Apoyo adicional',
+];
 
 class SupportCaseController extends Controller
 {
     public function index(Request $request)
     {
-        $base = SupportCase::approved()->latest();
+        $base = SupportCase::approved()->with('tasks')->latest();
 
         return Inertia::render('Casos/Index', [
             'by_status' => [
@@ -41,63 +53,72 @@ class SupportCaseController extends Controller
             'has_children'  => 'boolean',
             'has_elderly'   => 'boolean',
             'contact_phone' => 'required|string|max:30',
-            'is_anonymous'  => 'boolean',
             'photo_path'    => 'nullable|string|max:500',
         ]);
 
-        SupportCase::create(array_merge($request->all(), [
+        $case = SupportCase::create(array_merge($request->all(), [
             'validation_status' => 'approved',
             'status'            => 'open',
+            'is_anonymous'      => false,
         ]));
+
+        // Auto-create one task per need
+        foreach ($request->needs as $need) {
+            $case->tasks()->create([
+                'need_key' => $need,
+                'title'    => NEED_TASK_TITLES[$need] ?? 'Apoyo adicional',
+                'status'   => 'pending',
+            ]);
+        }
 
         return redirect('/casos')->with('success', '¡Caso publicado! Ya está visible para los voluntarios.');
     }
 
     public function show(SupportCase $supportCase)
     {
-        $supportCase->load(['updates' => fn($q) => $q->oldest(), 'adoption.volunteer']);
+        $supportCase->load(['updates' => fn($q) => $q->oldest(), 'tasks']);
 
-        // contact_phone es privado: solo se revela en la sesion flash tras adoptar
         $caseData = $supportCase->toArray();
         unset($caseData['contact_phone']);
 
         return Inertia::render('Casos/Show', [
             'supportCase' => $caseData,
+            'tasks'       => $supportCase->tasks()->orderBy('id')->get(),
         ]);
     }
 
-    public function adopt(Request $request, SupportCase $supportCase)
+    public function claimTask(Request $request, SupportCase $supportCase, CaseTask $task)
     {
+        if ($task->status !== 'pending') {
+            return back()->withErrors(['task' => 'Esta tarea ya fue tomada.']);
+        }
+
         $request->validate([
+            'volunteer_name'  => 'required|string|max:100',
             'volunteer_phone' => 'required|string|max:30',
-            'message'         => 'nullable|string|max:1000',
         ]);
 
-        $volunteer = CaseVolunteer::where('phone', $request->volunteer_phone)
-            ->where('validation_status', 'approved')
-            ->first();
-
-        if (! $volunteer) {
-            return back()->withErrors(['volunteer_phone' => 'No se encontro un voluntario aprobado con ese numero de telefono. Registrate primero en la seccion de voluntarios.']);
-        }
-
-        if ($supportCase->status !== 'open') {
-            return back()->withErrors(['supportCase' => 'Este caso ya fue adoptado por otro voluntario.']);
-        }
-
-        CaseAdoption::create([
-            'support_case_id'   => $supportCase->id,
-            'case_volunteer_id' => $volunteer->id,
-            'message'           => $request->message,
-            'status'            => 'active',
+        $task->update([
+            'status'          => 'claimed',
+            'volunteer_name'  => $request->volunteer_name,
+            'volunteer_phone' => $request->volunteer_phone,
         ]);
 
-        $supportCase->update([
-            'status'     => 'adopted',
-            'adopted_at' => now(),
+        $supportCase->syncStatusFromTasks();
+
+        return back()->with('success', "¡Listo! Quedaste encargado de: {$task->title}");
+    }
+
+    public function completeTask(Request $request, SupportCase $supportCase, CaseTask $task)
+    {
+        $task->update([
+            'status'       => 'done',
+            'completed_at' => now(),
         ]);
 
-        return back()->with('contact_phone', $supportCase->contact_phone);
+        $supportCase->syncStatusFromTasks();
+
+        return back()->with('success', '¡Tarea completada! Gracias por tu ayuda.');
     }
 
     public function addUpdate(Request $request, SupportCase $supportCase)
@@ -114,6 +135,6 @@ class SupportCaseController extends Controller
             'content'         => $request->content,
         ]);
 
-        return back()->with('success', 'Actualizacion publicada.');
+        return back()->with('success', 'Actualización publicada.');
     }
 }

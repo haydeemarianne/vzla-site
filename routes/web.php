@@ -100,8 +100,9 @@ Route::prefix('casos')->group(function () {
     Route::get('/publicar', [SupportCaseController::class, 'create']);
     Route::post('/', [SupportCaseController::class, 'store']);
     Route::get('/{supportCase}', [SupportCaseController::class, 'show']);
-    Route::post('/{supportCase}/apadrinar', [SupportCaseController::class, 'adopt']);
     Route::post('/{supportCase}/actualizar', [SupportCaseController::class, 'addUpdate']);
+    Route::post('/{supportCase}/tareas/{task}/tomar', [SupportCaseController::class, 'claimTask']);
+    Route::patch('/{supportCase}/tareas/{task}/completar', [SupportCaseController::class, 'completeTask']);
 });
 
 Route::prefix('voluntarios')->group(function () {
