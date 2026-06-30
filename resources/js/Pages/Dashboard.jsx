@@ -213,35 +213,52 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning, top_ma
                                         return (
                                             <Link key={m.id} href="/materiales" style={{
                                                 textDecoration:'none',
-                                                display:'flex', alignItems:'center', gap:10,
-                                                padding:'9px 0',
+                                                display:'flex', alignItems:'center', gap:8,
+                                                padding:'8px 0',
                                                 borderTop: i === 0 ? 'none' : '1px solid #f3f4f8',
                                             }}>
                                                 {/* Ícono */}
-                                                <div style={{ width:28, height:28, borderRadius:7, background:'#fef9c3', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                                                    <FileText size={12} color="#92600e" strokeWidth={2}/>
+                                                <div style={{ width:26, height:26, borderRadius:7, background:'#fef9c3', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                                    <FileText size={11} color="#92600e" strokeWidth={2}/>
                                                 </div>
 
-                                                {/* Título */}
-                                                <span style={{ flex:1, minWidth:0, fontSize:12, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                {/* Título — crece más */}
+                                                <span style={{ flex:2, minWidth:0, fontSize:11.5, fontWeight:700, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                                                     {m.title}
                                                 </span>
 
                                                 {/* Categoría */}
-                                                {m.category && (
-                                                    <span style={{ fontSize:10.5, color:'#7b8595', whiteSpace:'nowrap', flexShrink:0 }}>
-                                                        {m.category}
-                                                    </span>
-                                                )}
+                                                <span style={{ flex:1, minWidth:0, fontSize:10.5, color:'#7b8595', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                    {m.category ?? '—'}
+                                                </span>
 
-                                                {/* Tipo */}
+                                                {/* Tipo de archivo */}
                                                 <span style={{ fontSize:9, fontWeight:700, background:ft.bg, color:ft.color, padding:'2px 6px', borderRadius:4, flexShrink:0 }}>
                                                     {ftUpper}
                                                 </span>
 
+                                                {/* Organización */}
+                                                <span style={{ flex:1.2, minWidth:0, fontSize:10.5, color:'#5b6677', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                                    {m.organization || m.uploaded_by || '—'}
+                                                </span>
+
+                                                {/* Instagram */}
+                                                {m.contributor_instagram ? (
+                                                    <span style={{ fontSize:10, color:'#7c3aed', whiteSpace:'nowrap', flexShrink:0 }}>
+                                                        @{m.contributor_instagram.replace(/^@/, '')}
+                                                    </span>
+                                                ) : <span style={{ fontSize:10, color:'#d0d6e4', flexShrink:0 }}>—</span>}
+
+                                                {/* Teléfono */}
+                                                {m.contributor_phone ? (
+                                                    <span style={{ fontSize:10, color:'#5b6677', whiteSpace:'nowrap', flexShrink:0 }}>
+                                                        {m.contributor_phone}
+                                                    </span>
+                                                ) : <span style={{ fontSize:10, color:'#d0d6e4', flexShrink:0 }}>—</span>}
+
                                                 {/* Descargas */}
-                                                <span style={{ display:'flex', alignItems:'center', gap:2, fontSize:10.5, color:'#94a3b8', flexShrink:0 }}>
-                                                    <Download size={9} color="#94a3b8" strokeWidth={2}/>{m.download_count ?? 0}
+                                                <span style={{ display:'flex', alignItems:'center', gap:2, fontSize:10, color:'#92600e', flexShrink:0, fontWeight:700 }}>
+                                                    <Download size={9} color="#92600e" strokeWidth={2}/>{m.download_count ?? 0}
                                                 </span>
                                             </Link>
                                         );

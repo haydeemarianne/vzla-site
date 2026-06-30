@@ -58,7 +58,7 @@ class DashboardController extends Controller
             'top_materials' => PrintableMaterial::approved()
                 ->orderByDesc('download_count')
                 ->limit(5)
-                ->get(['id', 'title', 'description', 'category', 'file_type', 'download_count']),
+                ->get(['id', 'title', 'category', 'file_type', 'uploaded_by', 'organization', 'contributor_instagram', 'contributor_phone', 'download_count']),
             'recent_inspections' => InspectionRequest::where('status', 'open')
                 ->latest()
                 ->limit(4)
