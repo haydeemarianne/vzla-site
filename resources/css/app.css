@@ -327,6 +327,16 @@
     }
 }
 
+/* ValidarDashboard — fila inferior: cola + estado */
+.va-validar-bottom {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+@media (min-width: 900px) {
+    .va-validar-bottom { grid-template-columns: 1.55fr 1fr; align-items: start; }
+}
+
 /* Estadísticas — grid 2→3 cols */
 .va-stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
