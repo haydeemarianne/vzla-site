@@ -141,7 +141,7 @@ export default function Dashboard({ stats, recent_cases, recent_cleaning, top_ma
     );
 
     return (
-        <MainLayout stats={s}>
+        <MainLayout>
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
 
                 {/* ── Hero ── */}

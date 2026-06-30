@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index']);
 
+Route::get('/estadisticas', [DashboardController::class, 'estadisticas'])->name('estadisticas');
+
 // ── Admin / Panel validador ──────────────────────────────────────────────────
 Route::get('/admin/login',  [AdminController::class, 'login']);
 Route::post('/admin/login', [AdminController::class, 'authenticate']);

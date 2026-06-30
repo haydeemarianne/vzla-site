@@ -1,19 +1,20 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Heart, Sparkles, Wrench, Home, Truck,
-    ArrowLeft, Share2, Plus, Users, Settings,
+    ArrowLeft, Share2, Plus, Users, Settings, BarChart2,
     Search, RotateCw,
 } from 'lucide-react';
 
 /* ─── Navegación ──────────────────────────────── */
 const TOP_NAV = [
-    { href: '/',           label: 'Inicio'     },
-    { href: '/casos',      label: 'Casos'      },
-    { href: '/limpieza',   label: 'Limpieza'   },
-    { href: '/ingenieros', label: 'Ingenieros' },
-    { href: '/transporte', label: 'Transporte' },
-    { href: '/materiales', label: 'Recursos'   },
-    { href: '/validar',    label: 'Validación' },
+    { href: '/',              label: 'Inicio'        },
+    { href: '/casos',         label: 'Casos'         },
+    { href: '/limpieza',      label: 'Limpieza'      },
+    { href: '/ingenieros',    label: 'Ingenieros'    },
+    { href: '/transporte',    label: 'Transporte'    },
+    { href: '/materiales',    label: 'Recursos'      },
+    { href: '/estadisticas',  label: 'Estadísticas'  },
+    { href: '/validar',       label: 'Validación'    },
 ];
 
 const BOTTOM_NAV = [
@@ -26,11 +27,12 @@ const BOTTOM_NAV = [
 
 /* Sidebar: acciones rápidas — icono semántico por función */
 const SIDEBAR_ACTIONS = [
-    { id: 'back',     Icon: ArrowLeft,   label: 'Volver atrás',        href: null,            onClick: () => window.history.back()              },
-    { id: 'share',    Icon: Share2,      label: 'Compartir esta página',href: null,            onClick: sharePage                                },
-    { id: 'nuevo',    Icon: Plus,        label: 'Publicar caso nuevo',  href: '/casos/publicar',onClick: null                                   },
-    { id: 'casos',    Icon: Users,       label: 'Ver todos los casos',  href: '/casos',        onClick: null                                     },
-    { id: 'limpieza', Icon: Sparkles,    label: 'Jornadas de limpieza', href: '/limpieza',     onClick: null                                     },
+    { id: 'back',     Icon: ArrowLeft,   label: 'Volver atrás',         href: null,               onClick: () => window.history.back(), homeOnly: false },
+    { id: 'share',    Icon: Share2,      label: 'Compartir esta página', href: null,               onClick: sharePage,                  homeOnly: false },
+    { id: 'stats',    Icon: BarChart2,   label: 'Estadísticas',          href: '/estadisticas',    onClick: null,                       homeOnly: false },
+    { id: 'nuevo',    Icon: Plus,        label: 'Publicar caso nuevo',   href: '/casos/publicar',  onClick: null,                       homeOnly: false },
+    { id: 'casos',    Icon: Users,       label: 'Ver todos los casos',   href: '/casos',           onClick: null,                       homeOnly: false },
+    { id: 'limpieza', Icon: Sparkles,    label: 'Jornadas de limpieza',  href: '/limpieza',        onClick: null,                       homeOnly: false },
 ];
 
 /* ─── Estilos reutilizables ────────────────────── */
@@ -86,7 +88,7 @@ function HeaderCircle({ onClick, title, children, href, notif = false }) {
 }
 
 /* ─── Layout principal ─────────────────────────── */
-export default function MainLayout({ children, stats }) {
+export default function MainLayout({ children }) {
     const { url } = usePage();
 
     return (
@@ -100,9 +102,9 @@ export default function MainLayout({ children, stats }) {
                     <Heart size={17} color="#fff" fill="#fff" />
                 </Link>
 
-                {/* Acciones */}
+                {/* Acciones — "Atrás" se oculta en el home */}
                 <nav className="va-sidebar-nav">
-                    {SIDEBAR_ACTIONS.map(({ id, Icon, label, href, onClick }) => (
+                    {SIDEBAR_ACTIONS.filter(({ id }) => id !== 'back' || url !== '/').map(({ id, Icon, label, href, onClick }) => (
                         <SideBtn key={id} href={href} onClick={onClick} title={label}>
                             <Icon size={18} color="#5b6677" strokeWidth={1.9} />
                         </SideBtn>
@@ -152,22 +154,6 @@ export default function MainLayout({ children, stats }) {
                             Venezuela <span style={{ color: '#83A2DB' }}>Site</span>
                         </span>
                     </div>
-
-                    {/* Métricas rápidas — desktop, solo cuando hay stats */}
-                    {stats && (
-                        <div className="va-desktop-only" style={{ alignItems: 'center', gap: 6, marginLeft: 16, flex: 1 }}>
-                            {[
-                                { v: stats.cases_open,      label: 'sin apadrinar', color: '#CE6969', bg: '#fbeaea' },
-                                { v: stats.cleaning_points, label: 'jornadas',       color: '#16a34a', bg: '#dcfce7' },
-                                { v: stats.engineers,       label: 'ingenieros',    color: '#7c3aed', bg: '#f3eeff' },
-                            ].map(({ v, label, color, bg }) => (
-                                <div key={label} style={{ background: bg, borderRadius: 999, padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 5 }}>
-                                    <span style={{ fontSize: 13, fontWeight: 800, color }}>{v ?? 0}</span>
-                                    <span style={{ fontSize: 11, color: '#7b8595', fontWeight: 600 }}>{label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
 
                     <div style={{ flex: 1 }} />
 

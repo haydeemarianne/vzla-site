@@ -14,6 +14,25 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    public function estadisticas()
+    {
+        return Inertia::render('Estadisticas/Index', [
+            'stats_today' => [
+                'cases_new'       => SupportCase::approved()->whereDate('created_at', today())->count(),
+                'cases_adopted'   => SupportCase::approved()->adopted()->whereDate('updated_at', today())->count(),
+                'cleaning_active' => CleaningPoint::whereIn('status', ['pending', 'in_process'])->count(),
+                'engineers'       => VolunteerEngineer::where('validation_status', 'approved')->count(),
+                'materials_dl'    => PrintableMaterial::approved()->whereDate('updated_at', today())->sum('download_count'),
+                'transport_open'  => TransportRequest::where('status', 'open')->count(),
+                'inspections_open'=> InspectionRequest::where('status', 'open')->count(),
+            ],
+            'stats_yesterday' => [
+                'cases_new'       => SupportCase::approved()->whereDate('created_at', today()->subDay())->count(),
+                'cases_adopted'   => SupportCase::approved()->adopted()->whereDate('updated_at', today()->subDay())->count(),
+            ],
+        ]);
+    }
+
     public function index()
     {
         return Inertia::render('Dashboard', [
