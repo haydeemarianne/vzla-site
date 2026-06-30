@@ -27,12 +27,12 @@ const BOTTOM_NAV = [
 
 /* Sidebar: acciones rápidas — icono semántico por función */
 const SIDEBAR_ACTIONS = [
-    { id: 'back',     Icon: ArrowLeft,   label: 'Volver atrás',         href: null,               onClick: () => window.history.back(), homeOnly: false },
-    { id: 'share',    Icon: Share2,      label: 'Compartir esta página', href: null,               onClick: sharePage,                  homeOnly: false },
-    { id: 'stats',    Icon: BarChart2,   label: 'Estadísticas',          href: '/estadisticas',    onClick: null,                       homeOnly: false },
-    { id: 'nuevo',    Icon: Plus,        label: 'Publicar caso nuevo',   href: '/casos/publicar',  onClick: null,                       homeOnly: false },
-    { id: 'casos',    Icon: Users,       label: 'Ver todos los casos',   href: '/casos',           onClick: null,                       homeOnly: false },
-    { id: 'limpieza', Icon: Sparkles,    label: 'Jornadas de limpieza',  href: '/limpieza',        onClick: null,                       homeOnly: false },
+    { id: 'back',     Icon: ArrowLeft,  label: 'Volver atrás',         href: null,              onClick: () => window.history.back() },
+    { id: 'casos',    Icon: Users,      label: 'Ver todos los casos',  href: '/casos',          onClick: null                        },
+    { id: 'nuevo',    Icon: Plus,       label: 'Publicar caso nuevo',  href: '/casos/publicar', onClick: null                        },
+    { id: 'limpieza', Icon: Sparkles,   label: 'Jornadas de limpieza', href: '/limpieza',       onClick: null                        },
+    { id: 'stats',    Icon: BarChart2,  label: 'Estadísticas',         href: '/estadisticas',   onClick: null                        },
+    { id: 'share',    Icon: Share2,     label: 'Compartir esta página',href: null,              onClick: sharePage                   },
 ];
 
 /* ─── Estilos reutilizables ────────────────────── */
