@@ -197,27 +197,9 @@ function Column({ col, items, renderCard, emptyIcon: EmptyIcon, emptyLabel }) {
 
 // ─── Separador de grupo ────────────────────────────────────────────────────────
 
-function GroupDivider({ label, total }) {
-    const repeat = Array.from({ length: 12 }, (_, i) => (
-        <span key={i} style={{ opacity: i % 3 === 0 ? 0.18 : i % 3 === 1 ? 0.09 : 0.05 }}>{label}</span>
-    ));
+function GroupDivider() {
     return (
-        <div style={{ width: 22, flexShrink: 0, alignSelf: 'stretch', display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 2px', position: 'relative' }}>
-            <div style={{ flex: 1, width: 1, background: '#e9ebf1', position: 'absolute', top: 0, bottom: 0, left: '50%' }}/>
-            <div style={{
-                writingMode: 'vertical-rl', textOrientation: 'mixed',
-                display: 'flex', flexDirection: 'column', gap: 10,
-                fontSize: 10, fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', color: '#4263ac',
-                background: '#f8fafc', padding: '10px 0', borderRadius: 8,
-                position: 'relative', zIndex: 1, userSelect: 'none',
-                border: '1px solid #e9ebf1',
-            }}>
-                {repeat}
-            </div>
-            <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#4263ac', color: 'white', fontSize: 9.5, fontWeight: 700, padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap', zIndex: 2 }}>
-                {total}
-            </div>
-        </div>
+        <div style={{ width: 1, flexShrink: 0, alignSelf: 'stretch', background: '#e2e8f0', margin: '0 6px' }}/>
     );
 }
 
@@ -275,7 +257,7 @@ export default function IngenierosIndex({ requests, engineers }) {
                     ))}
 
                     {/* Divisor */}
-                    <GroupDivider label="Ingenieros" total={totalEngs}/>
+                    <GroupDivider/>
 
                     {/* Ingenieros */}
                     {ENG_COLS.map(col => (
