@@ -5,6 +5,7 @@ import {
     ArrowLeft, Check, CheckCircle, Circle, Phone, MessageCircle,
     Utensils, Droplets, Pill, Shirt, Home, Baby, Wrench,
     FileText, Package, MapPin, Users, Clock, User, Lock, ShieldAlert,
+    Heart, UserCheck, Hourglass,
 } from 'lucide-react';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -162,7 +163,7 @@ function TaskCard({ task, caseId, familyPhone, idx }) {
 }
 
 // ─── Página ───────────────────────────────────────────────────────────────────
-export default function CasosShow({ supportCase, tasks }) {
+export default function CasosShow({ supportCase, tasks, adoption }) {
     const { props } = usePage();
     const flash = props.flash ?? {};
 
@@ -302,6 +303,36 @@ export default function CasosShow({ supportCase, tasks }) {
                                 </p>
                             </div>
                         )}
+
+                        {/* Estado del padrino / botón */}
+                        {adoption?.status === 'active' ? (
+                            <div style={{ background:'#dcfce7', border:'1px solid #bbf7d0', borderRadius:14, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
+                                <UserCheck size={16} color="#16a34a" strokeWidth={2} style={{ flexShrink:0 }}/>
+                                <div>
+                                    <div style={{ fontSize:12, fontWeight:700, color:'#15803d' }}>Padrino asignado</div>
+                                    <div style={{ fontSize:11, color:'#16a34a' }}>{adoption.volunteer_name}</div>
+                                </div>
+                            </div>
+                        ) : adoption?.status === 'pending' ? (
+                            <div style={{ background:'#fef9c3', border:'1px solid #fde68a', borderRadius:14, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
+                                <Hourglass size={15} color="#92600e" strokeWidth={2} style={{ flexShrink:0 }}/>
+                                <div>
+                                    <div style={{ fontSize:12, fontWeight:700, color:'#92600e' }}>Solicitud en revisión</div>
+                                    <div style={{ fontSize:11, color:'#b45309' }}>{adoption.volunteer_name} · pendiente de aprobación</div>
+                                </div>
+                            </div>
+                        ) : supportCase.status === 'open' || supportCase.status === 'in_review' ? (
+                            <Link href={`/casos/${supportCase.id}/apadrinar`} style={{
+                                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                                padding:'11px 16px', borderRadius:14,
+                                background:'#4263ac', color:'white',
+                                fontSize:13.5, fontWeight:700, textDecoration:'none',
+                                boxShadow:'0 4px 14px rgba(66,99,172,.25)',
+                            }}>
+                                <Heart size={14} fill="white" color="white" strokeWidth={0}/>
+                                Quiero ser padrino de este caso
+                            </Link>
+                        ) : null}
 
                         {/* Info coordinadores */}
                         <div style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'11px 14px', background:'#eef1fa', borderRadius:14, border:'1px solid #d0d9f0' }}>

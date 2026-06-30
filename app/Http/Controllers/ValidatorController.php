@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\CaseAdoption;
 use App\Models\MissingChild;
 use App\Models\UnattendedZone;
 use App\Models\VolunteerEngineer;
@@ -30,7 +31,10 @@ class ValidatorController extends Controller
             'pending_engineers'  => VolunteerEngineer::where('validation_status', 'pending')->latest()->limit(30)->get(),
             'pending_zones'      => UnattendedZone::where('validation_status', 'pending')->latest()->limit(30)->get(),
             'pending_cases'      => SupportCase::where('validation_status', 'pending')->latest()->limit(30)->get(),
-            'pending_volunteers' => CaseVolunteer::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_volunteers'  => CaseVolunteer::where('validation_status', 'pending')->latest()->limit(30)->get(),
+            'pending_adoptions'   => CaseAdoption::where('status', 'pending')
+                ->with(['volunteer', 'supportCase:id,family_name,is_anonymous,zone,state,needs'])
+                ->latest()->limit(30)->get(),
         ]);
     }
 

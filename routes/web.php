@@ -13,6 +13,7 @@ use App\Http\Controllers\ValidatorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SupportCaseController;
 use App\Http\Controllers\CaseVolunteerController;
+use App\Http\Controllers\CaseSponsorshipController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'index']);
@@ -28,6 +29,8 @@ Route::prefix('validar')->group(function () {
     Route::get('/',          [ValidatorController::class, 'dashboard']);
     Route::post('/approve',  [ValidatorController::class, 'approve']);
     Route::post('/reject',   [ValidatorController::class, 'reject']);
+    Route::post('/padrinos/{adoption}/aprobar',  [CaseSponsorshipController::class, 'approve']);
+    Route::post('/padrinos/{adoption}/rechazar', [CaseSponsorshipController::class, 'reject']);
 });
 
 // ── Personas ─────────────────────────────────────────────────────────────────
@@ -102,6 +105,8 @@ Route::prefix('casos')->group(function () {
     Route::get('/publicar', [SupportCaseController::class, 'create']);
     Route::post('/', [SupportCaseController::class, 'store']);
     Route::get('/{supportCase}', [SupportCaseController::class, 'show']);
+    Route::get('/{supportCase}/apadrinar', [CaseSponsorshipController::class, 'create']);
+    Route::post('/{supportCase}/apadrinar', [CaseSponsorshipController::class, 'store']);
     Route::post('/{supportCase}/actualizar', [SupportCaseController::class, 'addUpdate']);
     Route::post('/{supportCase}/tareas/{task}/tomar', [SupportCaseController::class, 'claimTask']);
     Route::patch('/{supportCase}/tareas/{task}/completar', [SupportCaseController::class, 'completeTask']);

@@ -97,14 +97,22 @@ class SupportCaseController extends Controller
 
     public function show(SupportCase $supportCase)
     {
-        $supportCase->load(['updates' => fn($q) => $q->oldest(), 'tasks']);
+        $supportCase->load(['updates' => fn($q) => $q->oldest(), 'tasks', 'adoption.volunteer']);
 
         $caseData = $supportCase->toArray();
         unset($caseData['contact_phone']);
 
+        $adoption = $supportCase->adoption;
+
         return Inertia::render('Casos/Show', [
             'supportCase' => $caseData,
             'tasks'       => $supportCase->tasks()->orderBy('id')->get(),
+            'adoption'    => $adoption ? [
+                'id'             => $adoption->id,
+                'status'         => $adoption->status,
+                'volunteer_name' => $adoption->volunteer?->name,
+                'volunteer_phone'=> $adoption->volunteer?->phone,
+            ] : null,
         ]);
     }
 

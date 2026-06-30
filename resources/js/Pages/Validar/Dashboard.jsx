@@ -109,6 +109,7 @@ export default function ValidarDashboard({
     pending_zones,
     pending_cases,
     pending_volunteers,
+    pending_adoptions,
 }) {
     const [activeTab, setActiveTab] = useState('cases');
 
@@ -117,10 +118,11 @@ export default function ValidarDashboard({
     const safeChildren   = pending_children   ?? [];
     const safeEngineers  = pending_engineers  ?? [];
     const safeZones      = pending_zones      ?? [];
+    const safeAdoptions  = pending_adoptions  ?? [];
 
     const totalPending =
         safeChildren.length + safeEngineers.length + safeZones.length +
-        safeCases.length + safeVolunteers.length;
+        safeCases.length + safeVolunteers.length + safeAdoptions.length;
 
     const approvedVal = 47;
     const pendingPct  = `${Math.min(99, Math.round((totalPending / Math.max(1, totalPending + approvedVal)) * 100))}%`;
@@ -132,6 +134,7 @@ export default function ValidarDashboard({
 
     const TABS = [
         { key: 'cases',      label: 'Casos',       count: safeCases.length,      type: 'support_case'   },
+        { key: 'adoptions',  label: 'Padrinos',    count: safeAdoptions.length,  type: 'adoption'       },
         { key: 'engineers',  label: 'Ingenieros',  count: safeEngineers.length,  type: 'engineer'       },
         { key: 'zones',      label: 'Zonas',       count: safeZones.length,      type: 'zone'           },
         { key: 'volunteers', label: 'Voluntarios', count: safeVolunteers.length, type: 'case_volunteer' },
@@ -142,7 +145,13 @@ export default function ValidarDashboard({
     const activeItems = {
         cases: safeCases, engineers: safeEngineers, zones: safeZones,
         volunteers: safeVolunteers, children: safeChildren,
+        adoptions: safeAdoptions,
     }[activeTab] || [];
+
+    const actAdoption = (action, id) => {
+        const path = action === 'approve' ? 'aprobar' : 'rechazar';
+        router.post(`/validar/padrinos/${id}/${path}`, {}, { preserveScroll: true });
+    };
 
     const boardAvatars = safeCases.slice(0, 5).length
         ? safeCases.slice(0, 5).map((c, i) => ({ label: initials(c.family_name || c.name || '?'), bg: pastel(i) }))
@@ -365,29 +374,58 @@ export default function ValidarDashboard({
 
                         {/* Table header */}
                         <div style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr .8fr', padding:'16px 6px 10px', fontSize:11, fontWeight:600, letterSpacing:'.4px', textTransform:'uppercase', color:'#9aa4b3' }}>
-                            <span>Nombre</span><span>Estado</span><span>Recibido</span><span>Acciones</span>
+                            {activeTab === 'adoptions'
+                                ? <span>Padrino → Caso</span>
+                                : <span>Nombre</span>}
+                            <span>Estado</span><span>Recibido</span><span>Acciones</span>
                         </div>
 
                         {/* Rows */}
                         {activeItems.length === 0 ? (
                             <p style={{ textAlign:'center', color:'#9aa4b3', fontSize:13, padding:'20px 0' }}>Sin elementos pendientes.</p>
-                        ) : activeItems.map((item) => (
-                            <div key={item.id} style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr .8fr', alignItems:'center', padding:'11px 6px', borderTop:'1px solid #f3f4f8' }}>
-                                <span style={{ fontSize:13, fontWeight:600, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', paddingRight:8 }}>
-                                    {itemName(item, activeTab)}
-                                </span>
-                                <StatusPill status={item.validation_status || 'pending'}/>
-                                <span style={{ fontSize:12.5, color:'#7b8595' }}>{fmtDate(item.created_at)}</span>
-                                <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-                                    <button title="Aprobar" onClick={() => act('approve', activeTabCfg?.type, item.id)} style={{ width:28, height:28, borderRadius:'50%', border:'1.5px solid #d1fae5', background:'#f0fdf4', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
-                                        <Check size={14} color="#16a34a" strokeWidth={2.2}/>
-                                    </button>
-                                    <button title="Rechazar" onClick={() => act('reject', activeTabCfg?.type, item.id)} style={{ width:28, height:28, borderRadius:'50%', border:'1.5px solid #e2e8f0', background:'#f8fafc', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
-                                        <X size={14} color="#64748b" strokeWidth={2.2}/>
-                                    </button>
+                        ) : activeTab === 'adoptions' ? (
+                            safeAdoptions.map((item) => (
+                                <div key={item.id} style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr .8fr', alignItems:'center', padding:'11px 6px', borderTop:'1px solid #f3f4f8' }}>
+                                    <div style={{ paddingRight:8, minWidth:0 }}>
+                                        <span style={{ fontSize:13, fontWeight:600, color:'#2b3340', display:'block', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                            {item.volunteer?.name || 'Sin nombre'}
+                                        </span>
+                                        <span style={{ fontSize:11, color:'#94a3b8', display:'block', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                            → {item.support_case?.is_anonymous ? 'Familia anónima' : (item.support_case?.family_name || 'Caso')}
+                                            {item.support_case?.zone ? ` · ${item.support_case.zone}` : ''}
+                                        </span>
+                                    </div>
+                                    <StatusPill status={item.status === 'active' ? 'approved' : item.status}/>
+                                    <span style={{ fontSize:12.5, color:'#7b8595' }}>{fmtDate(item.created_at)}</span>
+                                    <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                                        <button title="Aprobar" onClick={() => actAdoption('approve', item.id)} style={{ width:28, height:28, borderRadius:'50%', border:'1.5px solid #d1fae5', background:'#f0fdf4', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                                            <Check size={14} color="#16a34a" strokeWidth={2.2}/>
+                                        </button>
+                                        <button title="Rechazar" onClick={() => actAdoption('reject', item.id)} style={{ width:28, height:28, borderRadius:'50%', border:'1.5px solid #e2e8f0', background:'#f8fafc', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                                            <X size={14} color="#64748b" strokeWidth={2.2}/>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            activeItems.map((item) => (
+                                <div key={item.id} style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr .8fr', alignItems:'center', padding:'11px 6px', borderTop:'1px solid #f3f4f8' }}>
+                                    <span style={{ fontSize:13, fontWeight:600, color:'#2b3340', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', paddingRight:8 }}>
+                                        {itemName(item, activeTab)}
+                                    </span>
+                                    <StatusPill status={item.validation_status || 'pending'}/>
+                                    <span style={{ fontSize:12.5, color:'#7b8595' }}>{fmtDate(item.created_at)}</span>
+                                    <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                                        <button title="Aprobar" onClick={() => act('approve', activeTabCfg?.type, item.id)} style={{ width:28, height:28, borderRadius:'50%', border:'1.5px solid #d1fae5', background:'#f0fdf4', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                                            <Check size={14} color="#16a34a" strokeWidth={2.2}/>
+                                        </button>
+                                        <button title="Rechazar" onClick={() => act('reject', activeTabCfg?.type, item.id)} style={{ width:28, height:28, borderRadius:'50%', border:'1.5px solid #e2e8f0', background:'#f8fafc', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                                            <X size={14} color="#64748b" strokeWidth={2.2}/>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
 
                     {/* Estado de la cola */}
