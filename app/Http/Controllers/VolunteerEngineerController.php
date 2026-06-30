@@ -8,16 +8,18 @@ use Inertia\Inertia;
 
 class VolunteerEngineerController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = VolunteerEngineer::where('validation_status', 'approved')
-            ->when($request->zone, fn($q) => $q->whereJsonContains('zones_available', $request->zone))
-            ->latest();
-
         return Inertia::render('Ingenieros/Index', [
-            'engineers' => $query->paginate(20)->withQueryString(),
-            'filters'   => $request->only(['zone']),
-            'total'     => VolunteerEngineer::approved()->count(),
+            'requests' => [
+                'pending'   => InspectionRequest::where('status', 'pending')->latest()->get(),
+                'assigned'  => InspectionRequest::with('engineer')->where('status', 'assigned')->latest()->get(),
+                'completed' => InspectionRequest::with('engineer')->where('status', 'completed')->latest()->get(),
+            ],
+            'engineers' => [
+                'pending'  => VolunteerEngineer::where('validation_status', 'pending')->withCount('inspectionRequests')->latest()->get(),
+                'approved' => VolunteerEngineer::approved()->withCount('inspectionRequests')->latest()->get(),
+            ],
         ]);
     }
 
