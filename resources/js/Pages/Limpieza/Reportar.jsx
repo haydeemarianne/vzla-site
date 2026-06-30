@@ -50,7 +50,7 @@ function ToggleGrid({ options, value, onChange, active = '#4263ac' }) {
 export default function ReportarLimpieza() {
     const [photoPreview, setPhotoPreview] = useState(null);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, setError } = useForm({
         zone_name:      '',
         city:           '',
         state:          'La Guaira (Vargas)',
@@ -72,6 +72,10 @@ export default function ReportarLimpieza() {
 
     const submit = (e) => {
         e.preventDefault();
+        if (!data.photo) {
+            setError('photo', 'La foto es requerida para identificar el punto.');
+            return;
+        }
         post('/limpieza', { forceFormData: true });
     };
 

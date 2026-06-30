@@ -39,26 +39,11 @@ class CleaningPointController extends Controller
 {
     public function index(Request $request)
     {
-        $status = in_array($request->status, ['pending', 'in_process', 'resolved']) ? $request->status : null;
-
-        $points = CleaningPoint::when($status, fn($q) => $q->where('status', $status))
-            ->when($request->search, fn($q) => $q->where(function ($q) use ($request) {
-                $q->where('zone_name', 'like', "%{$request->search}%")
-                  ->orWhere('city', 'like', "%{$request->search}%")
-                  ->orWhere('state', 'like', "%{$request->search}%");
-            }))
-            ->orderByRaw("FIELD(status,'pending','in_process','resolved')")
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
-
         return Inertia::render('Limpieza/Index', [
-            'points'  => $points,
-            'filters' => $request->only(['status', 'search']),
-            'counts'  => [
-                'pending'    => CleaningPoint::pending()->count(),
-                'in_process' => CleaningPoint::inProcess()->count(),
-                'resolved'   => CleaningPoint::resolved()->count(),
+            'by_status' => [
+                'pending'    => CleaningPoint::pending()->latest()->get(),
+                'in_process' => CleaningPoint::inProcess()->latest()->get(),
+                'resolved'   => CleaningPoint::resolved()->latest()->get(),
             ],
         ]);
     }
@@ -109,8 +94,9 @@ class CleaningPointController extends Controller
         }
 
         $data = $request->validate([
-            'name'  => 'required|string|max:100',
-            'phone' => 'required|string|max:30',
+            'name'    => 'required|string|max:100',
+            'phone'   => 'required|string|max:30',
+            'address' => 'nullable|string|max:200',
         ]);
 
         $volunteer = $cleaningPoint->volunteers()->create($data);

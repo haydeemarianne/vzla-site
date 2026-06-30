@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class CleaningPointVolunteer extends Model
 {
-    protected $fillable = ['cleaning_point_id', 'name', 'phone', 'status', 'token'];
+    protected $fillable = ['cleaning_point_id', 'name', 'phone', 'address', 'status', 'token'];
 
     protected static function booted(): void
     {

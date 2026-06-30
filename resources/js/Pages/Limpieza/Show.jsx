@@ -38,7 +38,7 @@ export default function LimpiezaShow({ point, volunteers, tasks }) {
     const flash = props.flash ?? {};
     const [signing, setSigning] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({ name: '', phone: '' });
+    const { data, setData, post, processing, errors, reset } = useForm({ name: '', phone: '', address: '' });
 
     const submit = (e) => {
         e.preventDefault();
@@ -230,19 +230,30 @@ export default function LimpiezaShow({ point, volunteers, tasks }) {
                             {!resolved && (
                                 signing ? (
                                     <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                        <input style={{ width: '100%', boxSizing: 'border-box', border: '1.5px solid #e2e8f0', borderRadius: 11, padding: '9px 12px', fontSize: 13, fontFamily: 'inherit', color: '#1e293b' }}
-                                            type="text" placeholder="Tu nombre completo *"
-                                            value={data.name} onChange={e => setData('name', e.target.value)} required/>
-                                        {errors.name && <p style={{ fontSize: 11, color: '#CE6969', margin: 0 }}>{errors.name}</p>}
-                                        <input style={{ width: '100%', boxSizing: 'border-box', border: '1.5px solid #e2e8f0', borderRadius: 11, padding: '9px 12px', fontSize: 13, fontFamily: 'inherit', color: '#1e293b' }}
-                                            type="tel" placeholder="Tu teléfono *"
-                                            value={data.phone} onChange={e => setData('phone', e.target.value)} required/>
-                                        {errors.phone && <p style={{ fontSize: 11, color: '#CE6969', margin: 0 }}>{errors.phone}</p>}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                                            <div>
+                                                <input style={{ width: '100%', boxSizing: 'border-box', border: '1.5px solid #e2e8f0', borderRadius: 10, padding: '8px 11px', fontSize: 12.5, fontFamily: 'inherit', color: '#1e293b' }}
+                                                    type="text" placeholder="Nombre *"
+                                                    value={data.name} onChange={e => setData('name', e.target.value)} required/>
+                                                {errors.name && <p style={{ fontSize: 10.5, color: '#CE6969', margin: '3px 0 0' }}>{errors.name}</p>}
+                                            </div>
+                                            <div>
+                                                <input style={{ width: '100%', boxSizing: 'border-box', border: '1.5px solid #e2e8f0', borderRadius: 10, padding: '8px 11px', fontSize: 12.5, fontFamily: 'inherit', color: '#1e293b' }}
+                                                    type="tel" placeholder="Teléfono *"
+                                                    value={data.phone} onChange={e => setData('phone', e.target.value)} required/>
+                                                {errors.phone && <p style={{ fontSize: 10.5, color: '#CE6969', margin: '3px 0 0' }}>{errors.phone}</p>}
+                                            </div>
+                                            <div>
+                                                <input style={{ width: '100%', boxSizing: 'border-box', border: '1.5px solid #e2e8f0', borderRadius: 10, padding: '8px 11px', fontSize: 12.5, fontFamily: 'inherit', color: '#1e293b' }}
+                                                    type="text" placeholder="Dirección / sector"
+                                                    value={data.address} onChange={e => setData('address', e.target.value)}/>
+                                            </div>
+                                        </div>
                                         <div style={{ display: 'flex', gap: 7 }}>
-                                            <button type="button" onClick={() => setSigning(false)} style={{ flex: 1, padding: '10px', borderRadius: 11, background: '#f1f4f9', border: 'none', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit', color: '#64748b' }}>
+                                            <button type="button" onClick={() => setSigning(false)} style={{ flex: 1, padding: '9px', borderRadius: 10, background: '#f1f4f9', border: 'none', fontWeight: 700, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit', color: '#64748b' }}>
                                                 Cancelar
                                             </button>
-                                            <button type="submit" disabled={processing} style={{ flex: 2, padding: '10px', borderRadius: 11, background: processing ? '#83A2DB' : '#4263ac', border: 'none', fontWeight: 700, fontSize: 12.5, cursor: processing ? 'not-allowed' : 'pointer', fontFamily: 'inherit', color: 'white' }}>
+                                            <button type="submit" disabled={processing} style={{ flex: 2, padding: '9px', borderRadius: 10, background: processing ? '#83A2DB' : '#4263ac', border: 'none', fontWeight: 700, fontSize: 12.5, cursor: processing ? 'not-allowed' : 'pointer', fontFamily: 'inherit', color: 'white' }}>
                                                 {processing ? 'Apuntando…' : 'Confirmar apunte'}
                                             </button>
                                         </div>
