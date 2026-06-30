@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { Check, MapPin, Phone, Users, Baby, AlertCircle } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
+import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 
 const STATES = [
     'Distrito Capital','Miranda','La Guaira (Vargas)','Aragua','Carabobo',
@@ -21,31 +22,6 @@ const NEEDS = [
     { value: 'furniture', label: 'Mobiliario' },
     { value: 'other',     label: 'Otro' },
 ];
-
-const S = {
-    field: {
-        width: '100%', boxSizing: 'border-box',
-        border: '1.5px solid #e2e8f0', borderRadius: 13,
-        padding: '11px 14px', fontSize: 14,
-        fontFamily: "'Onest', system-ui, sans-serif",
-        color: '#1e293b', background: '#fff', outline: 'none',
-    },
-    label: {
-        display: 'block', fontSize: 12.5, fontWeight: 700,
-        color: '#374151', marginBottom: 6,
-    },
-    err: { fontSize: 11.5, color: '#CE6969', marginTop: 4, fontWeight: 500 },
-};
-
-function Field({ label, error, children }) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-            <label style={S.label}>{label}</label>
-            {children}
-            {error && <p style={S.err}>{error}</p>}
-        </div>
-    );
-}
 
 export default function CasosPublicar() {
     const { data, setData, post, processing, errors } = useForm({
@@ -69,51 +45,53 @@ export default function CasosPublicar() {
 
     return (
         <MainLayout>
-            <div style={{ padding: '20px 20px 100px', fontFamily: "'Onest', system-ui, sans-serif" }}>
-                <h1 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 700, letterSpacing: '-.4px', color: '#1e293b' }}>
+            <div style={{ padding: '24px 20px 100px', fontFamily: "'Onest', system-ui, sans-serif" }}>
+
+                {/* Encabezado */}
+                <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, letterSpacing: '-.5px', color: '#1e293b' }}>
                     Publicar caso
                 </h1>
-                <p style={{ margin: '0 0 20px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 24px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
                     Conecta tu familia con un voluntario directo.
                 </p>
 
-                {/* Aviso privacidad teléfono */}
+                {/* Aviso privacidad */}
                 <div style={{
                     display: 'flex', gap: 10, alignItems: 'flex-start',
-                    background: '#eef1fa', borderRadius: 12, padding: '12px 14px', marginBottom: 20,
+                    background: '#eef1fa', borderRadius: 13, padding: '13px 15px', marginBottom: 28,
+                    border: '1px solid #d0d9f0',
                 }}>
                     <AlertCircle size={16} color="#4263ac" strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
-                    <p style={{ margin: 0, fontSize: 12.5, color: '#4263ac', lineHeight: 1.5 }}>
-                        Tu teléfono solo lo verá el voluntario que te apadrine. El caso aparece con nombre visible.
+                    <p style={{ margin: 0, fontSize: 12.5, color: '#4263ac', lineHeight: 1.55 }}>
+                        Tu teléfono solo lo verá el voluntario que te apadrine.
+                        El caso aparece con nombre visible.
                     </p>
                 </div>
 
                 <form
                     onSubmit={e => { e.preventDefault(); post('/casos', { forceFormData: true }); }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: 22 }}
                 >
                     {/* Nombre */}
-                    <Field label="Nombre de la familia *" error={errors.family_name}>
-                        <input
-                            style={S.field} type="text"
-                            value={data.family_name}
-                            onChange={e => setData('family_name', e.target.value)}
-                            placeholder="Ej: Familia González Pérez"
-                        />
-                    </Field>
+                    <FloatInput
+                        label="Nombre de la familia *"
+                        value={data.family_name}
+                        onChange={e => setData('family_name', e.target.value)}
+                        error={errors.family_name}
+                        placeholder=" "
+                    />
 
                     {/* Personas */}
-                    <Field label="¿Cuántas personas son? *" error={errors.people_count}>
-                        <div style={{ position: 'relative' }}>
-                            <Users size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                style={{ ...S.field, paddingLeft: 36 }}
-                                type="number" min={1} max={50}
-                                value={data.people_count}
-                                onChange={e => setData('people_count', parseInt(e.target.value) || 1)}
-                            />
-                        </div>
-                    </Field>
+                    <FloatInput
+                        label="¿Cuántas personas son? *"
+                        type="number"
+                        value={data.people_count}
+                        onChange={e => setData('people_count', parseInt(e.target.value) || 1)}
+                        error={errors.people_count}
+                        icon={Users}
+                        min={1} max={50}
+                        placeholder=" "
+                    />
 
                     {/* Niños / Adultos mayores */}
                     <div style={{ display: 'flex', gap: 10 }}>
@@ -122,17 +100,19 @@ export default function CasosPublicar() {
                             { key: 'has_elderly',  label: 'Adultos mayores' },
                         ].map(({ key, label }) => (
                             <button
-                                key={key}
-                                type="button"
+                                key={key} type="button"
                                 onClick={() => setData(key, !data[key])}
                                 style={{
-                                    flex: 1, padding: '10px 8px', borderRadius: 12, fontSize: 12.5,
-                                    fontWeight: 600, cursor: 'pointer',
+                                    flex: 1, padding: '12px 10px',
+                                    borderRadius: 13, fontSize: 13,
+                                    fontWeight: 700, cursor: 'pointer',
                                     border: data[key] ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
                                     background: data[key] ? '#eef1fa' : '#fff',
                                     color: data[key] ? '#4263ac' : '#64748b',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                                     fontFamily: 'inherit',
+                                    transition: 'all .15s',
+                                    boxShadow: data[key] ? '0 0 0 3px rgba(66,99,172,.09)' : 'none',
                                 }}
                             >
                                 <Baby size={14} strokeWidth={2} />
@@ -143,18 +123,23 @@ export default function CasosPublicar() {
                     </div>
 
                     {/* Descripción */}
-                    <Field label="Describe su situación *" error={errors.description}>
-                        <textarea
-                            style={{ ...S.field, resize: 'none', lineHeight: 1.6 }}
-                            rows={4}
-                            value={data.description}
-                            onChange={e => setData('description', e.target.value)}
-                            placeholder="¿Qué pasó? ¿Dónde están? ¿Qué necesitan con más urgencia?"
-                        />
-                    </Field>
+                    <FloatTextarea
+                        label="Describe su situación *"
+                        value={data.description}
+                        onChange={e => setData('description', e.target.value)}
+                        error={errors.description}
+                        rows={4}
+                        placeholder=" "
+                    />
 
                     {/* Necesidades */}
-                    <Field label="¿Qué necesitan? *" error={errors.needs}>
+                    <div>
+                        <p style={{
+                            margin: '0 0 10px', fontSize: 12, fontWeight: 700,
+                            color: '#64748b', letterSpacing: '.4px', textTransform: 'uppercase',
+                        }}>
+                            ¿Qué necesitan? *
+                        </p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                             {NEEDS.map(({ value, label }) => {
                                 const on = data.needs.includes(value);
@@ -163,13 +148,14 @@ export default function CasosPublicar() {
                                         key={value} type="button"
                                         onClick={() => toggleNeed(value)}
                                         style={{
-                                            padding: '7px 13px', borderRadius: 999,
+                                            padding: '8px 14px', borderRadius: 999,
                                             fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
                                             border: on ? 'none' : '1.5px solid #e2e8f0',
-                                            background: on ? '#4263ac' : '#fff',
+                                            background: on ? '#4263ac' : '#f8fafc',
                                             color: on ? '#fff' : '#475569',
                                             fontFamily: 'inherit',
                                             display: 'flex', alignItems: 'center', gap: 5,
+                                            transition: 'all .13s',
                                         }}
                                     >
                                         {on && <Check size={11} color="#fff" strokeWidth={2.5} />}
@@ -178,68 +164,61 @@ export default function CasosPublicar() {
                                 );
                             })}
                         </div>
-                    </Field>
+                        {errors.needs && (
+                            <p style={{ margin: '6px 0 0', fontSize: 11.5, color: '#CE6969', fontWeight: 500 }}>
+                                {errors.needs}
+                            </p>
+                        )}
+                    </div>
 
                     {/* Zona */}
-                    <Field label="Zona o sector donde están *" error={errors.zone}>
-                        <div style={{ position: 'relative' }}>
-                            <MapPin size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                style={{ ...S.field, paddingLeft: 36 }}
-                                type="text"
-                                value={data.zone}
-                                onChange={e => setData('zone', e.target.value)}
-                                placeholder="Ej: Sector Las Flores, Catia"
-                            />
-                        </div>
-                    </Field>
+                    <FloatInput
+                        label="Zona o sector donde están *"
+                        value={data.zone}
+                        onChange={e => setData('zone', e.target.value)}
+                        error={errors.zone}
+                        icon={MapPin}
+                        placeholder=" "
+                    />
 
                     {/* Estado */}
-                    <Field label="Estado *" error={errors.state}>
-                        <select
-                            style={{ ...S.field, cursor: 'pointer' }}
-                            value={data.state}
-                            onChange={e => setData('state', e.target.value)}
-                        >
-                            <option value="">Selecciona un estado</option>
-                            {STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </Field>
+                    <FloatSelect
+                        label="Estado *"
+                        value={data.state}
+                        onChange={e => setData('state', e.target.value)}
+                        error={errors.state}
+                    >
+                        <option value="">—</option>
+                        {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </FloatSelect>
 
                     {/* Teléfono */}
-                    <Field label="Tu teléfono (privado) *" error={errors.contact_phone}>
-                        <div style={{ position: 'relative' }}>
-                            <Phone size={15} color="#94a3b8" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                style={{ ...S.field, paddingLeft: 36 }}
-                                type="tel"
-                                value={data.contact_phone}
-                                onChange={e => setData('contact_phone', e.target.value)}
-                                placeholder="0412-1234567"
-                            />
-                        </div>
-                    </Field>
+                    <FloatInput
+                        label="Tu teléfono (privado) *"
+                        type="tel"
+                        value={data.contact_phone}
+                        onChange={e => setData('contact_phone', e.target.value)}
+                        error={errors.contact_phone}
+                        icon={Phone}
+                        placeholder=" "
+                    />
 
                     {/* Foto URL */}
-                    <Field label="Foto de la familia (URL, opcional)" error={errors.photo_path}>
-                        <input
-                            style={S.field} type="url"
-                            value={data.photo_path}
-                            onChange={e => setData('photo_path', e.target.value)}
-                            placeholder="https://…/foto.jpg"
-                        />
-                    </Field>
+                    <FloatInput
+                        label="Foto de la familia (URL, opcional)"
+                        type="url"
+                        value={data.photo_path}
+                        onChange={e => setData('photo_path', e.target.value)}
+                        error={errors.photo_path}
+                        placeholder=" "
+                    />
 
+                    {/* Submit */}
                     <button
                         type="submit"
                         disabled={processing}
-                        style={{
-                            width: '100%', padding: '14px', borderRadius: 14,
-                            background: processing ? '#83A2DB' : '#4263ac',
-                            color: '#fff', border: 'none', fontSize: 15, fontWeight: 700,
-                            cursor: processing ? 'not-allowed' : 'pointer',
-                            fontFamily: 'inherit',
-                        }}
+                        className="va-btn va-btn--primary va-btn--full va-btn--lg"
+                        style={{ marginTop: 4 }}
                     >
                         {processing ? 'Publicando…' : 'Publicar caso'}
                     </button>
