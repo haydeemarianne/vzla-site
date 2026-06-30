@@ -155,7 +155,24 @@ export default function MainLayout({ children }) {
                         </span>
                     </div>
 
-                    <div style={{ flex: 1 }} />
+                    {/* Nav pills — desktop, centrado */}
+                    <nav className="va-desktop-only" style={{ alignItems: 'center', gap: 2, marginLeft: 12, flex: 1, justifyContent: 'center' }}>
+                        {TOP_NAV.map(({ href, label }) => {
+                            const active = isActive(href, url);
+                            return (
+                                <Link key={href} href={href} style={{
+                                    textDecoration: 'none', fontSize: 12, fontWeight: 600,
+                                    padding: '7px 13px', borderRadius: 999, border: 'none',
+                                    background: active ? '#0f172a' : 'transparent',
+                                    color: active ? '#fff' : '#5b6677',
+                                    boxShadow: active ? '0 6px 18px rgba(2,6,23,.28)' : 'none',
+                                    whiteSpace: 'nowrap', cursor: 'pointer', transition: 'all .15s',
+                                }}>
+                                    {label}
+                                </Link>
+                            );
+                        })}
+                    </nav>
 
                     {/* Acciones del header */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
