@@ -111,22 +111,23 @@
 .va-sidebar-btn[data-tip]::after {
     content: attr(data-tip);
     position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #0f172a;
-    color: #fff;
+    top: 50%;
+    left: calc(100% + 10px);
+    transform: translateY(-50%);
+    background: #fff;
+    color: #1a2230;
     font-size: 12px;
     font-weight: 600;
     font-family: 'Onest', system-ui, sans-serif;
-    padding: 6px 12px;
+    padding: 6px 13px;
     border-radius: 9px;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
     transition: opacity .15s;
     z-index: 200;
-    box-shadow: 0 6px 18px rgba(2,6,23,.22);
+    box-shadow: 0 4px 16px rgba(16,24,40,.13);
+    border: 1px solid #e6e9f0;
 }
 .va-sidebar-btn[data-tip]:hover::after {
     opacity: 1;
