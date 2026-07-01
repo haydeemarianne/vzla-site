@@ -9,14 +9,17 @@ const VISIBLE = 5;  // tarjetas visibles antes de hacer scroll en la columna
 
 const NEED_LABELS = {
     food: 'Alimentación', water: 'Agua', medicine: 'Medicamentos',
-    clothing: 'Ropa', furniture: 'Mobiliario', baby: 'Bebé',
-    tools: 'Herramientas', documents: 'Documentos', shelter: 'Refugio', other: 'Otro',
+    medical_care: 'Atención médica', shelter: 'Refugio', clothing: 'Ropa',
+    hygiene: 'Higiene', baby: 'Bebé', construction: 'Materiales',
+    cleaning: 'Limpieza', transport: 'Transporte', electricity: 'Electricidad',
+    tools: 'Herramientas', documents: 'Documentos', furniture: 'Mobiliario',
+    emotional: 'Apoyo emocional', other: 'Otro',
 };
 
 const PASTEL = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#fde68a'];
 
 const COLUMNS = [
-    { key: 'open',      label: 'Sin apadrinar',  color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
+    { key: 'open',      label: 'Pendiente',       color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
     { key: 'in_review', label: 'En evaluación',  color: '#b45309', bg: '#fef3e2', dot: '#f59e0b' },
     { key: 'adopted',   label: 'Apadrinados',    color: '#0e7490', bg: '#e0f2fe', dot: '#0e7490' },
     { key: 'resolved',  label: 'Cerrados',       color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
@@ -206,7 +209,7 @@ export default function CasosIndex({ by_status }) {
                     <div>
                         <h1 style={{ margin:0, fontSize:20, fontWeight:700, letterSpacing:'-0.4px', color:'#1e293b' }}>Tablero de casos</h1>
                         <p style={{ margin:'3px 0 0', fontSize:12, color:'#94a3b8', fontWeight:500 }}>
-                            {open.length} sin apadrinar · {total} en total
+                            {open.length} pendientes · {total} en total
                         </p>
                     </div>
                     <Link href="/casos/publicar" style={{ display:'flex', alignItems:'center', gap:4, background:'#4263ac', color:'#fff', fontSize:12, fontWeight:700, padding:'8px 13px', borderRadius:11, textDecoration:'none', flexShrink:0 }}>

@@ -99,7 +99,7 @@ class SupportCaseController extends Controller
             ]);
         }
 
-        return redirect('/casos')->with('success', '¡Caso publicado! Ya está visible para los voluntarios.');
+        return redirect('/casos')->with('success', '¡Caso recibido! Estará visible en el tablero una vez que el equipo lo valide.');
     }
 
     public function show(SupportCase $supportCase)
