@@ -37,7 +37,11 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'auth' => [
+                'is_admin'   => (bool) $request->session()->get('is_admin'),
+                'admin_role' => $request->session()->get('admin_role'),
+                'admin_name' => $request->session()->get('admin_name'),
+            ],
         ];
     }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\CleaningPointController;
 use App\Http\Controllers\TransportController;
 use App\Http\Controllers\ValidatorController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\SupportCaseController;
 use App\Http\Controllers\CaseVolunteerController;
 use App\Http\Controllers\CaseSponsorshipController;
@@ -33,6 +34,12 @@ Route::prefix('validar')->group(function () {
     Route::post('/corregir', [ValidatorController::class, 'corregir']);
     Route::post('/padrinos/{adoption}/aprobar',  [CaseSponsorshipController::class, 'approve']);
     Route::post('/padrinos/{adoption}/rechazar', [CaseSponsorshipController::class, 'reject']);
+
+    // Gestión de usuarios del panel
+    Route::get('/usuarios',                              [AdminUserController::class, 'index']);
+    Route::post('/usuarios',                             [AdminUserController::class, 'store']);
+    Route::post('/usuarios/{adminUser}/toggle',          [AdminUserController::class, 'toggleActive']);
+    Route::delete('/usuarios/{adminUser}',               [AdminUserController::class, 'destroy']);
 });
 
 // ── Personas ─────────────────────────────────────────────────────────────────

@@ -86,7 +86,8 @@ function HeaderCircle({ onClick, title, children, href, notif = false }) {
 
 /* ─── Layout principal ─────────────────────────── */
 export default function MainLayout({ children }) {
-    const { url } = usePage();
+    const { url, props } = usePage();
+    const isAdmin = props.auth?.is_admin;
 
     return (
         <div className="va-app">
@@ -108,8 +109,15 @@ export default function MainLayout({ children }) {
                     ))}
                 </nav>
 
+                {/* Usuarios — solo si está logueado */}
+                {isAdmin && (
+                    <SideBtn href="/validar/usuarios" title="Gestión de usuarios">
+                        <Users size={18} color="#5b6677" strokeWidth={1.9} />
+                    </SideBtn>
+                )}
+
                 {/* Admin — círculo negro al fondo */}
-                <SideBtn dark onClick={() => router.visit('/admin/login')} title="Panel de administración">
+                <SideBtn dark onClick={() => router.visit(isAdmin ? '/validar' : '/admin/login')} title={isAdmin ? 'Panel de validación' : 'Panel de administración'}>
                     <Settings size={18} color="white" strokeWidth={1.9} />
                 </SideBtn>
 

@@ -31,6 +31,8 @@ class ValidatorController extends Controller
 
         return Inertia::render('Validar/Dashboard', [
             'admin_email'        => session('admin_email'),
+            'admin_name'         => session('admin_name'),
+            'admin_role'         => session('admin_role'),
 
             // ── Cola de validación (pendientes) ──
             'pending_children'          => MissingChild::where('validation_status', 'pending')->latest()->limit(30)->get(),

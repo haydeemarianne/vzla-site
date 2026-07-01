@@ -1,7 +1,7 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Upload, Calendar, Check, X, ArrowRight, ChevronRight, User, Phone, MapPin, Tag, Clock } from 'lucide-react';
+import { Plus, Upload, Calendar, Check, X, ArrowRight, ChevronRight, User, Phone, MapPin, Tag, Clock, LogOut } from 'lucide-react';
 
 /* ─── helpers ─── */
 const PASTEL = ['#e7dcf2','#dfe6f4','#d6e8e0','#f0d6d6','#f3e2cf','#fde68a'];
@@ -1153,8 +1153,12 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar }) {
 /* ════════════════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════ */
+const ROLE_LABEL = { super_admin:'Super Admin', admin:'Admin', validator:'Validador' };
+
 export default function ValidarDashboard({
     admin_email,
+    admin_name,
+    admin_role,
     pending_children,
     pending_engineers,
     pending_zones,
@@ -1353,18 +1357,44 @@ export default function ValidarDashboard({
         <MainLayout>
             <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
 
-                {/* ── Título ── */}
-                <div>
-                    <h1 style={{ margin:0, fontSize:28, fontWeight:800, letterSpacing:'-1px', color:'#1a2230' }}>
-                        Panel de validación
-                    </h1>
-                    <p style={{ margin:'4px 0 0', fontSize:13, color:'#7b8595' }}>
-                        {totalPending > 0
-                            ? `${totalPending} pendiente${totalPending !== 1 ? 's' : ''} · ${totalStaged} en recorrido`
-                            : totalStaged > 0
-                                ? `Todo al día · ${totalStaged} en recorrido`
-                                : 'Todo al día — sin pendientes'}
-                    </p>
+                {/* ── Título + usuario ── */}
+                <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12 }}>
+                    <div>
+                        <h1 style={{ margin:0, fontSize:28, fontWeight:800, letterSpacing:'-1px', color:'#1a2230' }}>
+                            Panel de validación
+                        </h1>
+                        <p style={{ margin:'4px 0 0', fontSize:13, color:'#7b8595' }}>
+                            {totalPending > 0
+                                ? `${totalPending} pendiente${totalPending !== 1 ? 's' : ''} · ${totalStaged} en recorrido`
+                                : totalStaged > 0
+                                    ? `Todo al día · ${totalStaged} en recorrido`
+                                    : 'Todo al día — sin pendientes'}
+                        </p>
+                    </div>
+
+                    {/* Usuario actual + logout */}
+                    {admin_name && (
+                        <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+                            <div style={{ textAlign:'right' }}>
+                                <div style={{ fontSize:13, fontWeight:700, color:'#1a2230' }}>{admin_name}</div>
+                                <div style={{ fontSize:11, color:'#94a3b8', marginTop:1 }}>
+                                    {ROLE_LABEL[admin_role] || admin_role}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => router.post('/admin/logout')}
+                                title="Cerrar sesión"
+                                style={{
+                                    width:36, height:36, borderRadius:'50%',
+                                    border:'1.5px solid #e6e9f0', background:'white',
+                                    display:'flex', alignItems:'center', justifyContent:'center',
+                                    cursor:'pointer', flexShrink:0,
+                                }}
+                            >
+                                <LogOut size={15} color="#CE6969" strokeWidth={2}/>
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* ── Recorrido del caso ── */}

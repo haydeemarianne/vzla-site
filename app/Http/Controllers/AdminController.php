@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\AdminUser;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -21,20 +22,28 @@ class AdminController extends Controller
             'password' => 'required',
         ]);
 
-        $adminEmail = config('app.admin_email');
-        $adminPass  = config('app.admin_password');
+        $user = AdminUser::where('email', $request->email)
+            ->where('active', true)
+            ->first();
 
-        if ($request->email === $adminEmail && $request->password === $adminPass) {
-            session(['is_admin' => true, 'admin_email' => $request->email]);
-            return redirect('/validar');
+        if (! $user || ! $user->checkPassword($request->password)) {
+            return back()->withErrors(['email' => 'Credenciales incorrectas.']);
         }
 
-        return back()->withErrors(['email' => 'Credenciales incorrectas.']);
+        session([
+            'is_admin'    => true,
+            'admin_id'    => $user->id,
+            'admin_email' => $user->email,
+            'admin_name'  => $user->name,
+            'admin_role'  => $user->role,
+        ]);
+
+        return redirect('/validar');
     }
 
     public function logout(Request $request)
     {
-        $request->session()->forget(['is_admin', 'admin_email']);
+        $request->session()->forget(['is_admin', 'admin_id', 'admin_email', 'admin_name', 'admin_role']);
         return redirect('/admin/login');
     }
 }
