@@ -42,14 +42,14 @@ function RequestCard({ req }) {
     const isUrgent  = req.urgency === 'urgent';
     const days      = Math.floor((Date.now() - new Date(req.created_at)) / 86400000);
 
-    const takeReq     = () => router.post(`/transporte/solicitudes/${req.id}/tomar`,     {}, { preserveScroll: true });
-    const completeReq = () => router.post(`/transporte/solicitudes/${req.id}/completar`, {}, { preserveScroll: true });
+    const takeReq     = (e) => { e.stopPropagation(); router.post(`/transporte/solicitudes/${req.id}/tomar`,     {}, { preserveScroll: true }); };
+    const completeReq = (e) => { e.stopPropagation(); router.post(`/transporte/solicitudes/${req.id}/completar`, {}, { preserveScroll: true }); };
 
     return (
-        <div style={{
+        <div onClick={() => router.visit(`/transporte/solicitudes/${req.id}`)} style={{
             background: 'white', borderRadius: 12,
             boxShadow: '0 1px 6px rgba(16,24,40,.06)',
-            padding: '10px 12px',
+            padding: '10px 12px', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
         }}>
             {/* Tipo + urgencia */}
@@ -125,37 +125,38 @@ function DriverCard({ driver, idx }) {
 
     return (
         <div style={{
-            background: 'white', borderRadius: 12,
-            boxShadow: '0 1px 6px rgba(16,24,40,.06)',
+            background: '#f8fafc', borderRadius: 12,
+            border: '1px solid #e2e8f0',
             padding: '10px 12px',
             display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
         }}>
+            {/* Avatar + nombre + teléfono derecha */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', background: PASTEL[idx % PASTEL.length], flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#3a4250' }}>{initials(driver.name)}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{driver.name}</div>
-                    <span style={{ fontSize: 9.5, fontWeight: 700, color: '#4263ac', background: '#eef1fa', padding: '1px 6px', borderRadius: 999 }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: '#475569', background: '#e2e8f0', padding: '1px 6px', borderRadius: 999 }}>
                         {VEHICLE_LABEL[driver.vehicle_type] || driver.vehicle_type}
                     </span>
                 </div>
+                {driver.phone && (
+                    <a href={`tel:${driver.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 3, background: '#e2e8f0', color: '#475569', fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, textDecoration: 'none', flexShrink: 0 }}>
+                        <Phone size={9} color="#475569" strokeWidth={2}/> {driver.phone}
+                    </a>
+                )}
             </div>
 
             {zones.length > 0 && (
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
                     <MapPin size={9} color="#94a3b8" strokeWidth={2}/>
                     {zones.slice(0, 2).map(z => (
-                        <span key={z} style={{ fontSize: 9.5, fontWeight: 600, color: '#475569', background: '#f1f4f9', padding: '1px 6px', borderRadius: 4 }}>{z}</span>
+                        <span key={z} style={{ fontSize: 9.5, fontWeight: 600, color: '#475569', background: '#e2e8f0', padding: '1px 6px', borderRadius: 4 }}>{z}</span>
                     ))}
                     {zones.length > 2 && <span style={{ fontSize: 9.5, color: '#94a3b8' }}>+{zones.length - 2}</span>}
                 </div>
             )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Phone size={9} color="#94a3b8" strokeWidth={2}/>
-                <span style={{ fontSize: 10.5, color: '#64748b', fontWeight: 600 }}>{driver.phone}</span>
-            </div>
         </div>
     );
 }

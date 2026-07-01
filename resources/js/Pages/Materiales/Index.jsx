@@ -1,11 +1,10 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { FiFileText, FiDownload, FiUpload, FiPrinter, FiPackage, FiInstagram, FiPhone, FiBox } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { Upload, Download, Printer, Box, Package, Phone, AtSign, FileText } from 'lucide-react';
 
 const PRINT_CATEGORIES = [
-    { value: '', label: 'Todos' },
+    { value: '',       label: 'Todos' },
     { value: 'flyer',  label: 'Flyers' },
     { value: 'poster', label: 'Carteles' },
     { value: 'guide',  label: 'Guías' },
@@ -14,48 +13,119 @@ const PRINT_CATEGORIES = [
 ];
 
 const CATEGORIES_3D = [
-    { value: '',               label: 'Todos' },
+    { value: '',                label: 'Todos' },
     { value: '3d_construction', label: 'Construcción' },
     { value: '3d_ironwork',     label: 'Herrería' },
-    { value: '3d_medical',      label: 'Médico / Primeros auxilios' },
+    { value: '3d_medical',      label: 'Médico' },
     { value: '3d_furniture',    label: 'Literas y muebles' },
     { value: '3d_tools',        label: 'Herramientas' },
     { value: '3d_other',        label: 'Otro' },
 ];
 
-const FileTypeIcon = ({ fileType, is3d }) => {
-    if (is3d) return <FiBox className="w-5 h-5 text-blue-500" />;
-    if (['jpg','jpeg','png','svg'].includes(fileType)) return <FiFileText className="w-5 h-5 text-indigo-400" />;
-    if (fileType === 'pdf') return <FiFileText className="w-5 h-5 text-red-400" />;
-    return <FiPackage className="w-5 h-5 text-gray-400" />;
-};
+const TABS = [
+    { key: 'print', label: 'Para imprimir', Icon: Printer },
+    { key: '3d',    label: 'Archivos 3D',   Icon: Box     },
+];
 
-const ContributorContact = ({ material }) => {
-    if (!material.contributor_instagram && !material.contributor_phone) return null;
+const SEC = { margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: '#7b8595' };
+
+function FileIcon({ fileType, is3d }) {
+    if (is3d) return <Box size={16} color="#4263ac" strokeWidth={1.5}/>;
+    if (['jpg','jpeg','png','svg'].includes(fileType)) return <FileText size={16} color="#7c3aed" strokeWidth={1.5}/>;
+    if (fileType === 'pdf') return <FileText size={16} color="#CE6969" strokeWidth={1.5}/>;
+    return <Package size={16} color="#64748b" strokeWidth={1.5}/>;
+}
+
+function MaterialCard({ material }) {
+    const pi = material.print_instructions || {};
+    const hasPrint = !material.is_3d && (pi.size || pi.color || pi.paper || pi.quantity || pi.notes);
+
     return (
-        <div className="flex items-center gap-3 mt-2 flex-wrap">
-            {material.contributor_instagram && (
-                <a href={`https://instagram.com/${material.contributor_instagram.replace('@','')}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
-                    <FiInstagram className="w-3.5 h-3.5" />
-                    {material.contributor_instagram}
-                </a>
+        <div style={{ background: 'white', border: '1px solid #e9ebf1', borderRadius: 16, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+            {/* Icono + título */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 10, background: '#f8fafc', border: '1px solid #e9ebf1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <FileIcon fileType={material.file_type} is3d={material.is_3d}/>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>{material.title}</div>
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                        {material.organization || material.uploaded_by}
+                    </div>
+                </div>
+            </div>
+
+            {/* Descripción */}
+            {material.description && (
+                <p style={{ margin: 0, fontSize: 11.5, color: '#475569', lineHeight: 1.5,
+                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {material.description}
+                </p>
             )}
-            {material.contributor_phone && (
-                <a href={`tel:${material.contributor_phone}`}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-blue-600 transition-colors">
-                    <FiPhone className="w-3.5 h-3.5" />
-                    {material.contributor_phone}
-                </a>
+
+            {/* Instrucciones de impresión */}
+            {hasPrint && (
+                <div style={{ background: '#f8fafc', borderRadius: 10, padding: '9px 11px', border: '1px solid #e9ebf1', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <p style={{ ...SEC, marginBottom: 4 }}>Instrucciones de impresión</p>
+                    {pi.size     && <span style={{ fontSize: 11, color: '#475569' }}>Tamaño: <strong>{pi.size}</strong></span>}
+                    {pi.color    && <span style={{ fontSize: 11, color: '#475569' }}>Color: <strong>{pi.color}</strong></span>}
+                    {pi.paper    && <span style={{ fontSize: 11, color: '#475569' }}>Papel: <strong>{pi.paper}</strong></span>}
+                    {pi.quantity && <span style={{ fontSize: 11, color: '#475569' }}>Cantidad: <strong>{pi.quantity}</strong></span>}
+                    {pi.notes    && <span style={{ fontSize: 10.5, color: '#94a3b8', fontStyle: 'italic' }}>{pi.notes}</span>}
+                </div>
             )}
+
+            {/* Info 3D */}
+            {material.is_3d && (
+                <div style={{ background: '#eef1fa', borderRadius: 10, padding: '9px 11px', border: '1px solid #d6dffa' }}>
+                    <p style={{ margin: 0, fontSize: 11, color: '#4263ac', fontWeight: 700 }}>
+                        Archivo 3D — {material.file_type?.toUpperCase()}
+                    </p>
+                    <p style={{ margin: '3px 0 0', fontSize: 10.5, color: '#4263ac', opacity: .8 }}>
+                        Contacta al contribuidor para coordinar la producción.
+                    </p>
+                </div>
+            )}
+
+            {/* Footer */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 8, borderTop: '1px solid #f1f4f9', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    {material.contributor_instagram && (
+                        <a href={`https://instagram.com/${material.contributor_instagram.replace('@','')}`}
+                            target="_blank" rel="noopener noreferrer"
+                            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10.5, color: '#64748b', textDecoration: 'none' }}>
+                            <AtSign size={10} strokeWidth={2}/> {material.contributor_instagram}
+                        </a>
+                    )}
+                    {material.contributor_phone && (
+                        <a href={`tel:${material.contributor_phone}`}
+                            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10.5, color: '#64748b', textDecoration: 'none' }}>
+                            <Phone size={10} strokeWidth={2}/> {material.contributor_phone}
+                        </a>
+                    )}
+                    {!material.contributor_instagram && !material.contributor_phone && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#cbd5e1' }}>
+                            <Download size={10} strokeWidth={2}/> {material.download_count} descargas
+                        </span>
+                    )}
+                </div>
+                <a href={`/materiales/${material.id}/descargar`} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
+                    background: '#4263ac', color: 'white', fontSize: 11.5, fontWeight: 700,
+                    padding: '6px 12px', borderRadius: 10, textDecoration: 'none',
+                }}>
+                    <Download size={11} color="white" strokeWidth={2}/> Descargar
+                </a>
+            </div>
         </div>
     );
-};
+}
 
 export default function MaterialesIndex({ materials, filters }) {
-    const activeTab      = filters.tab === '3d' ? '3d' : 'print';
+    const activeTab = filters.tab === '3d' ? '3d' : 'print';
     const [category, setCategory] = useState(filters.category || '');
+    const categories = activeTab === '3d' ? CATEGORIES_3D : PRINT_CATEGORIES;
 
     const filterBy = (value) => {
         setCategory(value);
@@ -67,173 +137,101 @@ export default function MaterialesIndex({ materials, filters }) {
         router.get('/materiales', { tab }, { preserveScroll: true, replace: true });
     };
 
-    const categories = activeTab === '3d' ? CATEGORIES_3D : PRINT_CATEGORIES;
+    const list = materials?.data ?? [];
 
     return (
         <MainLayout>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Materiales y archivos</h1>
-                    <p className="text-slate-500 mt-1 text-sm">Descargue y comparta recursos gratuitos para la emergencia</p>
-                </div>
-                <Link href="/materiales/subir"
-                    className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                    <FiUpload className="w-4 h-4" /> Subir archivo
-                </Link>
-            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Main tabs */}
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl mb-5 w-fit">
-                <button onClick={() => switchTab('print')}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                        activeTab === 'print'
-                            ? 'bg-white text-slate-900 shadow-sm'
-                            : 'text-slate-500 hover:text-slate-700'
-                    }`}>
-                    <FiPrinter className="w-4 h-4 inline mr-1.5 -mt-0.5" />
-                    Para imprimir
-                </button>
-                <button onClick={() => switchTab('3d')}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                        activeTab === '3d'
-                            ? 'bg-white text-slate-900 shadow-sm'
-                            : 'text-slate-500 hover:text-slate-700'
-                    }`}>
-                    <FiBox className="w-4 h-4 inline mr-1.5 -mt-0.5" />
-                    Archivos 3D
-                </button>
-            </div>
-
-            {/* Info banner */}
-            {activeTab === '3d' ? (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
-                    <p className="text-sm text-blue-700">
-                        <strong>Para constructores, herreros y fabricantes:</strong> Descargue los patrones STL
-                        y contacte directamente al contribuidor para coordinar la produccion.
-                    </p>
-                </div>
-            ) : (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-5">
-                    <p className="text-sm text-slate-600">
-                        <strong>Para imprentas y voluntarios:</strong> Descargue el archivo y siga las instrucciones
-                        de impresion incluidas. Todos los materiales son gratuitos.
-                    </p>
-                </div>
-            )}
-
-            {/* Category filter */}
-            <div className="flex gap-2 flex-wrap mb-6">
-                {categories.map(({ value, label }) => (
-                    <button key={value} onClick={() => filterBy(value)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                            category === value
-                                ? 'bg-blue-700 text-white'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}>
-                        {label}
-                    </button>
-                ))}
-            </div>
-
-            {materials.data.length === 0 ? (
-                <div className="text-center py-16 text-slate-400">
-                    <FiPackage className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p className="font-medium">No hay archivos en esta categoria</p>
-                    <Link href="/materiales/subir"
-                        className="mt-4 inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                        Subir el primero
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px', color: '#1e293b' }}>Materiales y archivos</h1>
+                        <p style={{ margin: '3px 0 0', fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
+                            Descarga y comparte recursos gratuitos para la emergencia
+                        </p>
+                    </div>
+                    <Link href="/materiales/subir" style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#4263ac', color: 'white', fontSize: 12, fontWeight: 700, padding: '8px 13px', borderRadius: 11, textDecoration: 'none', flexShrink: 0 }}>
+                        <Upload size={12} color="white" strokeWidth={2.5}/> Subir archivo
                     </Link>
                 </div>
-            ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    {materials.data.map((material, i) => (
-                        <motion.div key={material.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, ease: 'easeOut', delay: i * 0.06 }}
-                            className="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md transition-shadow flex flex-col">
 
-                            <div className="flex items-start gap-3 mb-3">
-                                <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0">
-                                    <FileTypeIcon fileType={material.file_type} is3d={material.is_3d} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-slate-900 leading-snug text-sm">{material.title}</h3>
-                                    <p className="text-xs text-slate-400 mt-0.5">
-                                        {material.organization || material.uploaded_by}
-                                    </p>
-                                    <ContributorContact material={material} />
-                                </div>
-                            </div>
-
-                            {material.description && (
-                                <p className="text-xs text-slate-600 mb-3 leading-relaxed">{material.description}</p>
-                            )}
-
-                            {/* Print instructions (solo para imprimibles) */}
-                            {!material.is_3d && material.print_instructions && Object.values(material.print_instructions).some(Boolean) && (
-                                <div className="bg-slate-50 rounded-xl p-3 mb-3 text-xs space-y-1 flex-1">
-                                    <p className="font-semibold text-slate-700 flex items-center gap-1.5 mb-1.5">
-                                        <FiPrinter className="w-3.5 h-3.5" /> Instrucciones de impresion
-                                    </p>
-                                    {material.print_instructions.size && (
-                                        <p className="text-slate-600">Tamano: <span className="font-medium">{material.print_instructions.size}</span></p>
-                                    )}
-                                    {material.print_instructions.color && (
-                                        <p className="text-slate-600">Color: <span className="font-medium">{material.print_instructions.color}</span></p>
-                                    )}
-                                    {material.print_instructions.paper && (
-                                        <p className="text-slate-600">Papel: <span className="font-medium">{material.print_instructions.paper}</span></p>
-                                    )}
-                                    {material.print_instructions.quantity && (
-                                        <p className="text-slate-600">Cantidad: <span className="font-medium">{material.print_instructions.quantity}</span></p>
-                                    )}
-                                    {material.print_instructions.notes && (
-                                        <p className="text-slate-500 italic">{material.print_instructions.notes}</p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* 3D info */}
-                            {material.is_3d && (
-                                <div className="bg-blue-50 rounded-xl p-3 mb-3 text-xs flex-1">
-                                    <p className="font-semibold text-blue-700 mb-1">Archivo 3D — {material.file_type?.toUpperCase()}</p>
-                                    {material.subcategory && (
-                                        <p className="text-blue-600">Categoria: {material.subcategory}</p>
-                                    )}
-                                    <p className="text-blue-600 mt-1">Contacta al contribuidor para coordinar la produccion.</p>
-                                </div>
-                            )}
-
-                            <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
-                                <span className="text-xs text-slate-400 flex items-center gap-1">
-                                    <FiDownload className="w-3 h-3" />
-                                    {material.download_count} descargas
-                                </span>
-                                <a href={`/materiales/${material.id}/descargar`}
-                                    className="flex items-center gap-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
-                                    <FiDownload className="w-3.5 h-3.5" /> Descargar
-                                </a>
-                            </div>
-                        </motion.div>
-                    ))}
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: 4, background: '#f1f4f9', padding: 4, borderRadius: 14, width: 'fit-content' }}>
+                    {TABS.map(({ key, label, Icon }) => {
+                        const sel = activeTab === key;
+                        return (
+                            <button key={key} onClick={() => switchTab(key)} style={{
+                                display: 'flex', alignItems: 'center', gap: 5,
+                                padding: '7px 16px', borderRadius: 10, fontSize: 12.5, fontWeight: 700,
+                                background: sel ? 'white' : 'transparent',
+                                color: sel ? '#1e293b' : '#94a3b8',
+                                boxShadow: sel ? '0 1px 4px rgba(16,24,40,.08)' : 'none',
+                                border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'all .13s',
+                            }}>
+                                <Icon size={12} strokeWidth={2}/> {label}
+                            </button>
+                        );
+                    })}
                 </div>
-            )}
 
-            {materials.links && (
-                <div className="flex justify-center gap-2 flex-wrap">
-                    {materials.links.map((link, i) => (
-                        link.url ? (
-                            <Link key={i} href={link.url}
-                                className={`px-3 py-1.5 rounded-lg text-sm ${link.active ? 'bg-blue-700 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
-                                dangerouslySetInnerHTML={{ __html: link.label }} />
-                        ) : (
-                            <span key={i} className="px-3 py-1.5 rounded-lg text-sm text-slate-300 bg-white border border-slate-100"
-                                dangerouslySetInnerHTML={{ __html: link.label }} />
-                        )
-                    ))}
+                {/* Aviso contextual */}
+                <div style={{ background: activeTab === '3d' ? '#eef1fa' : '#f8fafc', border: `1px solid ${activeTab === '3d' ? '#d6dffa' : '#e9ebf1'}`, borderRadius: 12, padding: '10px 14px' }}>
+                    <p style={{ margin: 0, fontSize: 11.5, color: activeTab === '3d' ? '#4263ac' : '#64748b', lineHeight: 1.5 }}>
+                        {activeTab === '3d'
+                            ? <><strong>Para constructores, herreros y fabricantes:</strong> Descarga los patrones STL y contacta al contribuidor para coordinar la producción.</>
+                            : <><strong>Para imprentas y voluntarios:</strong> Descarga el archivo y sigue las instrucciones incluidas. Todos los materiales son gratuitos.</>
+                        }
+                    </p>
                 </div>
-            )}
+
+                {/* Chips de categoría */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {categories.map(({ value, label }) => {
+                        const sel = category === value;
+                        return (
+                            <button key={value} onClick={() => filterBy(value)} style={{
+                                padding: '5px 14px', borderRadius: 999, fontSize: 11.5, fontWeight: 600,
+                                background: sel ? '#4263ac' : 'white',
+                                color: sel ? 'white' : '#475569',
+                                border: `1px solid ${sel ? '#4263ac' : '#e2e8f0'}`,
+                                cursor: 'pointer', fontFamily: 'inherit', transition: 'all .13s',
+                            }}>
+                                {label}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Grid */}
+                {list.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '48px 16px' }}>
+                        <Package size={36} color="#e2e8f0" strokeWidth={1.5} style={{ display: 'block', margin: '0 auto 10px' }}/>
+                        <p style={{ margin: '0 0 12px', fontSize: 13.5, color: '#94a3b8', fontWeight: 500 }}>No hay archivos en esta categoría</p>
+                        <Link href="/materiales/subir" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#4263ac', color: 'white', fontSize: 12.5, fontWeight: 700, padding: '9px 18px', borderRadius: 11, textDecoration: 'none' }}>
+                            <Upload size={12} color="white" strokeWidth={2}/> Subir el primero
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="va-limpieza-grid">
+                        {list.map(m => <MaterialCard key={m.id} material={m}/>)}
+                    </div>
+                )}
+
+                {/* Paginación */}
+                {materials?.links && materials.links.length > 3 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 8 }}>
+                        {materials.links.map((link, i) =>
+                            link.url ? (
+                                <Link key={i} href={link.url} style={{ padding: '6px 14px', borderRadius: 10, fontSize: 13, fontWeight: link.active ? 700 : 500, background: link.active ? '#4263ac' : 'white', color: link.active ? 'white' : '#475569', border: link.active ? 'none' : '1px solid #e2e6ee', textDecoration: 'none' }}
+                                    dangerouslySetInnerHTML={{ __html: link.label }}/>
+                            ) : (
+                                <span key={i} style={{ padding: '6px 14px', borderRadius: 10, fontSize: 13, color: '#cbd5e1' }} dangerouslySetInnerHTML={{ __html: link.label }}/>
+                            )
+                        )}
+                    </div>
+                )}
+            </div>
         </MainLayout>
     );
 }

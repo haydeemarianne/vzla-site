@@ -96,6 +96,7 @@ Route::prefix('transporte')->group(function () {
     Route::post('/solicitar', [TransportController::class, 'requestStore']);
     Route::get('/registrar', [TransportController::class, 'driverCreate']);
     Route::post('/registrar', [TransportController::class, 'driverStore']);
+    Route::get('/solicitudes/{transportRequest}', [TransportController::class, 'show']);
     Route::post('/solicitudes/{transportRequest}/tomar', [TransportController::class, 'take']);
     Route::post('/solicitudes/{transportRequest}/completar', [TransportController::class, 'complete']);
 });

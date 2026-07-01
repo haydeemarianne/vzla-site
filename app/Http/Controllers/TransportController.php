@@ -24,6 +24,13 @@ class TransportController extends Controller
         ]);
     }
 
+    public function show(TransportRequest $transportRequest)
+    {
+        return Inertia::render('Transporte/Show', [
+            'request' => $transportRequest,
+        ]);
+    }
+
     public function requestCreate()
     {
         return Inertia::render('Transporte/Solicitar');

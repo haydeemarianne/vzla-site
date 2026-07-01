@@ -116,12 +116,12 @@ function EngineerCard({ eng, idx }) {
 
     return (
         <div style={{
-            background: 'white', borderRadius: 12,
-            boxShadow: '0 1px 6px rgba(16,24,40,.06)',
+            background: '#faf8ff', borderRadius: 12,
+            border: '1px solid #ede9ff',
             padding: '10px 12px',
             display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
         }}>
-            {/* Avatar + nombre */}
+            {/* Avatar + nombre + teléfono derecha */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: PASTEL[idx % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#3a4250' }}>{initials(eng.name)}</span>
@@ -129,36 +129,33 @@ function EngineerCard({ eng, idx }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eng.name}</div>
                     {eng.specialty && (
-                        <span style={{ fontSize: 9.5, fontWeight: 700, color: '#7c3aed', background: '#f3eeff', padding: '1px 6px', borderRadius: 999 }}>{eng.specialty}</span>
+                        <span style={{ fontSize: 9.5, fontWeight: 700, color: '#7c3aed', background: '#ede9ff', padding: '1px 6px', borderRadius: 999 }}>{eng.specialty}</span>
                     )}
                 </div>
+                {eng.phone && (
+                    <a href={`tel:${eng.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 3, background: '#ede9ff', color: '#7c3aed', fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, textDecoration: 'none', flexShrink: 0 }}>
+                        <Phone size={9} color="#7c3aed" strokeWidth={2}/> {eng.phone}
+                    </a>
+                )}
             </div>
 
             {/* Zonas */}
             {zones.length > 0 && (
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <MapPin size={9} color="#94a3b8" strokeWidth={2}/>
+                    <MapPin size={9} color="#a78bfa" strokeWidth={2}/>
                     {zones.slice(0, 2).map(z => (
-                        <span key={z} style={{ fontSize: 9.5, fontWeight: 600, color: '#475569', background: '#f1f4f9', padding: '1px 6px', borderRadius: 4 }}>{z}</span>
+                        <span key={z} style={{ fontSize: 9.5, fontWeight: 600, color: '#7c3aed', background: '#ede9ff', padding: '1px 6px', borderRadius: 4 }}>{z}</span>
                     ))}
-                    {zones.length > 2 && <span style={{ fontSize: 9.5, color: '#94a3b8' }}>+{zones.length - 2}</span>}
+                    {zones.length > 2 && <span style={{ fontSize: 9.5, color: '#a78bfa' }}>+{zones.length - 2}</span>}
                 </div>
             )}
 
-            {/* Teléfono + inspecciones */}
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                {eng.phone && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <Phone size={9} color="#94a3b8" strokeWidth={2}/>
-                        <span style={{ fontSize: 10.5, color: '#64748b', fontWeight: 600 }}>{eng.phone}</span>
-                    </div>
-                )}
-                {(eng.inspection_requests_count ?? 0) > 0 && (
-                    <span style={{ fontSize: 9.5, fontWeight: 700, background: '#fef3e2', color: '#b45309', padding: '1px 7px', borderRadius: 999 }}>
-                        {eng.inspection_requests_count} solicitud{eng.inspection_requests_count !== 1 ? 'es' : ''}
-                    </span>
-                )}
-            </div>
+            {/* Inspecciones asignadas */}
+            {(eng.inspection_requests_count ?? 0) > 0 && (
+                <span style={{ fontSize: 9.5, fontWeight: 700, background: '#fef3e2', color: '#b45309', padding: '2px 8px', borderRadius: 999, alignSelf: 'flex-start' }}>
+                    {eng.inspection_requests_count} solicitud{eng.inspection_requests_count !== 1 ? 'es' : ''}
+                </span>
+            )}
         </div>
     );
 }
