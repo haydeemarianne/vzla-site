@@ -12,7 +12,6 @@ const TOP_NAV = [
     { href: '/ingenieros',    label: 'Ingenieros'    },
     { href: '/transporte',    label: 'Transporte'    },
     { href: '/materiales',    label: 'Recursos'      },
-    { href: '/validar',       label: 'Validación'    },
 ];
 
 const BOTTOM_NAV = [
@@ -63,8 +62,8 @@ function sharePage() {
 /* Botón del sidebar (círculo) */
 function SideBtn({ href, onClick, title, children, dark = false }) {
     const cls = `va-sidebar-btn${dark ? ' va-sidebar-btn--dark' : ''}`;
-    if (href) return <Link href={href} className={cls} title={title}>{children}</Link>;
-    return <button onClick={onClick} className={cls} title={title}>{children}</button>;
+    if (href) return <Link href={href} className={cls} data-tip={title}>{children}</Link>;
+    return <button onClick={onClick} className={cls} data-tip={title}>{children}</button>;
 }
 
 /* Círculo de acción en el header (igual estilo que sidebar) */
@@ -141,13 +140,7 @@ export default function MainLayout({ children }) {
                     </Link>
 
                     {/* Logo — desktop */}
-                    <div className="va-desktop-only" style={{ alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                        <div style={{
-                            width: 34, height: 34, borderRadius: 10, background: '#83A2DB',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                            <Heart size={18} color="white" strokeWidth={2} />
-                        </div>
+                    <div className="va-desktop-only" style={{ alignItems: 'center', flexShrink: 0 }}>
                         <span style={{ fontSize: 16, fontWeight: 700, color: '#1a2230', letterSpacing: '-.3px' }}>
                             Venezuela <span style={{ color: '#83A2DB' }}>Site</span>
                         </span>

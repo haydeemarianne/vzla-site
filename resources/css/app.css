@@ -107,6 +107,31 @@
 }
 .va-sidebar-btn--dark:hover { background: #1e293b; transform: translateY(-1px); }
 
+/* Tooltip del sidebar */
+.va-sidebar-btn[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #0f172a;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Onest', system-ui, sans-serif;
+    padding: 6px 12px;
+    border-radius: 9px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 200;
+    box-shadow: 0 6px 18px rgba(2,6,23,.22);
+}
+.va-sidebar-btn[data-tip]:hover::after {
+    opacity: 1;
+}
+
 /* ── Main area ─────────────────────────────────── */
 .va-main-area {
     flex: 1;
