@@ -52,12 +52,12 @@
         gap: 12px;
         flex-shrink: 0;
         width: 48px;
-        /* Sticky — se queda visible al hacer scroll */
         position: sticky;
         top: 20px;
         align-self: flex-start;
         max-height: calc(100vh - 56px);
-        /* SIN background, SIN border — solo círculos flotantes */
+        overflow: visible;
+        z-index: 100;
     }
 }
 
