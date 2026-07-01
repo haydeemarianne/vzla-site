@@ -1,27 +1,31 @@
 import MainLayout from '@/Layouts/MainLayout';
+import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 import { useForm } from '@inertiajs/react';
-import { FiMapPin } from 'react-icons/fi';
-import toast from 'react-hot-toast';
+import { Truck, MapPin } from 'lucide-react';
 
 const STATES = [
     'La Guaira (Vargas)', 'Distrito Capital', 'Miranda', 'Aragua', 'Carabobo',
-    'Anzoategui', 'Bolivar', 'Falcon', 'Guarico', 'Lara', 'Merida',
-    'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Tachira', 'Trujillo',
+    'Anzoátegui', 'Bolívar', 'Falcón', 'Guárico', 'Lara', 'Mérida',
+    'Monagas', 'Nueva Esparta', 'Portuguesa', 'Sucre', 'Táchira', 'Trujillo',
     'Yaracuy', 'Zulia', 'Amazonas', 'Apure', 'Barinas', 'Cojedes', 'Delta Amacuro',
 ];
 
 const ZONES = [
-    'La Guaira', 'Maiquetia', 'Catia La Mar', 'Naiguata', 'Caraballeda',
+    'La Guaira', 'Maiquetía', 'Catia La Mar', 'Naiguatá', 'Caraballeda',
     'Macuto', 'Caracas (centro)', 'Caracas (este)', 'Caracas (oeste)',
     'Los Teques', 'Guarenas / Guatire', 'Otra zona',
 ];
 
 const VEHICLE_OPTIONS = [
-    { value: 'moto',   label: 'Moto',      desc: 'Rapido, rutas estrechas' },
+    { value: 'moto',   label: 'Moto',      desc: 'Rápida, rutas estrechas' },
     { value: 'car',    label: 'Carro',     desc: 'Hasta 4 personas o carga liviana' },
     { value: 'pickup', label: 'Camioneta', desc: 'Carga media o grupos' },
-    { value: 'truck',  label: 'Camion',    desc: 'Carga pesada o voluminosa' },
+    { value: 'truck',  label: 'Camión',    desc: 'Carga pesada o voluminosa' },
 ];
+
+const CARD = { background: 'white', border: '1px solid #e9ebf1', borderRadius: 20, padding: '20px', display: 'flex', flexDirection: 'column', gap: 14 };
+const SEC  = { margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: '#7b8595' };
+const DIV  = { height: 1, background: '#f3f4f8' };
 
 export default function RegistrarConductor() {
     const { data, setData, post, processing, errors } = useForm({
@@ -36,112 +40,137 @@ export default function RegistrarConductor() {
 
     const toggleZone = (zone) => {
         setData('zones', data.zones.includes(zone)
-            ? data.zones.filter((z) => z !== zone)
+            ? data.zones.filter(z => z !== zone)
             : [...data.zones, zone]
         );
     };
 
     const submit = (e) => {
         e.preventDefault();
-        post('/transporte/registrar', {
-            onSuccess: () => toast.success('Registrado. Gracias por ofrecerte como conductor voluntario.'),
-        });
+        post('/transporte/registrar');
     };
-
-    const inputClass = 'w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white';
-    const labelClass = 'block text-sm font-semibold text-slate-700 mb-1';
 
     return (
         <MainLayout>
-            <div className="max-w-2xl mx-auto">
-                <div className="mb-5">
-                    <h1 className="text-2xl font-bold text-slate-900">Registrarme como conductor voluntario</h1>
-                    <p className="text-slate-500 text-sm mt-1">
-                        Tu vehiculo puede marcar la diferencia. Los solicitantes veran tu contacto y te llamaran directamente.
-                    </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, background: '#eef1fa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Truck size={20} color="#4263ac" strokeWidth={2}/>
+                    </div>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1a2230', letterSpacing: '-.5px' }}>
+                            Registrarme como conductor voluntario
+                        </h1>
+                        <p style={{ margin: 0, fontSize: 12.5, color: '#7b8595' }}>
+                            Tu vehículo puede marcar la diferencia. Los solicitantes verán tu contacto y te llamarán directamente.
+                        </p>
+                    </div>
                 </div>
 
-                <form onSubmit={submit} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-5">
+                <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div className="va-publish-grid">
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Tu nombre *</label>
-                            <input className={inputClass} value={data.name}
-                                onChange={(e) => setData('name', e.target.value)} />
-                            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                        {/* Card 1 — Datos personales */}
+                        <div style={CARD}>
+                            <p style={SEC}>Tus datos</p>
+                            <FloatInput
+                                label="Tu nombre completo *"
+                                value={data.name}
+                                error={errors.name}
+                                onChange={e => setData('name', e.target.value)}
+                            />
+                            <FloatInput
+                                label="Teléfono (WhatsApp) *"
+                                type="tel"
+                                value={data.phone}
+                                error={errors.phone}
+                                onChange={e => setData('phone', e.target.value)}
+                            />
+                            <div style={DIV}/>
+                            <p style={SEC}>Tipo de vehículo *</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                                {VEHICLE_OPTIONS.map(({ value, label, desc }) => {
+                                    const sel = data.vehicle_type === value;
+                                    return (
+                                        <button type="button" key={value} onClick={() => setData('vehicle_type', value)} style={{
+                                            padding: '10px 8px', borderRadius: 12, textAlign: 'left',
+                                            border: `1.5px solid ${sel ? '#4263ac' : '#e2e8f0'}`,
+                                            background: sel ? '#4263ac' : 'white',
+                                            cursor: 'pointer', transition: 'all .13s', fontFamily: 'inherit',
+                                        }}>
+                                            <p style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: sel ? 'white' : '#2b3340' }}>{label}</p>
+                                            <p style={{ margin: '3px 0 0', fontSize: 10, lineHeight: 1.3, color: sel ? 'rgba(255,255,255,.7)' : '#7b8595' }}>{desc}</p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
-                        <div>
-                            <label className={labelClass}>Telefono *</label>
-                            <input className={inputClass} value={data.phone}
-                                onChange={(e) => setData('phone', e.target.value)}
-                                placeholder="+58 412 000 0000" />
-                            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+
+                        {/* Card 2 — Zonas */}
+                        <div style={CARD}>
+                            <p style={SEC}>Zonas donde puedes operar</p>
+                            <p style={{ margin: '-6px 0 0', fontSize: 11.5, color: '#7b8595' }}>
+                                Selecciona todas las zonas a las que puedes llegar.
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+                                {ZONES.map(zone => {
+                                    const sel = data.zones.includes(zone);
+                                    return (
+                                        <button type="button" key={zone} onClick={() => toggleZone(zone)} style={{
+                                            display: 'flex', alignItems: 'center', gap: 5,
+                                            padding: '8px 10px', borderRadius: 11, textAlign: 'left',
+                                            border: `1.5px solid ${sel ? '#4263ac' : '#e2e8f0'}`,
+                                            background: sel ? '#4263ac' : 'white',
+                                            cursor: 'pointer', transition: 'all .13s', fontFamily: 'inherit',
+                                        }}>
+                                            <MapPin size={10} color={sel ? 'rgba(255,255,255,.8)' : '#94a3b8'} strokeWidth={2} style={{ flexShrink: 0 }}/>
+                                            <span style={{ fontSize: 11.5, fontWeight: 600, color: sel ? 'white' : '#475569' }}>{zone}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Card 3 — Capacidad + estado + notas */}
+                        <div style={CARD}>
+                            <p style={SEC}>Capacidad y disponibilidad</p>
+                            <FloatInput
+                                label="Capacidad aproximada"
+                                value={data.capacity}
+                                onChange={e => setData('capacity', e.target.value)}
+                            />
+                            <FloatSelect
+                                label="Estado base"
+                                value={data.state}
+                                onChange={e => setData('state', e.target.value)}
+                            >
+                                {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                            </FloatSelect>
+                            <div style={DIV}/>
+                            <p style={SEC}>Notas adicionales</p>
+                            <FloatTextarea
+                                label="Horario disponible, restricciones, condiciones especiales..."
+                                value={data.notes}
+                                rows={5}
+                                onChange={e => setData('notes', e.target.value)}
+                            />
                         </div>
                     </div>
 
-                    {/* Tipo de vehiculo */}
-                    <div>
-                        <label className={labelClass}>Tipo de vehiculo *</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            {VEHICLE_OPTIONS.map(({ value, label, desc }) => (
-                                <button type="button" key={value} onClick={() => setData('vehicle_type', value)}
-                                    className={`p-3 rounded-xl border text-left transition-all ${
-                                        data.vehicle_type === value
-                                            ? 'bg-blue-700 text-white border-blue-700'
-                                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
-                                    }`}>
-                                    <p className="font-semibold text-sm">{label}</p>
-                                    <p className={`text-[10px] mt-0.5 leading-tight ${data.vehicle_type === value ? 'text-blue-100' : 'text-slate-400'}`}>{desc}</p>
-                                </button>
-                            ))}
-                        </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button type="submit" disabled={processing} style={{
+                            display: 'flex', alignItems: 'center', gap: 7, padding: '11px 28px',
+                            borderRadius: 13, border: 'none', background: '#4263ac', color: 'white',
+                            fontSize: 14, fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer',
+                            fontFamily: 'inherit', opacity: processing ? .6 : 1,
+                            boxShadow: '0 4px 14px rgba(66,99,172,.28)',
+                        }}>
+                            <Truck size={15} color="white" strokeWidth={2}/>
+                            {processing ? 'Registrando...' : 'Registrarme como conductor voluntario'}
+                        </button>
                     </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Capacidad aproximada</label>
-                            <input className={inputClass} value={data.capacity}
-                                onChange={(e) => setData('capacity', e.target.value)}
-                                placeholder="Ej: 4 personas, 200 kg, 10 cajas..." />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Estado base</label>
-                            <select className={inputClass} value={data.state}
-                                onChange={(e) => setData('state', e.target.value)}>
-                                {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Zonas */}
-                    <div>
-                        <label className={labelClass}>Zonas donde puedes operar</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
-                            {ZONES.map((zone) => (
-                                <button type="button" key={zone} onClick={() => toggleZone(zone)}
-                                    className={`flex items-center gap-1.5 py-2 px-3 rounded-xl border text-sm font-medium transition-all ${
-                                        data.zones.includes(zone)
-                                            ? 'bg-blue-700 text-white border-blue-700'
-                                            : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300'
-                                    }`}>
-                                    <FiMapPin className="w-3 h-3 flex-shrink-0" /> {zone}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className={labelClass}>Notas adicionales</label>
-                        <textarea className={`${inputClass} resize-none`} rows={2}
-                            value={data.notes}
-                            onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="Horario disponible, restricciones, condiciones especiales..." />
-                    </div>
-
-                    <button type="submit" disabled={processing}
-                        className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors text-sm">
-                        {processing ? 'Registrando...' : 'Registrarme como conductor voluntario'}
-                    </button>
                 </form>
             </div>
         </MainLayout>

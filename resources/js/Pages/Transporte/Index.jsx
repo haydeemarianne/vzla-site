@@ -1,257 +1,259 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { Link, router } from '@inertiajs/react';
-import { FiTruck, FiPlus, FiMapPin, FiPhone, FiPackage, FiUsers, FiCheckCircle, FiClock } from 'react-icons/fi';
-import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { Truck, MapPin, Phone, Package, Users, CheckCircle, Clock, Plus } from 'lucide-react';
+
+// ─── Config ────────────────────────────────────────────────────────────────────
+
+const REQ_CARD_H = 172;
+const DRV_CARD_H = 120;
+const VISIBLE    = 4;
+
+const REQ_COLS = [
+    { key: 'open',      label: 'Abiertas',   color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
+    { key: 'taken',     label: 'En camino',  color: '#b45309', bg: '#fef3e2', dot: '#f59e0b' },
+    { key: 'completed', label: 'Completadas',color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
+];
+
+const DRV_COLS = [
+    { key: 'available', label: 'Disponibles', color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
+    { key: 'busy',      label: 'Ocupados',    color: '#b45309', bg: '#fef3e2', dot: '#f59e0b' },
+];
 
 const CARGO_LABEL = { supplies: 'Insumos', debris: 'Escombros', people: 'Personas' };
-const CARGO_ICON  = { supplies: FiPackage, debris: FiTruck, people: FiUsers };
+const CARGO_ICON  = { supplies: Package, debris: Truck, people: Users };
 
-const VEHICLE_LABEL = { moto: 'Moto', car: 'Carro', pickup: 'Camioneta', truck: 'Camion' };
-const AVAIL_CFG = {
-    available:   { label: 'Disponible', cls: 'bg-green-50 text-green-700 border border-green-200' },
-    busy:        { label: 'Ocupado',    cls: 'bg-amber-50 text-amber-700 border border-amber-200' },
-    unavailable: { label: 'No disponible', cls: 'bg-slate-100 text-slate-500 border border-slate-200' },
-};
+const VEHICLE_LABEL = { moto: 'Moto', car: 'Carro', pickup: 'Camioneta', truck: 'Camión' };
 
-const STATUS_CFG = {
-    open:      { label: 'Abierto',    cls: 'bg-blue-50 text-blue-700 border border-blue-200' },
-    taken:     { label: 'En camino',  cls: 'bg-amber-50 text-amber-700 border border-amber-200' },
-    completed: { label: 'Completado', cls: 'bg-green-50 text-green-700 border border-green-200' },
-};
+const PASTEL = ['#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf', '#e7dcf2'];
 
-const take = (id) => {
-    router.post(`/transporte/solicitudes/${id}/tomar`, {}, {
-        preserveScroll: true,
-        onSuccess: () => toast.success('Viaje tomado. Contacta al solicitante.'),
-    });
-};
+function initials(name) {
+    return (name ?? '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
+}
 
-const complete = (id) => {
-    router.post(`/transporte/solicitudes/${id}/completar`, {}, {
-        preserveScroll: true,
-        onSuccess: () => toast.success('¡Viaje completado! Gracias.'),
-    });
-};
+function fmtDate(d) {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('es-VE', { day: '2-digit', month: 'short' });
+}
 
-export default function TransporteIndex({ requests, drivers, filters, counts }) {
-    const activeTab = filters.tab || 'requests';
+// ─── Tarjeta solicitud ─────────────────────────────────────────────────────────
 
-    const switchTab = (tab) => {
-        router.get('/transporte', { tab }, { preserveScroll: true, replace: true });
+function RequestCard({ req }) {
+    const CargoIcon = CARGO_ICON[req.cargo_type] || Package;
+    const isUrgent  = req.urgency === 'urgent';
+    const days      = Math.floor((Date.now() - new Date(req.created_at)) / 86400000);
+
+    const takeReq     = () => router.post(`/transporte/solicitudes/${req.id}/tomar`,     {}, { preserveScroll: true });
+    const completeReq = () => router.post(`/transporte/solicitudes/${req.id}/completar`, {}, { preserveScroll: true });
+
+    return (
+        <div style={{
+            background: 'white', borderRadius: 12,
+            boxShadow: '0 1px 6px rgba(16,24,40,.06)',
+            padding: '10px 12px',
+            display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
+        }}>
+            {/* Tipo + urgencia */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 26, height: 26, borderRadius: 8, background: '#eef1fa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <CargoIcon size={12} color="#4263ac" strokeWidth={2}/>
+                </div>
+                <span style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a', flex: 1 }}>
+                    {CARGO_LABEL[req.cargo_type]}
+                </span>
+                {isUrgent && req.status === 'open' && (
+                    <span style={{ fontSize: 9.5, fontWeight: 700, background: '#fef3e2', color: '#b45309', padding: '2px 7px', borderRadius: 999, flexShrink: 0 }}>Urgente</span>
+                )}
+            </div>
+
+            {/* Descripción */}
+            {req.description && (
+                <p style={{ margin: 0, fontSize: 11, color: '#64748b', lineHeight: 1.4,
+                    display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {req.description}
+                </p>
+            )}
+
+            {/* Ruta */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#f8fafc', borderRadius: 8, padding: '5px 8px' }}>
+                <MapPin size={9} color="#94a3b8" strokeWidth={2} style={{ flexShrink: 0 }}/>
+                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.origin_zone}</span>
+                <span style={{ fontSize: 10, color: '#cbd5e1', flexShrink: 0 }}>→</span>
+                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.destination_zone}</span>
+            </div>
+
+            {/* Solicitante + fecha */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Phone size={9} color="#94a3b8" strokeWidth={2}/>
+                    <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>{req.requester_name}</span>
+                </div>
+                <span style={{ fontSize: 9.5, color: days > 3 ? '#CE6969' : '#94a3b8' }}>{days}d</span>
+            </div>
+
+            {/* Acción */}
+            {req.status === 'open' && (
+                <button onClick={takeReq} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                    padding: '6px', borderRadius: 9, background: '#0f172a', border: 'none',
+                    color: 'white', fontWeight: 700, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
+                    <Truck size={11} color="white" strokeWidth={2}/> Tomar viaje
+                </button>
+            )}
+            {req.status === 'taken' && (
+                <button onClick={completeReq} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                    padding: '6px', borderRadius: 9, background: '#16a34a', border: 'none',
+                    color: 'white', fontWeight: 700, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
+                    <CheckCircle size={11} color="white" strokeWidth={2}/> Marcar completado
+                </button>
+            )}
+            {req.status === 'completed' && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, fontSize: 10.5, color: '#16a34a', fontWeight: 600 }}>
+                    <CheckCircle size={10} color="#16a34a" strokeWidth={2}/> Completado {fmtDate(req.completed_at)}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Tarjeta conductor ─────────────────────────────────────────────────────────
+
+function DriverCard({ driver, idx }) {
+    const zones = Array.isArray(driver.zones) ? driver.zones : [];
+
+    return (
+        <div style={{
+            background: 'white', borderRadius: 12,
+            boxShadow: '0 1px 6px rgba(16,24,40,.06)',
+            padding: '10px 12px',
+            display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 30, height: 30, borderRadius: '50%', background: PASTEL[idx % PASTEL.length], flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#3a4250' }}>{initials(driver.name)}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{driver.name}</div>
+                    <span style={{ fontSize: 9.5, fontWeight: 700, color: '#4263ac', background: '#eef1fa', padding: '1px 6px', borderRadius: 999 }}>
+                        {VEHICLE_LABEL[driver.vehicle_type] || driver.vehicle_type}
+                    </span>
+                </div>
+            </div>
+
+            {zones.length > 0 && (
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <MapPin size={9} color="#94a3b8" strokeWidth={2}/>
+                    {zones.slice(0, 2).map(z => (
+                        <span key={z} style={{ fontSize: 9.5, fontWeight: 600, color: '#475569', background: '#f1f4f9', padding: '1px 6px', borderRadius: 4 }}>{z}</span>
+                    ))}
+                    {zones.length > 2 && <span style={{ fontSize: 9.5, color: '#94a3b8' }}>+{zones.length - 2}</span>}
+                </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Phone size={9} color="#94a3b8" strokeWidth={2}/>
+                <span style={{ fontSize: 10.5, color: '#64748b', fontWeight: 600 }}>{driver.phone}</span>
+            </div>
+        </div>
+    );
+}
+
+// ─── Columna ──────────────────────────────────────────────────────────────────
+
+function Column({ col, items, cardH, renderCard, emptyIcon: EmptyIcon, emptyLabel }) {
+    return (
+        <div style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 11px', background: col.bg, borderRadius: 11, flexShrink: 0 }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: col.dot, flexShrink: 0 }}/>
+                <span style={{ fontSize: 12, fontWeight: 700, color: col.color, flex: 1 }}>{col.label}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'white', background: col.color, minWidth: 20, height: 20, borderRadius: '50%', padding: '0 4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {items.length}
+                </span>
+            </div>
+            <div style={{
+                display: 'flex', flexDirection: 'column', gap: 8,
+                overflowY: 'auto', overflowX: 'hidden',
+                maxHeight: VISIBLE * cardH,
+                paddingRight: 2, flex: 1,
+                scrollbarWidth: 'thin', scrollbarColor: '#e2e8f0 transparent',
+            }}>
+                {items.length === 0 ? (
+                    <div style={{ background: 'white', borderRadius: 12, padding: '20px 13px', textAlign: 'center', boxShadow: '0 1px 5px rgba(16,24,40,.04)' }}>
+                        <EmptyIcon size={18} color="#e2e8f0" strokeWidth={2} style={{ display: 'block', margin: '0 auto 5px' }}/>
+                        <p style={{ fontSize: 11.5, color: '#cbd5e1', margin: 0, fontWeight: 500 }}>{emptyLabel}</p>
+                    </div>
+                ) : items.map((item, i) => renderCard(item, i))}
+            </div>
+        </div>
+    );
+}
+
+// ─── Página ───────────────────────────────────────────────────────────────────
+
+export default function TransporteIndex({ by_status, drivers }) {
+    const reqs = {
+        open:      by_status?.open      ?? [],
+        taken:     by_status?.taken     ?? [],
+        completed: by_status?.completed ?? [],
     };
+    const drvs = {
+        available: drivers?.available ?? [],
+        busy:      drivers?.busy      ?? [],
+    };
+
+    const totalReqs = reqs.open.length + reqs.taken.length + reqs.completed.length;
+    const totalDrvs = drvs.available.length + drvs.busy.length;
 
     return (
         <MainLayout>
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-                <div>
-                    <h1 className="text-xl font-bold text-slate-900">Transporte solidario</h1>
-                    <p className="text-slate-500 text-xs mt-0.5">Conductores voluntarios que mueven insumos, escombros o personas</p>
-                </div>
-                <div className="flex gap-2">
-                    <Link href="/transporte/registrar"
-                        className="flex items-center gap-1.5 border border-blue-700 text-blue-700 hover:bg-blue-50 text-sm font-semibold px-3 py-2.5 rounded-xl transition-colors">
-                        <FiTruck className="w-4 h-4" /> Soy conductor
-                    </Link>
-                    <Link href="/transporte/solicitar"
-                        className="flex items-center gap-1.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-3 py-2.5 rounded-xl transition-colors">
-                        <FiPlus className="w-4 h-4" /> Necesito transporte
-                    </Link>
-                </div>
-            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden', padding: '16px 0 0' }}>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-4 gap-2 mb-5">
-                {[
-                    { label: 'Solicitudes abiertas', value: counts.open,      color: 'text-blue-700' },
-                    { label: 'En camino',             value: counts.taken,     color: 'text-amber-600' },
-                    { label: 'Completados',           value: counts.completed, color: 'text-green-600' },
-                    { label: 'Conductores activos',   value: counts.drivers,   color: 'text-slate-700' },
-                ].map(({ label, value, color }) => (
-                    <div key={label} className="bg-white border border-slate-200 rounded-2xl p-3 text-center">
-                        <p className={`text-xl font-bold ${color}`}>{value}</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">{label}</p>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '0 20px', marginBottom: 14, flexShrink: 0, flexWrap: 'wrap', gap: 10 }}>
+                    <div>
+                        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px', color: '#1e293b' }}>Transporte solidario</h1>
+                        <p style={{ margin: '3px 0 0', fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
+                            {reqs.open.length} solicitud{reqs.open.length !== 1 ? 'es' : ''} abierta{reqs.open.length !== 1 ? 's' : ''} · {drvs.available.length} conductor{drvs.available.length !== 1 ? 'es' : ''} disponible{drvs.available.length !== 1 ? 's' : ''}
+                        </p>
                     </div>
-                ))}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        <Link href="/transporte/solicitar" style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#4263ac', color: 'white', fontSize: 12, fontWeight: 700, padding: '8px 13px', borderRadius: 11, textDecoration: 'none', flexShrink: 0 }}>
+                            <Plus size={12} color="white" strokeWidth={2.5}/> Necesito transporte
+                        </Link>
+                        <Link href="/transporte/registrar" style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'white', color: '#4263ac', fontSize: 12, fontWeight: 700, padding: '8px 13px', borderRadius: 11, textDecoration: 'none', flexShrink: 0, border: '1.5px solid #4263ac' }}>
+                            <Truck size={12} color="#4263ac" strokeWidth={2.5}/> Soy conductor
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Kanban */}
+                <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '2px 20px 20px', flex: 1, alignItems: 'flex-start', scrollbarWidth: 'none' }}>
+
+                    {REQ_COLS.map(col => (
+                        <Column key={col.key} col={col} items={reqs[col.key]} cardH={REQ_CARD_H}
+                            renderCard={(item) => <RequestCard key={item.id} req={item}/>}
+                            emptyIcon={Truck} emptyLabel="Sin solicitudes"
+                        />
+                    ))}
+
+                    <div style={{ width: 1, flexShrink: 0, alignSelf: 'stretch', background: '#e2e8f0', margin: '0 6px' }}/>
+
+                    {DRV_COLS.map(col => (
+                        <Column key={col.key} col={col} items={drvs[col.key]} cardH={DRV_CARD_H}
+                            renderCard={(item, i) => <DriverCard key={item.id} driver={item} idx={i}/>}
+                            emptyIcon={Truck} emptyLabel="Ninguno"
+                        />
+                    ))}
+                </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl mb-5 w-fit">
-                {[
-                    { key: 'requests', label: 'Solicitudes' },
-                    { key: 'drivers',  label: 'Conductores' },
-                ].map(({ key, label }) => (
-                    <button key={key} onClick={() => switchTab(key)}
-                        className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                            activeTab === key
-                                ? 'bg-white text-slate-900 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700'
-                        }`}>
-                        {label}
-                    </button>
-                ))}
-            </div>
-
-            {/* Solicitudes */}
-            {activeTab === 'requests' && (
-                <>
-                    {requests.data.length === 0 ? (
-                        <div className="text-center py-14 text-slate-400">
-                            <FiTruck className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                            <p className="font-medium text-slate-600 text-sm">No hay solicitudes abiertas</p>
-                            <Link href="/transporte/solicitar"
-                                className="mt-3 inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                                <FiPlus className="w-4 h-4" /> Publicar solicitud
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="space-y-3 mb-6">
-                            {requests.data.map((req, i) => {
-                                const CargoIcon = CARGO_ICON[req.cargo_type] || FiPackage;
-                                const statusCfg = STATUS_CFG[req.status] || STATUS_CFG.open;
-                                const isUrgent  = req.urgency === 'urgent';
-
-                                return (
-                                    <motion.div key={req.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.4, ease: 'easeOut', delay: i * 0.06 }}
-                                        className={`bg-white border rounded-2xl p-4 ${isUrgent && req.status === 'open' ? 'border-amber-200' : 'border-slate-200'}`}>
-
-                                        <div className="flex items-start justify-between gap-3 mb-3">
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                                    <CargoIcon className="w-4 h-4 text-blue-700" />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="font-bold text-slate-900 text-sm leading-tight">
-                                                        {CARGO_LABEL[req.cargo_type]}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500 truncate">{req.description}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-1.5 flex-shrink-0">
-                                                {isUrgent && req.status === 'open' && (
-                                                    <span className="text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
-                                                        Urgente
-                                                    </span>
-                                                )}
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusCfg.cls}`}>
-                                                    {statusCfg.label}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Ruta */}
-                                        <div className="flex items-center gap-2 mb-3 text-xs text-slate-600 bg-slate-50 rounded-xl px-3 py-2">
-                                            <FiMapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                                            <span className="truncate font-medium">{req.origin_zone}</span>
-                                            <span className="text-slate-400 flex-shrink-0">→</span>
-                                            <span className="truncate font-medium">{req.destination_zone}</span>
-                                        </div>
-
-                                        {req.notes && (
-                                            <p className="text-xs text-slate-500 mb-3 line-clamp-1">{req.notes}</p>
-                                        )}
-
-                                        <div className="flex items-center justify-between">
-                                            <a href={`tel:${req.requester_phone}`}
-                                                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 transition-colors">
-                                                <FiPhone className="w-3.5 h-3.5" />
-                                                {req.requester_name} · {req.requester_phone}
-                                            </a>
-
-                                            {req.status === 'open' && (
-                                                <button onClick={() => take(req.id)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 rounded-lg transition-colors">
-                                                    <FiTruck className="w-3.5 h-3.5" /> Tomar viaje
-                                                </button>
-                                            )}
-                                            {req.status === 'taken' && (
-                                                <button onClick={() => complete(req.id)}
-                                                    className="flex items-center gap-1.5 text-xs font-semibold bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg transition-colors">
-                                                    <FiCheckCircle className="w-3.5 h-3.5" /> Completar
-                                                </button>
-                                            )}
-                                            {req.status === 'completed' && (
-                                                <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
-                                                    <FiCheckCircle className="w-3.5 h-3.5" /> Completado
-                                                </span>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </>
-            )}
-
-            {/* Conductores */}
-            {activeTab === 'drivers' && (
-                <>
-                    {drivers.data.length === 0 ? (
-                        <div className="text-center py-14 text-slate-400">
-                            <FiTruck className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                            <p className="font-medium text-slate-600 text-sm">No hay conductores registrados</p>
-                            <Link href="/transporte/registrar"
-                                className="mt-3 inline-flex items-center gap-2 border border-blue-700 text-blue-700 hover:bg-blue-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                                <FiTruck className="w-4 h-4" /> Registrarme
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-                            {drivers.data.map((driver, i) => {
-                                const availCfg = AVAIL_CFG[driver.availability] || AVAIL_CFG.available;
-                                return (
-                                    <motion.div key={driver.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.4, ease: 'easeOut', delay: i * 0.06 }}
-                                        className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col">
-
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                                <FiTruck className="w-4 h-4 text-slate-500" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 text-sm truncate">{driver.name}</p>
-                                                <p className="text-xs text-slate-500">{VEHICLE_LABEL[driver.vehicle_type]}</p>
-                                            </div>
-                                        </div>
-
-                                        {driver.capacity && (
-                                            <p className="text-xs text-slate-500 mb-2">Capacidad: {driver.capacity}</p>
-                                        )}
-
-                                        {driver.zones?.length > 0 && (
-                                            <div className="flex flex-wrap gap-1 mb-3">
-                                                {driver.zones.map((zone) => (
-                                                    <span key={zone}
-                                                        className="flex items-center gap-1 text-[10px] bg-slate-50 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-full">
-                                                        <FiMapPin className="w-2.5 h-2.5" /> {zone}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <div className="border-t border-slate-100 pt-3 mt-auto flex items-center justify-between">
-                                            <a href={`tel:${driver.phone}`}
-                                                className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-blue-700 transition-colors">
-                                                <FiPhone className="w-3.5 h-3.5" /> {driver.phone}
-                                            </a>
-                                            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${availCfg.cls}`}>
-                                                {availCfg.label}
-                                            </span>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </>
-            )}
+            <style>{`
+                div::-webkit-scrollbar { width: 4px; height: 4px; }
+                div::-webkit-scrollbar-track { background: transparent; }
+                div::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+            `}</style>
         </MainLayout>
     );
 }

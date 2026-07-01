@@ -9,31 +9,17 @@ use Inertia\Inertia;
 
 class TransportController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $tab = in_array($request->tab, ['requests', 'drivers']) ? $request->tab : 'requests';
-
-        $requests = TransportRequest::when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->cargo, fn($q) => $q->where('cargo_type', $request->cargo))
-            ->orderByRaw("FIELD(urgency,'urgent','normal')")
-            ->orderByRaw("FIELD(status,'open','taken','completed')")
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
-
-        $drivers = TransportDriver::orderByRaw("FIELD(availability,'available','busy','unavailable')")
-            ->latest()
-            ->paginate(20);
-
         return Inertia::render('Transporte/Index', [
-            'requests' => $requests,
-            'drivers'  => $drivers,
-            'filters'  => $request->only(['tab', 'status', 'cargo']),
-            'counts'   => [
-                'open'      => TransportRequest::open()->count(),
-                'taken'     => TransportRequest::taken()->count(),
-                'completed' => TransportRequest::completed()->count(),
-                'drivers'   => TransportDriver::available()->count(),
+            'by_status' => [
+                'open'      => TransportRequest::where('status', 'open')->orderByRaw("FIELD(urgency,'urgent','normal')")->latest()->get(),
+                'taken'     => TransportRequest::where('status', 'taken')->latest()->get(),
+                'completed' => TransportRequest::where('status', 'completed')->latest()->get(),
+            ],
+            'drivers' => [
+                'available' => TransportDriver::where('availability', 'available')->latest()->get(),
+                'busy'      => TransportDriver::where('availability', 'busy')->latest()->get(),
             ],
         ]);
     }

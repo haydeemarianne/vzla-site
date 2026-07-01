@@ -1,1 +1,0 @@
-import{c}from"./heart-ClfLtPBu.js";const e=[["path",{d:"M21.801 10A10 10 0 1 1 17 3.335",key:"yps3ct"}],["path",{d:"m9 11 3 3L22 4",key:"1pflzl"}]],r=c("circle-check-big",e);const o=[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}]],t=c("circle",o);export{r as C,t as a};
