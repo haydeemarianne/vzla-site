@@ -5,7 +5,8 @@ import {
     ArrowLeft, Check, CheckCircle, Circle, Phone, MessageCircle,
     Utensils, Droplets, Pill, Shirt, Home, Baby, Wrench,
     FileText, Package, MapPin, Users, Clock, User, Lock, ShieldAlert,
-    Heart, UserCheck, Hourglass,
+    Heart, UserCheck, Hourglass, Stethoscope, Hammer,
+    Truck, Zap, SmilePlus, Wind,
 } from 'lucide-react';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -15,19 +16,33 @@ const DIV  = { height:1, background:'#f3f4f8', margin:'14px 0' };
 
 // ─── Necesidades ──────────────────────────────────────────────────────────────
 const NEED_META = {
-    food:      { label:'Alimentos',    Icon:Utensils, bg:'#fef3e2', icon:'#b45309', urgency:'Crítica',  ubg:'#fef3e2', ucol:'#b45309' },
-    water:     { label:'Agua',         Icon:Droplets, bg:'#e0f2fe', icon:'#0369a1', urgency:'Crítica',  ubg:'#fef3e2', ucol:'#b45309' },
-    medicine:  { label:'Medicamentos', Icon:Pill,     bg:'#fce7f3', icon:'#9d174d', urgency:'Crítica',  ubg:'#fef3e2', ucol:'#b45309' },
-    shelter:   { label:'Refugio',      Icon:Home,     bg:'#dcfce7', icon:'#15803d', urgency:'Alta',     ubg:'#fef9c3', ucol:'#92600e' },
-    clothing:  { label:'Ropa',         Icon:Shirt,    bg:'#f3e8ff', icon:'#7e22ce', urgency:'Alta',     ubg:'#fef9c3', ucol:'#92600e' },
-    baby:      { label:'Bebé',         Icon:Baby,     bg:'#fef9c3', icon:'#92600e', urgency:'Crítica',  ubg:'#fef3e2', ucol:'#b45309' },
-    tools:     { label:'Herramientas', Icon:Wrench,   bg:'#f1f5f9', icon:'#475569', urgency:'Normal',   ubg:'#f1f4f9', ucol:'#64748b' },
-    documents: { label:'Documentos',  Icon:FileText, bg:'#eff6ff', icon:'#1d4ed8', urgency:'Normal',   ubg:'#f1f4f9', ucol:'#64748b' },
-    furniture: { label:'Mobiliario',  Icon:Package,  bg:'#f8fafc', icon:'#94a3b8', urgency:'Normal',   ubg:'#f1f4f9', ucol:'#64748b' },
-    other:     { label:'Otro',         Icon:Package,  bg:'#f8fafc', icon:'#64748b', urgency:'Normal',   ubg:'#f1f4f9', ucol:'#64748b' },
+    food:         { label:'Alimentos',          Icon:Utensils,    bg:'#fef3e2', icon:'#b45309', urgency:'Crítica', ubg:'#fef3e2', ucol:'#b45309' },
+    water:        { label:'Agua',               Icon:Droplets,    bg:'#e0f2fe', icon:'#0369a1', urgency:'Crítica', ubg:'#fef3e2', ucol:'#b45309' },
+    medicine:     { label:'Medicamentos',       Icon:Pill,        bg:'#fce7f3', icon:'#9d174d', urgency:'Crítica', ubg:'#fef3e2', ucol:'#b45309' },
+    medical_care: { label:'Atención médica',    Icon:Stethoscope, bg:'#fce7f3', icon:'#be185d', urgency:'Crítica', ubg:'#fef3e2', ucol:'#b45309' },
+    shelter:      { label:'Refugio',            Icon:Home,        bg:'#dcfce7', icon:'#15803d', urgency:'Alta',    ubg:'#fef9c3', ucol:'#92600e' },
+    clothing:     { label:'Ropa',               Icon:Shirt,       bg:'#f3e8ff', icon:'#7e22ce', urgency:'Alta',    ubg:'#fef9c3', ucol:'#92600e' },
+    hygiene:      { label:'Higiene personal',   Icon:Wind,        bg:'#f0fdf4', icon:'#15803d', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
+    baby:         { label:'Artículos de bebé',  Icon:Baby,        bg:'#fef9c3', icon:'#92600e', urgency:'Crítica', ubg:'#fef3e2', ucol:'#b45309' },
+    construction: { label:'Materiales',         Icon:Hammer,      bg:'#fef3e2', icon:'#92400e', urgency:'Alta',    ubg:'#fef9c3', ucol:'#92600e' },
+    cleaning:     { label:'Limpieza',           Icon:Wrench,      bg:'#f0fdf4', icon:'#0f766e', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
+    transport:    { label:'Transporte',         Icon:Truck,       bg:'#eff6ff', icon:'#1d4ed8', urgency:'Alta',    ubg:'#fef9c3', ucol:'#92600e' },
+    electricity:  { label:'Electricidad',       Icon:Zap,         bg:'#fef9c3', icon:'#a16207', urgency:'Alta',    ubg:'#fef9c3', ucol:'#92600e' },
+    tools:        { label:'Herramientas',       Icon:Wrench,      bg:'#f1f5f9', icon:'#475569', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
+    documents:    { label:'Documentos',         Icon:FileText,    bg:'#eff6ff', icon:'#1d4ed8', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
+    furniture:    { label:'Mobiliario',         Icon:Package,     bg:'#f8fafc', icon:'#94a3b8', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
+    emotional:    { label:'Apoyo emocional',    Icon:SmilePlus,   bg:'#fdf2f8', icon:'#9d174d', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
+    other:        { label:'Otro',               Icon:Package,     bg:'#f8fafc', icon:'#64748b', urgency:'Normal',  ubg:'#f1f4f9', ucol:'#64748b' },
 };
 
-const NEED_LABEL = { food:'Alimentación', water:'Agua', medicine:'Medicamentos', clothing:'Ropa', furniture:'Mobiliario', baby:'Bebé', tools:'Herramientas', documents:'Documentos', shelter:'Refugio', other:'Otro' };
+const NEED_LABEL = {
+    food:'Alimentación', water:'Agua', medicine:'Medicamentos', medical_care:'Atención médica',
+    shelter:'Refugio', clothing:'Ropa', hygiene:'Higiene personal', baby:'Artículos de bebé',
+    construction:'Materiales de construcción', cleaning:'Limpieza y desinfección',
+    transport:'Transporte', electricity:'Electricidad/planta',
+    tools:'Herramientas', documents:'Documentos', furniture:'Mobiliario',
+    emotional:'Apoyo emocional', other:'Otro',
+};
 
 const STATUS_MAP = {
     open:      { label:'Necesita ayuda', bg:'#fef3e2', col:'#b45309' },
@@ -321,7 +336,7 @@ export default function CasosShow({ supportCase, tasks, adoption }) {
                                     <div style={{ fontSize:11, color:'#b45309' }}>{adoption.volunteer_name} · pendiente de aprobación</div>
                                 </div>
                             </div>
-                        ) : supportCase.status === 'open' || supportCase.status === 'in_review' ? (
+                        ) : supportCase.validation_status === 'approved' && (supportCase.status === 'open' || supportCase.status === 'in_review') ? (
                             <Link href={`/casos/${supportCase.id}/apadrinar`} style={{
                                 display:'flex', alignItems:'center', justifyContent:'center', gap:8,
                                 padding:'11px 16px', borderRadius:14,
@@ -332,6 +347,13 @@ export default function CasosShow({ supportCase, tasks, adoption }) {
                                 <Heart size={14} fill="white" color="white" strokeWidth={0}/>
                                 Quiero ser padrino de este caso
                             </Link>
+                        ) : supportCase.validation_status === 'pending' ? (
+                            <div style={{ background:'#f8fafc', border:'1px solid #e6e9f0', borderRadius:14, padding:'12px 14px', display:'flex', alignItems:'center', gap:10 }}>
+                                <Hourglass size={15} color="#94a3b8" strokeWidth={2} style={{ flexShrink:0 }}/>
+                                <div style={{ fontSize:12, fontWeight:600, color:'#64748b' }}>
+                                    Este caso está siendo revisado por el equipo.
+                                </div>
+                            </div>
                         ) : null}
 
                         {/* Info coordinadores */}

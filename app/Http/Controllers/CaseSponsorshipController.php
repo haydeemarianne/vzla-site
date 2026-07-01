@@ -22,6 +22,10 @@ class CaseSponsorshipController extends Controller
 
     public function store(Request $request, SupportCase $supportCase)
     {
+        if ($supportCase->validation_status !== 'approved') {
+            abort(403, 'Este caso aún no ha sido validado.');
+        }
+
         $request->validate([
             'name'       => 'required|string|max:200',
             'cedula'     => 'required|string|max:30',

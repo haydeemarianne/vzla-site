@@ -8,16 +8,23 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 const NEED_TASK_TITLES = [
-    'food'      => 'Llevar alimentos',
-    'water'     => 'Proveer agua potable',
-    'medicine'  => 'Conseguir medicamentos',
-    'shelter'   => 'Apoyo con refugio',
-    'clothing'  => 'Llevar ropa y calzado',
-    'baby'      => 'Artículos para bebé',
-    'tools'     => 'Conseguir herramientas',
-    'documents' => 'Apoyo con documentos',
-    'furniture' => 'Conseguir mobiliario',
-    'other'     => 'Apoyo adicional',
+    'food'         => 'Llevar alimentos',
+    'water'        => 'Proveer agua potable',
+    'medicine'     => 'Conseguir medicamentos',
+    'medical_care' => 'Gestionar atención médica',
+    'shelter'      => 'Apoyo con refugio',
+    'clothing'     => 'Llevar ropa y calzado',
+    'hygiene'      => 'Proveer artículos de higiene',
+    'baby'         => 'Artículos para bebé',
+    'construction' => 'Conseguir materiales de construcción',
+    'cleaning'     => 'Apoyar con limpieza y desinfección',
+    'transport'    => 'Gestionar transporte',
+    'electricity'  => 'Apoyo con electricidad o planta',
+    'tools'        => 'Conseguir herramientas',
+    'documents'    => 'Apoyo con documentos',
+    'furniture'    => 'Conseguir mobiliario',
+    'emotional'    => 'Brindar apoyo emocional',
+    'other'        => 'Apoyo adicional',
 ];
 
 class SupportCaseController extends Controller
@@ -78,7 +85,7 @@ class SupportCaseController extends Controller
             'has_risk'          => $request->boolean('has_risk'),
             'contact_phone'     => $request->contact_phone,
             'photo_path'        => $photoPath,
-            'validation_status' => 'approved',
+            'validation_status' => 'pending',
             'status'            => 'open',
             'is_anonymous'      => false,
         ]);
