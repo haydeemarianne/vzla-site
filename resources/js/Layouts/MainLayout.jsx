@@ -49,12 +49,13 @@ const isActive = (href, url) =>
 
 function sharePage() {
     const url = window.location.href;
+    const text = 'Plataforma de ayuda humanitaria post-terremoto Venezuela 2026';
     if (navigator.share) {
-        navigator.share({ url, title: 'Venezuela Ayuda' }).catch(() => {});
+        navigator.share({ url, title: 'Venezuela Site', text }).catch(() => {});
     } else {
         navigator.clipboard?.writeText(url)
-            .then(() => alert('Enlace copiado'))
-            .catch(() => {});
+            .then(() => alert('Enlace copiado al portapapeles'))
+            .catch(() => alert(url));
     }
 }
 
@@ -191,6 +192,13 @@ export default function MainLayout({ children }) {
                         >
                             <Search size={17} color="#5b6677" strokeWidth={1.9} />
                         </HeaderCircle>
+
+                        {/* Compartir — solo mobile */}
+                        <span className="va-mobile-only" style={{ display: 'flex' }}>
+                            <HeaderCircle title="Compartir esta página" onClick={sharePage}>
+                                <Share2 size={17} color="#5b6677" strokeWidth={1.9} />
+                            </HeaderCircle>
+                        </span>
 
                     </div>
 

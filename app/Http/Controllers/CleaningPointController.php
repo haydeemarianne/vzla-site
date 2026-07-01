@@ -69,9 +69,9 @@ class CleaningPointController extends Controller
     {
         $data = $request->validate([
             'zone_name'      => 'required|string|max:200',
-            'city'           => 'nullable|string|max:100',
+            'city'           => 'required|string|max:100',
             'state'          => 'nullable|string|max:100',
-            'address'        => 'nullable|string|max:300',
+            'address'        => 'required|string|max:300',
             'type'           => 'required|in:domestic,debris,both',
             'volume'         => 'required|in:low,medium,high',
             'photo'          => 'required|image|max:10240',

@@ -106,8 +106,9 @@ export default function ReportarLimpieza() {
                                 onChange={e => setData('zone_name', e.target.value)}
                             />
                             <FloatInput
-                                label="Ciudad / Municipio"
+                                label="Ciudad / Municipio *"
                                 value={data.city}
+                                error={errors.city}
                                 onChange={e => setData('city', e.target.value)}
                             />
                             <FloatSelect
@@ -118,8 +119,9 @@ export default function ReportarLimpieza() {
                                 {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                             </FloatSelect>
                             <FloatInput
-                                label="Dirección de referencia"
+                                label="Dirección de referencia *"
                                 value={data.address}
+                                error={errors.address}
                                 onChange={e => setData('address', e.target.value)}
                             />
 
