@@ -16,7 +16,7 @@ if (! hash_equals($secret, $authHeader)) {
 
 // Ejecutar deploy en background y devolver respuesta rápido
 $logFile  = '/home/vzla.site/deploy.log';
-$deployScript = '/home/vzla.site/deploy.sh';
+$deployScript = '/home/vzla.site/public_html/deploy.sh';
 
 if (! file_exists($deployScript)) {
     http_response_code(500);
