@@ -37,85 +37,84 @@ function FileIcon({ fileType, is3d }) {
 }
 
 function MaterialCard({ material }) {
-    const pi = material.print_instructions || {};
+    const pi       = material.print_instructions || {};
     const hasPrint = !material.is_3d && (pi.size || pi.color || pi.paper || pi.quantity || pi.notes);
+    const ig       = material.contributor_instagram;
+    const phone    = material.contributor_phone;
 
     return (
-        <div style={{ background: 'white', border: '1px solid #e9ebf1', borderRadius: 16, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ background: 'white', border: '1px solid #e9ebf1', borderRadius: 14, padding: '12px 13px', display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-            {/* Icono + título */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: '#f8fafc', border: '1px solid #e9ebf1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {/* Header: icono + título + Instagram prioritario */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: '#f8fafc', border: '1px solid #e9ebf1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <FileIcon fileType={material.file_type} is3d={material.is_3d}/>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>{material.title}</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', lineHeight: 1.3,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {material.title}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: '#94a3b8', marginTop: 1 }}>
                         {material.organization || material.uploaded_by}
                     </div>
                 </div>
+                {/* Instagram — prioridad máxima, arriba a la derecha */}
+                {ig && (
+                    <a href={`https://instagram.com/${ig.replace('@','')}`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', gap: 3, background: '#fdf2f8', color: '#9d174d', fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, textDecoration: 'none', flexShrink: 0, border: '1px solid #fce7f3' }}>
+                        <AtSign size={9} color="#9d174d" strokeWidth={2}/> {ig.replace('@','')}
+                    </a>
+                )}
             </div>
 
             {/* Descripción */}
             {material.description && (
-                <p style={{ margin: 0, fontSize: 11.5, color: '#475569', lineHeight: 1.5,
+                <p style={{ margin: 0, fontSize: 11, color: '#64748b', lineHeight: 1.5,
                     display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {material.description}
                 </p>
             )}
 
-            {/* Instrucciones de impresión */}
+            {/* Instrucciones de impresión (compactas) */}
             {hasPrint && (
-                <div style={{ background: '#f8fafc', borderRadius: 10, padding: '9px 11px', border: '1px solid #e9ebf1', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <p style={{ ...SEC, marginBottom: 4 }}>Instrucciones de impresión</p>
-                    {pi.size     && <span style={{ fontSize: 11, color: '#475569' }}>Tamaño: <strong>{pi.size}</strong></span>}
-                    {pi.color    && <span style={{ fontSize: 11, color: '#475569' }}>Color: <strong>{pi.color}</strong></span>}
-                    {pi.paper    && <span style={{ fontSize: 11, color: '#475569' }}>Papel: <strong>{pi.paper}</strong></span>}
-                    {pi.quantity && <span style={{ fontSize: 11, color: '#475569' }}>Cantidad: <strong>{pi.quantity}</strong></span>}
-                    {pi.notes    && <span style={{ fontSize: 10.5, color: '#94a3b8', fontStyle: 'italic' }}>{pi.notes}</span>}
+                <div style={{ background: '#f8fafc', borderRadius: 8, padding: '7px 10px', border: '1px solid #e9ebf1', display: 'flex', flexWrap: 'wrap', gap: '3px 12px' }}>
+                    {pi.size     && <span style={{ fontSize: 10.5, color: '#475569' }}>📐 {pi.size}</span>}
+                    {pi.color    && <span style={{ fontSize: 10.5, color: '#475569' }}>🎨 {pi.color}</span>}
+                    {pi.paper    && <span style={{ fontSize: 10.5, color: '#475569' }}>{pi.paper}</span>}
+                    {pi.quantity && <span style={{ fontSize: 10.5, color: '#475569' }}>×{pi.quantity}</span>}
                 </div>
             )}
 
             {/* Info 3D */}
             {material.is_3d && (
-                <div style={{ background: '#eef1fa', borderRadius: 10, padding: '9px 11px', border: '1px solid #d6dffa' }}>
-                    <p style={{ margin: 0, fontSize: 11, color: '#4263ac', fontWeight: 700 }}>
-                        Archivo 3D — {material.file_type?.toUpperCase()}
-                    </p>
-                    <p style={{ margin: '3px 0 0', fontSize: 10.5, color: '#4263ac', opacity: .8 }}>
-                        Contacta al contribuidor para coordinar la producción.
-                    </p>
+                <div style={{ background: '#eef1fa', borderRadius: 8, padding: '6px 10px', border: '1px solid #d6dffa' }}>
+                    <span style={{ fontSize: 10.5, color: '#4263ac', fontWeight: 700 }}>3D · {material.file_type?.toUpperCase()}</span>
+                    <span style={{ fontSize: 10.5, color: '#4263ac', opacity: .7 }}> — coordina con el contribuidor</span>
                 </div>
             )}
 
             {/* Footer */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 8, borderTop: '1px solid #f1f4f9', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    {material.contributor_instagram && (
-                        <a href={`https://instagram.com/${material.contributor_instagram.replace('@','')}`}
-                            target="_blank" rel="noopener noreferrer"
-                            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10.5, color: '#64748b', textDecoration: 'none' }}>
-                            <AtSign size={10} strokeWidth={2}/> {material.contributor_instagram}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 6, borderTop: '1px solid #f1f4f9', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {phone && (
+                        <a href={`tel:${phone}`} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10.5, color: '#64748b', textDecoration: 'none' }}>
+                            <Phone size={9} strokeWidth={2}/> {phone}
                         </a>
                     )}
-                    {material.contributor_phone && (
-                        <a href={`tel:${material.contributor_phone}`}
-                            style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10.5, color: '#64748b', textDecoration: 'none' }}>
-                            <Phone size={10} strokeWidth={2}/> {material.contributor_phone}
-                        </a>
-                    )}
-                    {!material.contributor_instagram && !material.contributor_phone && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#cbd5e1' }}>
-                            <Download size={10} strokeWidth={2}/> {material.download_count} descargas
+                    {!ig && !phone && (
+                        <span style={{ fontSize: 10, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Download size={9} strokeWidth={2}/> {material.download_count}
                         </span>
                     )}
                 </div>
                 <a href={`/materiales/${material.id}/descargar`} style={{
-                    display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
-                    background: '#4263ac', color: 'white', fontSize: 11.5, fontWeight: 700,
-                    padding: '6px 12px', borderRadius: 10, textDecoration: 'none',
+                    display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                    background: '#4263ac', color: 'white', fontSize: 11, fontWeight: 700,
+                    padding: '5px 11px', borderRadius: 9, textDecoration: 'none',
                 }}>
-                    <Download size={11} color="white" strokeWidth={2}/> Descargar
+                    <Download size={10} color="white" strokeWidth={2}/> Descargar
                 </a>
             </div>
         </div>
