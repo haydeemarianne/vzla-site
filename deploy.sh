@@ -4,6 +4,7 @@ set -e
 cd /home/vzla.site/public_html
 
 echo "==> Pull..."
+git reset --hard HEAD
 git pull origin main
 
 echo "==> Composer..."
