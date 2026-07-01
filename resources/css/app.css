@@ -111,9 +111,9 @@
 .va-sidebar-btn[data-tip]::after {
     content: attr(data-tip);
     position: absolute;
-    left: calc(100% + 12px);
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
     background: #0f172a;
     color: #fff;
     font-size: 12px;
