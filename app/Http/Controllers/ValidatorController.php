@@ -97,7 +97,7 @@ class ValidatorController extends Controller
     private function allowedEditFields(string $type): array
     {
         return match ($type) {
-            'support_case'      => ['family_name','zone','state','contact_phone','people_count','case_type','description'],
+            'support_case'      => ['family_name','zone','city','state','contact_phone','people_count','description'],
             'engineer'          => ['name','phone','email','license_number','specialty','notes'],
             'material'          => ['title','category','subcategory','uploaded_by','organization','contact','description'],
             'cleaning'          => ['zone_name','city','state','address','reporter_name','reporter_phone','notes'],

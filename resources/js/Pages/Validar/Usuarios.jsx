@@ -1,7 +1,7 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, X, Check, Trash2, UserCog, ShieldCheck, Shield } from 'lucide-react';
+import { Plus, X, Check, Trash2, Eye, EyeOff } from 'lucide-react';
 
 const ROLE_CFG = {
     super_admin: { label:'Super Admin', bg:'#0f172a', color:'white'  },
@@ -23,10 +23,11 @@ export default function Usuarios({ users = [], admin_role, admin_name }) {
         ? [{ v:'admin', label:'Admin' }, { v:'validator', label:'Validador' }]
         : [{ v:'validator', label:'Validador' }];
 
-    const [showForm, setShowForm] = useState(false);
-    const [form, setForm]         = useState({ name:'', email:'', password:'', role: allowedRoles[0]?.v || 'validator' });
-    const [sending, setSend]      = useState(false);
-    const [confirm, setConfirm]   = useState(null);
+    const [showForm, setShowForm]   = useState(false);
+    const [form, setForm]           = useState({ name:'', email:'', password:'', role: allowedRoles[0]?.v || 'validator' });
+    const [sending, setSend]        = useState(false);
+    const [confirm, setConfirm]     = useState(null);
+    const [showPass, setShowPass]   = useState(false);
 
     const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -98,7 +99,26 @@ export default function Usuarios({ users = [], admin_role, admin_name }) {
                             </div>
                             <div>
                                 <label style={{ fontSize:11, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>Contraseña</label>
-                                <input type="password" value={form.password} onChange={e => set('password', e.target.value)} style={INPUT} placeholder="Mínimo 6 caracteres"/>
+                                <div style={{ position:'relative' }}>
+                                    <input
+                                        type={showPass ? 'text' : 'password'}
+                                        value={form.password}
+                                        onChange={e => set('password', e.target.value)}
+                                        style={{ ...INPUT, paddingRight:38 }}
+                                        placeholder="Mínimo 6 caracteres"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPass(s => !s)}
+                                        style={{
+                                            position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
+                                            background:'none', border:'none', cursor:'pointer', padding:2,
+                                            color:'#94a3b8', display:'flex', alignItems:'center',
+                                        }}
+                                    >
+                                        {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
+                                    </button>
+                                </div>
                             </div>
                             <div>
                                 <label style={{ fontSize:11, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>Rol</label>

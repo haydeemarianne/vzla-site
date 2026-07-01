@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { Check, MapPin, Phone, Users, Baby, AlertCircle, Heart, Camera, X, ShieldAlert, Users2 } from 'lucide-react';
+import { Check, MapPin, Phone, Users, Baby, Heart, Camera, X, ShieldAlert } from 'lucide-react';
 import MainLayout from '@/Layouts/MainLayout';
 import { FloatInput, FloatTextarea, FloatSelect } from '@/Components/UI/FloatField';
 
@@ -12,16 +12,23 @@ const STATES = [
 ];
 
 const NEEDS = [
-    { value: 'food',      label: 'Alimentación' },
-    { value: 'water',     label: 'Agua'          },
-    { value: 'medicine',  label: 'Medicamentos'  },
-    { value: 'shelter',   label: 'Refugio'       },
-    { value: 'clothing',  label: 'Ropa'          },
-    { value: 'baby',      label: 'Bebé'          },
-    { value: 'documents', label: 'Documentos'    },
-    { value: 'tools',     label: 'Herramientas'  },
-    { value: 'furniture', label: 'Mobiliario'    },
-    { value: 'other',     label: 'Otro'          },
+    { value: 'food',          label: 'Alimentación'        },
+    { value: 'water',         label: 'Agua'                },
+    { value: 'medicine',      label: 'Medicamentos'        },
+    { value: 'medical_care',  label: 'Atención médica'     },
+    { value: 'shelter',       label: 'Refugio/alojamiento' },
+    { value: 'clothing',      label: 'Ropa'                },
+    { value: 'hygiene',       label: 'Higiene personal'    },
+    { value: 'baby',          label: 'Artículos de bebé'   },
+    { value: 'construction',  label: 'Materiales de construcción' },
+    { value: 'cleaning',      label: 'Limpieza y desinfección'    },
+    { value: 'transport',     label: 'Transporte'          },
+    { value: 'electricity',   label: 'Electricidad/planta' },
+    { value: 'documents',     label: 'Documentos'          },
+    { value: 'tools',         label: 'Herramientas'        },
+    { value: 'furniture',     label: 'Mobiliario'          },
+    { value: 'emotional',     label: 'Apoyo emocional'     },
+    { value: 'other',         label: 'Otro'                },
 ];
 
 const CARD = {
@@ -37,13 +44,13 @@ export default function CasosPublicar() {
     const { data, setData, post, processing, errors } = useForm({
         family_name:   '',
         people_count:  1,
-        case_type:     'familiar',
         has_children:  false,
         has_elderly:   false,
         has_risk:      false,
         description:   '',
         needs:         [],
         zone:          '',
+        city:          '',
         state:         '',
         contact_phone: '',
         photo:         null,
@@ -75,13 +82,6 @@ export default function CasosPublicar() {
                     </p>
                 </div>
 
-                {/* Aviso */}
-                <div style={{ display:'flex', gap:10, alignItems:'flex-start', background:'#eef1fa', borderRadius:14, padding:'11px 14px', border:'1px solid #d0d9f0', marginBottom:14 }}>
-                    <AlertCircle size={15} color="#4263ac" strokeWidth={2} style={{ flexShrink:0, marginTop:1 }}/>
-                    <p style={{ margin:0, fontSize:12, color:'#4263ac', lineHeight:1.55 }}>
-                        Tu teléfono solo lo verá el voluntario que te apadrine. El caso aparece con nombre visible.
-                    </p>
-                </div>
 
                 <form onSubmit={e => { e.preventDefault(); post('/casos', { forceFormData: true }); }}>
 
@@ -91,31 +91,6 @@ export default function CasosPublicar() {
                         {/* Card 1 — Familia */}
                         <div style={CARD}>
                             <p style={SEC}>Datos del caso</p>
-
-                            {/* Tipo de caso */}
-                            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-                                {[
-                                    { val:'familiar', label:'Familiar',  Icon: Users2 },
-                                    { val:'personal', label:'Personal',  Icon: Users  },
-                                ].map(({ val, label, Icon }) => {
-                                    const sel = data.case_type === val;
-                                    return (
-                                        <button key={val} type="button" onClick={() => setData('case_type', val)} style={{
-                                            padding:'9px 10px', borderRadius:11,
-                                            border: sel ? '1.5px solid #4263ac' : '1.5px solid #e2e8f0',
-                                            background: sel ? '#eef1fa' : '#fafbfd',
-                                            color: sel ? '#4263ac' : '#64748b',
-                                            fontSize:12, fontWeight:700,
-                                            display:'flex', alignItems:'center', gap:6,
-                                            cursor:'pointer', fontFamily:'inherit',
-                                        }}>
-                                            <Icon size={13} strokeWidth={2}/>
-                                            {label}
-                                            {sel && <Check size={11} color="#4263ac" strokeWidth={2.5} style={{ marginLeft:'auto' }}/>}
-                                        </button>
-                                    );
-                                })}
-                            </div>
 
                             <FloatInput
                                 label="Nombre de la familia o persona *"
@@ -204,6 +179,12 @@ export default function CasosPublicar() {
                                 onChange={e => setData('zone', e.target.value)}
                                 error={errors.zone}
                                 icon={MapPin}
+                            />
+                            <FloatInput
+                                label="Ciudad / municipio"
+                                value={data.city}
+                                onChange={e => setData('city', e.target.value)}
+                                error={errors.city}
                             />
                             <FloatSelect
                                 label="Estado *"
