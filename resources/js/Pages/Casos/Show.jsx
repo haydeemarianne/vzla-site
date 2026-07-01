@@ -273,20 +273,17 @@ export default function CasosShow({ supportCase, tasks, adoption }) {
                             {/* Condiciones */}
                             <div style={{ ...DIV }}/>
                             <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-                                {supportCase.case_type === 'personal' && (
-                                    <span style={{ fontSize:11, fontWeight:600, padding:'4px 9px', borderRadius:999, background:'#f3e8ff', color:'#7e22ce' }}>Personal</span>
-                                )}
-                                {supportCase.has_children && (
+                                {!!supportCase.has_children && (
                                     <span style={{ fontSize:11, fontWeight:600, padding:'4px 9px', borderRadius:999, background:'#fef9c3', color:'#92600e', display:'flex', alignItems:'center', gap:4 }}>
                                         <Baby size={11} strokeWidth={2}/> Hay niños
                                     </span>
                                 )}
-                                {supportCase.has_elderly && (
+                                {!!supportCase.has_elderly && (
                                     <span style={{ fontSize:11, fontWeight:600, padding:'4px 9px', borderRadius:999, background:'#dfe6f4', color:'#4263ac', display:'flex', alignItems:'center', gap:4 }}>
                                         <Users size={11} strokeWidth={2}/> Adultos mayores
                                     </span>
                                 )}
-                                {supportCase.has_risk && (
+                                {!!supportCase.has_risk && (
                                     <span style={{ fontSize:11, fontWeight:600, padding:'4px 9px', borderRadius:999, background:'#fce7f3', color:'#9d174d', display:'flex', alignItems:'center', gap:4 }}>
                                         <ShieldAlert size={11} strokeWidth={2}/> Situación de riesgo
                                     </span>
