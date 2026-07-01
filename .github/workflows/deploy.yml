@@ -3,29 +3,49 @@ name: Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'public/build/**'   # Evita loop infinito: ignora los pushes del propio CI
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write       # Necesario para que CI pueda hacer push de vuelta
+
     steps:
-      - name: Trigger deploy webhook
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias JS
+        run: npm ci
+
+      - name: Build assets (Vite)
+        run: npm run build
+
+      - name: Commit y push build assets al repo
         run: |
-          curl -s -o /tmp/deploy-response.json -w "%{http_code}" \
-            -X POST https://vzla.site/deploy-hook.php \
-            -H "X-Deploy-Secret: ${{ secrets.DEPLOY_SECRET }}" \
-            --max-time 30 \
-            --retry 3 \
-            --retry-delay 5 > /tmp/http_code.txt
-
-          HTTP_CODE=$(cat /tmp/http_code.txt)
-          RESPONSE=$(cat /tmp/deploy-response.json)
-
-          echo "HTTP Status: $HTTP_CODE"
-          echo "Response: $RESPONSE"
-
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "Deploy webhook failed with status $HTTP_CODE"
-            exit 1
+          git config user.email "action@github.com"
+          git config user.name "GitHub Actions"
+          git add --force public/build/
+          if git diff --staged --quiet; then
+            echo "Assets sin cambios, no hace falta commit"
+          else
+            git commit -m "build: assets compilados [skip ci]"
+            git push origin main
           fi
 
-          echo "Deploy triggered successfully"
+      - name: Disparar deploy en servidor
+        run: |
+          HTTP=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST https://vzla.site/deploy-hook.php \
+            -H "X-Deploy-Secret: ${{ secrets.DEPLOY_SECRET }}" \
+            --max-time 30 --retry 3 --retry-delay 5)
+          echo "Webhook response: $HTTP"
+          [ "$HTTP" = "200" ] || exit 1
