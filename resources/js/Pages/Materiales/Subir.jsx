@@ -45,6 +45,7 @@ export default function SubirMaterial() {
         contact:               '',
         contributor_instagram: '',
         contributor_phone:     '',
+        price_estimate:        '',
     });
 
     const setPrint = (key, value) =>
@@ -220,6 +221,12 @@ export default function SubirMaterial() {
                                     />
                                 </div>
                             </div>
+                            <FloatInput
+                                label="Costo estimado de producción (opcional)"
+                                placeholder="Ej: Bs. 5 por hoja, $0.50 c/u"
+                                value={data.price_estimate}
+                                onChange={e => setData('price_estimate', e.target.value)}
+                            />
                             <div style={{ background: '#f8fafc', borderRadius: 12, padding: '11px 13px', border: '1px solid #e9ebf1' }}>
                                 <p style={{ margin: 0, fontSize: 11.5, color: '#7b8595', lineHeight: 1.6 }}>
                                     Tu contacto aparecerá en la tarjeta del archivo para que quienes lo descarguen puedan comunicarse contigo.

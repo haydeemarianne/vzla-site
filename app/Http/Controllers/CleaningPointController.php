@@ -41,9 +41,9 @@ class CleaningPointController extends Controller
     {
         return Inertia::render('Limpieza/Index', [
             'by_status' => [
-                'pending'    => CleaningPoint::pending()->latest()->get(),
-                'in_process' => CleaningPoint::inProcess()->latest()->get(),
-                'resolved'   => CleaningPoint::resolved()->latest()->get(),
+                'pending'    => CleaningPoint::pending()->where('validation_status', 'approved')->latest()->get(),
+                'in_process' => CleaningPoint::inProcess()->where('validation_status', 'approved')->latest()->get(),
+                'resolved'   => CleaningPoint::resolved()->where('validation_status', 'approved')->latest()->get(),
             ],
         ]);
     }

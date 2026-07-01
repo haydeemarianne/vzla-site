@@ -1,6 +1,6 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { router } from '@inertiajs/react';
-import { Truck, MapPin, Phone, Package, Users, CheckCircle, Clock } from 'lucide-react';
+import { Truck, MapPin, Phone, Package, Users, CheckCircle, Clock, ArrowRight } from 'lucide-react';
 
 const CARGO_LABEL = { supplies: 'Insumos', debris: 'Escombros', people: 'Personas' };
 const CARGO_ICON  = { supplies: Package, debris: Truck, people: Users };
@@ -75,7 +75,70 @@ export default function TransporteShow({ request: req }) {
                     )}
                 </div>
 
-                {/* 2 columnas — info principal */}
+                {/* Layout: columna izq (Ruta+Historial) + columna der (todo lo demás) */}
+                <div className="va-show-grid" style={{ alignItems: 'start' }}>
+
+                {/* ── Col izq: Ruta + Historial ── */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={CARD}>
+                        <p style={SEC}>Ruta</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                                <div style={{ width: 28, height: 28, borderRadius: 8, background: '#eef1fa', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                                    <MapPin size={12} color="#4263ac" strokeWidth={2}/>
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.4px' }}>Origen</p>
+                                    <p style={{ margin: '2px 0 0', fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{req.origin_zone}</p>
+                                    {req.origin_state && <p style={{ margin: '1px 0 0', fontSize: 11.5, color: '#94a3b8' }}>{req.origin_state}</p>}
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 8 }}>
+                                <div style={{ width: 1, height: 20, background: '#e2e8f0' }}/>
+                                <ArrowRight size={12} color="#94a3b8" strokeWidth={2}/>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                                <div style={{ width: 28, height: 28, borderRadius: 8, background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                                    <MapPin size={12} color="#16a34a" strokeWidth={2}/>
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.4px' }}>Destino</p>
+                                    <p style={{ margin: '2px 0 0', fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{req.destination_zone}</p>
+                                    {req.destination_state && <p style={{ margin: '1px 0 0', fontSize: 11.5, color: '#94a3b8' }}>{req.destination_state}</p>}
+                                </div>
+                            </div>
+                        </div>
+                        {req.description && <><div style={DIV}/><p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: 1.6 }}>{req.description}</p></>}
+                        {req.notes && <p style={{ margin: 0, fontSize: 12, color: '#64748b', lineHeight: 1.6 }}>{req.notes}</p>}
+                    </div>
+
+                    <div style={CARD}>
+                        <p style={SEC}>Historial</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#4263ac', flexShrink: 0 }}/>
+                                <span style={{ fontSize: 12, color: '#475569' }}>Publicada — {fmtDate(req.created_at)}</span>
+                            </div>
+                            {req.taken_at && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#b45309', flexShrink: 0 }}/>
+                                    <span style={{ fontSize: 12, color: '#475569' }}>Conductor asignado — {fmtDate(req.taken_at)}</span>
+                                </div>
+                            )}
+                            {req.completed_at && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }}/>
+                                    <span style={{ fontSize: 12, color: '#475569' }}>Completada — {fmtDate(req.completed_at)}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* ── Col der: todo lo demás ── */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+                {/* 2 columnas — Solicitante + Detalle */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
 
                     {/* Col izq — Solicitante */}
@@ -194,6 +257,9 @@ export default function TransporteShow({ request: req }) {
                         })}
                     </div>
                 </div>
+
+                </div>{/* fin col der */}
+                </div>{/* fin va-show-grid */}
 
             </div>
         </MainLayout>

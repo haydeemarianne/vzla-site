@@ -4,8 +4,8 @@ import { ArrowRight, Heart, MapPin, Share2, Plus } from 'lucide-react';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const CARD_H = 172; // altura aprox de cada tarjeta (px)
-const VISIBLE = 4;  // tarjetas visibles antes de hacer scroll en la columna
+const CARD_H = 120; // altura aprox de cada tarjeta (px)
+const VISIBLE = 5;  // tarjetas visibles antes de hacer scroll en la columna
 
 const NEED_LABELS = {
     food: 'Alimentación', water: 'Agua', medicine: 'Medicamentos',
@@ -35,6 +35,12 @@ function daysSince(date) {
     return Math.max(1, Math.floor((Date.now() - new Date(date)) / 86400000));
 }
 
+function fmtShort(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleDateString('es-VE', { day: '2-digit', month: 'short' });
+}
+
 function parseNeeds(raw) {
     if (Array.isArray(raw)) return raw;
     try { return JSON.parse(raw); } catch { return []; }
@@ -56,6 +62,7 @@ function shareCase(c) {
 function CaseCard({ c, idx }) {
     const needs      = parseNeeds(c.needs);
     const days       = daysSince(c.created_at);
+    const fecha      = fmtShort(c.created_at);
     const name       = c.is_anonymous ? 'Familia anónima' : (c.family_name ?? 'Familia');
     const isOpen     = c.status === 'open';
     const tasks      = c.tasks ?? [];
@@ -67,68 +74,71 @@ function CaseCard({ c, idx }) {
         <div
             onClick={() => router.visit(`/casos/${c.id}`)}
             style={{
-                background: '#fff', borderRadius: 14,
-                boxShadow: '0 2px 10px rgba(16,24,40,.07)',
-                padding: '12px 13px', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', gap: 7,
+                background: '#fff', borderRadius: 12,
+                boxShadow: '0 1px 6px rgba(16,24,40,.06)',
+                padding: '9px 11px', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', gap: 5,
                 flexShrink: 0,
             }}
         >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Fila 1: avatar + nombre + ubicación */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                 {c.photo_path ? (
-                    <img src={`/storage/${c.photo_path}`} alt="" style={{ width:34, height:34, borderRadius:'50%', objectFit:'cover', flexShrink:0 }}/>
+                    <img src={`/storage/${c.photo_path}`} alt="" style={{ width:28, height:28, borderRadius:'50%', objectFit:'cover', flexShrink:0 }}/>
                 ) : (
-                    <div style={{ width:34, height:34, borderRadius:'50%', flexShrink:0, background: PASTEL[idx % PASTEL.length], display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <span style={{ fontSize:11, fontWeight:700, color:'#3a4250' }}>{initials(c.family_name, c.is_anonymous)}</span>
+                    <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0, background: PASTEL[idx % PASTEL.length], display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <span style={{ fontSize:10, fontWeight:700, color:'#3a4250' }}>{initials(c.family_name, c.is_anonymous)}</span>
                     </div>
                 )}
                 <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:13, fontWeight:700, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{name}</div>
-                    <div style={{ display:'flex', alignItems:'center', gap:3, marginTop:1 }}>
-                        <MapPin size={10} color="#94a3b8" strokeWidth={2}/>
-                        <span style={{ fontSize:11, color:'#94a3b8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                    <div style={{ fontSize:12.5, fontWeight:700, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{name}</div>
+                    <div style={{ display:'flex', alignItems:'center', gap:3 }}>
+                        <MapPin size={9} color="#94a3b8" strokeWidth={2}/>
+                        <span style={{ fontSize:10.5, color:'#94a3b8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                             {[c.zone, c.state].filter(Boolean).join(', ')}{c.people_count ? ` · ${c.people_count}p` : ''}
                         </span>
                     </div>
                 </div>
             </div>
 
+            {/* Fila 2: chips de necesidades */}
             {needs.length > 0 && (
-                <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
-                    {needs.slice(0, 3).map(n => (
-                        <span key={n} style={{ background:'#f1f4f9', color:'#334155', fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:5 }}>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:3 }}>
+                    {needs.slice(0, 2).map(n => (
+                        <span key={n} style={{ background:'#f1f4f9', color:'#334155', fontSize:9.5, fontWeight:600, padding:'1px 6px', borderRadius:4 }}>
                             {NEED_LABELS[n] ?? n}
                         </span>
                     ))}
-                    {needs.length > 3 && (
-                        <span style={{ background:'#f1f4f9', color:'#94a3b8', fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:5 }}>+{needs.length - 3}</span>
+                    {needs.length > 2 && (
+                        <span style={{ background:'#f1f4f9', color:'#94a3b8', fontSize:9.5, fontWeight:600, padding:'1px 6px', borderRadius:4 }}>+{needs.length - 2}</span>
                     )}
                 </div>
             )}
 
+            {/* Fila 3: barra de tareas (solo si existen) */}
             {tasksTotal > 0 && (
-                <div>
-                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:3 }}>
-                        <span style={{ fontSize:10, color:'#94a3b8', fontWeight:600 }}>{tasksTaken}/{tasksTotal} tareas</span>
-                        {tasksDone > 0 && <span style={{ fontSize:10, color:'#16a34a', fontWeight:700 }}>{tasksDone} listas</span>}
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                    <div style={{ flex:1, height:2, borderRadius:999, background:'#f1f4f9', overflow:'hidden' }}>
+                        <div style={{ height:'100%', borderRadius:999, background: tasksDone === tasksTotal ? '#16a34a' : '#4263ac', width: `${Math.round((tasksDone/tasksTotal)*100)}%`, transition:'width .3s' }}/>
                     </div>
-                    <div style={{ height:3, borderRadius:999, background:'#f1f4f9', overflow:'hidden' }}>
-                        <div style={{ height:'100%', borderRadius:999, background: tasksTaken === tasksTotal ? '#16a34a' : '#4263ac', width: tasksTotal ? `${Math.round((tasksTaken/tasksTotal)*100)}%` : '0%', transition:'width .3s' }}/>
-                    </div>
+                    <span style={{ fontSize:9.5, color:'#94a3b8', fontWeight:600, whiteSpace:'nowrap' }}>{tasksDone}/{tasksTotal}</span>
                 </div>
             )}
 
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', borderTop:'1px solid #f1f4f9', paddingTop:6, marginTop:1 }}>
-                <span style={{ fontSize:10.5, fontWeight:600, color:'#94a3b8' }}>{days}d sin ayuda</span>
-                <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+            {/* Fila 4: fecha + días + acciones */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', borderTop:'1px solid #f1f4f9', paddingTop:5, marginTop:1 }}>
+                <span style={{ fontSize:10, fontWeight:600, color:'#94a3b8' }}>
+                    {fecha} · <span style={{ color: days > 14 ? '#CE6969' : '#94a3b8' }}>{days}d</span>
+                </span>
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                     <button onClick={e => { e.stopPropagation(); shareCase(c); }}
-                        style={{ width:24, height:24, borderRadius:'50%', background:'#f1f4f9', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <Share2 size={11} color="#64748b" strokeWidth={2}/>
+                        style={{ width:22, height:22, borderRadius:'50%', background:'#f1f4f9', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <Share2 size={10} color="#64748b" strokeWidth={2}/>
                     </button>
                     {isOpen && (
                         <Link href={`/casos/${c.id}`} onClick={e => e.stopPropagation()}
-                            style={{ display:'flex', alignItems:'center', gap:2, fontSize:11.5, fontWeight:700, color:'#4263ac', textDecoration:'none' }}>
-                            Apadrinar <ArrowRight size={12} color="#4263ac" strokeWidth={2.5}/>
+                            style={{ display:'flex', alignItems:'center', gap:2, fontSize:11, fontWeight:700, color:'#4263ac', textDecoration:'none' }}>
+                            Apadrinar <ArrowRight size={11} color="#4263ac" strokeWidth={2.5}/>
                         </Link>
                     )}
                 </div>

@@ -51,6 +51,7 @@ class PrintableMaterialController extends Controller
             'contact'               => 'nullable|string|max:200',
             'contributor_instagram' => 'nullable|string|max:100',
             'contributor_phone'     => 'nullable|string|max:30',
+            'price_estimate'        => 'nullable|string|max:100',
         ]);
 
         $filePath = $request->file('file')->store('materials', 'public');
@@ -70,9 +71,23 @@ class PrintableMaterialController extends Controller
             'contact'               => $request->contact,
             'contributor_instagram' => $request->contributor_instagram,
             'contributor_phone'     => $request->contributor_phone,
+            'price_estimate'        => $request->price_estimate,
         ]);
 
         return redirect('/materiales')->with('success', 'Archivo subido. Gracias por contribuir.');
+    }
+
+    public function show(PrintableMaterial $material)
+    {
+        abort_if($material->validation_status !== 'approved', 404);
+        return Inertia::render('Materiales/Show', ['material' => $material]);
+    }
+
+    public function vote(PrintableMaterial $material)
+    {
+        abort_if($material->validation_status !== 'approved', 404);
+        $material->increment('helpful_count');
+        return back()->with('voted', true);
     }
 
     public function download(PrintableMaterial $material)

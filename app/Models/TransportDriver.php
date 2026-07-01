@@ -9,6 +9,7 @@ class TransportDriver extends Model
     protected $fillable = [
         'name', 'phone', 'vehicle_type', 'capacity',
         'zones', 'state', 'availability', 'notes',
+        'validation_status', 'validation_stage', 'validated_at',
     ];
 
     protected $casts = ['zones' => 'array'];

@@ -121,7 +121,7 @@ function EngineerCard({ eng, idx }) {
             padding: '10px 12px',
             display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
         }}>
-            {/* Avatar + nombre + teléfono derecha */}
+            {/* Avatar + nombre */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: PASTEL[idx % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#3a4250' }}>{initials(eng.name)}</span>
@@ -132,11 +132,6 @@ function EngineerCard({ eng, idx }) {
                         <span style={{ fontSize: 9.5, fontWeight: 700, color: '#7c3aed', background: '#ede9ff', padding: '1px 6px', borderRadius: 999 }}>{eng.specialty}</span>
                     )}
                 </div>
-                {eng.phone && (
-                    <a href={`tel:${eng.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 3, background: '#ede9ff', color: '#7c3aed', fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, textDecoration: 'none', flexShrink: 0 }}>
-                        <Phone size={9} color="#7c3aed" strokeWidth={2}/> {eng.phone}
-                    </a>
-                )}
             </div>
 
             {/* Zonas */}
@@ -155,6 +150,13 @@ function EngineerCard({ eng, idx }) {
                 <span style={{ fontSize: 9.5, fontWeight: 700, background: '#fef3e2', color: '#b45309', padding: '2px 8px', borderRadius: 999, alignSelf: 'flex-start' }}>
                     {eng.inspection_requests_count} solicitud{eng.inspection_requests_count !== 1 ? 'es' : ''}
                 </span>
+            )}
+
+            {/* Teléfono — CTA al fondo */}
+            {eng.phone && (
+                <a href={`tel:${eng.phone}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, background: '#ede9ff', color: '#7c3aed', fontSize: 11, fontWeight: 700, padding: '6px', borderRadius: 9, textDecoration: 'none' }}>
+                    <Phone size={11} color="#7c3aed" strokeWidth={2}/> {eng.phone}
+                </a>
             )}
         </div>
     );

@@ -130,7 +130,7 @@ function DriverCard({ driver, idx }) {
             padding: '10px 12px',
             display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
         }}>
-            {/* Avatar + nombre + teléfono derecha */}
+            {/* Avatar + nombre */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', background: PASTEL[idx % PASTEL.length], flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#3a4250' }}>{initials(driver.name)}</span>
@@ -141,11 +141,6 @@ function DriverCard({ driver, idx }) {
                         {VEHICLE_LABEL[driver.vehicle_type] || driver.vehicle_type}
                     </span>
                 </div>
-                {driver.phone && (
-                    <a href={`tel:${driver.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 3, background: '#e2e8f0', color: '#475569', fontSize: 10, fontWeight: 700, padding: '4px 8px', borderRadius: 8, textDecoration: 'none', flexShrink: 0 }}>
-                        <Phone size={9} color="#475569" strokeWidth={2}/> {driver.phone}
-                    </a>
-                )}
             </div>
 
             {zones.length > 0 && (
@@ -156,6 +151,13 @@ function DriverCard({ driver, idx }) {
                     ))}
                     {zones.length > 2 && <span style={{ fontSize: 9.5, color: '#94a3b8' }}>+{zones.length - 2}</span>}
                 </div>
+            )}
+
+            {/* Teléfono — CTA al fondo */}
+            {driver.phone && (
+                <a href={`tel:${driver.phone}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, background: '#e2e8f0', color: '#475569', fontSize: 11, fontWeight: 700, padding: '6px', borderRadius: 9, textDecoration: 'none' }}>
+                    <Phone size={11} color="#475569" strokeWidth={2}/> {driver.phone}
+                </a>
             )}
         </div>
     );

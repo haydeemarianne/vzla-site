@@ -6,7 +6,7 @@ class VolunteerEngineer extends Model
 {
     protected $fillable = [
         'name','email','phone','license_number','specialty',
-        'zones_available','available_until','notes','validation_status','validated_at',
+        'zones_available','available_until','notes','validation_status','validation_stage','validated_at',
     ];
 
     protected $casts = [

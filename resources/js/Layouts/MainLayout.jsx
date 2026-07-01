@@ -7,13 +7,11 @@ import {
 
 /* ─── Navegación ──────────────────────────────── */
 const TOP_NAV = [
-    { href: '/',              label: 'Inicio'        },
     { href: '/casos',         label: 'Casos'         },
     { href: '/limpieza',      label: 'Limpieza'      },
     { href: '/ingenieros',    label: 'Ingenieros'    },
     { href: '/transporte',    label: 'Transporte'    },
     { href: '/materiales',    label: 'Recursos'      },
-    { href: '/estadisticas',  label: 'Estadísticas'  },
     { href: '/validar',       label: 'Validación'    },
 ];
 

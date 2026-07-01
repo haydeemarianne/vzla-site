@@ -10,7 +10,7 @@ class TransportRequest extends Model
         'cargo_type', 'description', 'origin_zone', 'origin_state',
         'destination_zone', 'destination_state', 'urgency', 'status',
         'driver_id', 'requester_name', 'requester_phone', 'notes',
-        'taken_at', 'completed_at',
+        'taken_at', 'completed_at', 'validation_status', 'validation_stage', 'validated_at',
     ];
 
     protected $casts = [

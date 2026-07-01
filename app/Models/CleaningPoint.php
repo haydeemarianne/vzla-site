@@ -10,6 +10,7 @@ class CleaningPoint extends Model
         'zone_name', 'city', 'state', 'address', 'type', 'volume',
         'photo_path', 'resolved_photo_path', 'status', 'helpers_count',
         'reporter_name', 'reporter_phone', 'notes', 'resolved_at',
+        'validation_status', 'validation_stage', 'validated_at',
     ];
 
     protected $casts = [

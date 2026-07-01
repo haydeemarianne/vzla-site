@@ -13,13 +13,13 @@ class TransportController extends Controller
     {
         return Inertia::render('Transporte/Index', [
             'by_status' => [
-                'open'      => TransportRequest::where('status', 'open')->orderByRaw("FIELD(urgency,'urgent','normal')")->latest()->get(),
-                'taken'     => TransportRequest::where('status', 'taken')->latest()->get(),
-                'completed' => TransportRequest::where('status', 'completed')->latest()->get(),
+                'open'      => TransportRequest::where('status', 'open')->where('validation_status', 'approved')->orderByRaw("FIELD(urgency,'urgent','normal')")->latest()->get(),
+                'taken'     => TransportRequest::where('status', 'taken')->where('validation_status', 'approved')->latest()->get(),
+                'completed' => TransportRequest::where('status', 'completed')->where('validation_status', 'approved')->latest()->get(),
             ],
             'drivers' => [
-                'available' => TransportDriver::where('availability', 'available')->latest()->get(),
-                'busy'      => TransportDriver::where('availability', 'busy')->latest()->get(),
+                'available' => TransportDriver::where('availability', 'available')->where('validation_status', 'approved')->latest()->get(),
+                'busy'      => TransportDriver::where('availability', 'busy')->where('validation_status', 'approved')->latest()->get(),
             ],
         ]);
     }

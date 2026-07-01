@@ -8,7 +8,7 @@ class PrintableMaterial extends Model
         'title','description','file_path','file_type','category','subcategory','is_3d',
         'print_instructions','uploaded_by','organization','contact',
         'contributor_instagram','contributor_phone',
-        'download_count','validation_status',
+        'download_count','helpful_count','validation_status','validation_stage','price_estimate',
     ];
 
     protected $casts = [

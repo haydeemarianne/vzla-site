@@ -129,13 +129,19 @@
     top: 0;
     z-index: 30;
 }
-/* Desktop: estático, padding inferior para separar del contenido */
+/* Desktop: sticky en la parte superior */
 @media (min-width: 768px) {
     .va-header {
-        position: static;
+        position: sticky;
+        top: 0;
         height: auto;
-        padding: 0 0 20px 0;
-        z-index: auto;
+        padding: 14px 0;
+        z-index: 80;
+        background: rgba(238, 240, 244, 0.94);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 0 0 14px 14px;
+        margin: -14px 0 6px;
     }
 }
 

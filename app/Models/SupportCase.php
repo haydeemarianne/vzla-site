@@ -9,7 +9,7 @@ class SupportCase extends Model
         'family_name', 'description', 'needs', 'zone', 'state',
         'people_count', 'has_children', 'has_elderly', 'has_risk', 'case_type',
         'contact_phone', 'is_anonymous',
-        'photo_path', 'validation_status', 'status', 'adopted_at', 'resolved_at',
+        'photo_path', 'validation_status', 'validation_stage', 'status', 'adopted_at', 'resolved_at',
     ];
 
     protected $casts = [

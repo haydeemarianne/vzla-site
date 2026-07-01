@@ -29,6 +29,8 @@ Route::prefix('validar')->group(function () {
     Route::get('/',          [ValidatorController::class, 'dashboard']);
     Route::post('/approve',  [ValidatorController::class, 'approve']);
     Route::post('/reject',   [ValidatorController::class, 'reject']);
+    Route::post('/avanzar',  [ValidatorController::class, 'avanzar']);
+    Route::post('/corregir', [ValidatorController::class, 'corregir']);
     Route::post('/padrinos/{adoption}/aprobar',  [CaseSponsorshipController::class, 'approve']);
     Route::post('/padrinos/{adoption}/rechazar', [CaseSponsorshipController::class, 'reject']);
 });
@@ -63,6 +65,8 @@ Route::prefix('materiales')->group(function () {
     Route::get('/', [PrintableMaterialController::class, 'index']);
     Route::get('/subir', [PrintableMaterialController::class, 'create']);
     Route::post('/', [PrintableMaterialController::class, 'store']);
+    Route::get('/{material}', [PrintableMaterialController::class, 'show']);
+    Route::post('/{material}/votar', [PrintableMaterialController::class, 'vote']);
     Route::get('/{material}/descargar', [PrintableMaterialController::class, 'download']);
 });
 
