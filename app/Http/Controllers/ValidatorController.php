@@ -104,12 +104,12 @@ class ValidatorController extends Controller
     private function allowedEditFields(string $type): array
     {
         return match ($type) {
-            'support_case'      => ['family_name','zone','city','state','contact_phone','people_count','description'],
-            'engineer'          => ['name','phone','email','license_number','specialty','notes'],
-            'material'          => ['title','category','subcategory','uploaded_by','organization','contact','description'],
-            'cleaning'          => ['zone_name','city','state','address','reporter_name','reporter_phone','notes'],
-            'transport_request' => ['requester_name','requester_phone','origin_zone','origin_state','destination_zone','destination_state','description','notes'],
-            'transport_driver'  => ['name','phone','vehicle_type','capacity','state','notes'],
+            'support_case'      => ['family_name','contact_phone','zone','state','people_count','has_children','has_elderly','has_risk','case_type','needs','description'],
+            'engineer'          => ['name','phone','email','license_number','specialty','available_until','zones_available','notes'],
+            'material'          => ['title','category','subcategory','is_3d','uploaded_by','organization','contact','contributor_instagram','contributor_phone','description'],
+            'cleaning'          => ['zone_name','city','state','address','type','volume','reporter_name','reporter_phone','notes'],
+            'transport_request' => ['requester_name','requester_phone','origin_zone','origin_state','destination_zone','destination_state','cargo_type','urgency','description','notes'],
+            'transport_driver'  => ['name','phone','vehicle_type','capacity','state','zones','notes'],
             default             => [],
         };
     }

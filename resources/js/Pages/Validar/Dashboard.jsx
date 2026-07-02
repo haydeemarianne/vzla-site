@@ -758,62 +758,23 @@ const MODULE_DATA_FIELDS = {
     ],
 };
 
-/* ─── Campos editables en Verificación por módulo ─── */
-const MODULE_VERIFY_EDIT = {
-    cases: [
-        { name:'family_name',   label:'Nombre familia',       type:'text'     },
-        { name:'contact_phone', label:'Teléfono',              type:'text'     },
-        { name:'zone',          label:'Zona / barrio',         type:'text'     },
-        { name:'state',         label:'Estado',                type:'text'     },
-        { name:'people_count',  label:'N° personas',           type:'number'   },
-        { name:'case_type',     label:'Tipo de caso',          type:'text'     },
-        { name:'description',   label:'Descripción',           type:'textarea' },
-    ],
-    engineers: [
-        { name:'name',          label:'Nombre completo',       type:'text'     },
-        { name:'phone',         label:'Teléfono',              type:'text'     },
-        { name:'email',         label:'Correo',                type:'email'    },
-        { name:'license_number',label:'N° colegiatura',        type:'text'     },
-        { name:'specialty',     label:'Especialidad',          type:'text'     },
-        { name:'notes',         label:'Notas',                 type:'textarea' },
-    ],
-    materials: [
-        { name:'title',         label:'Título',                type:'text'     },
-        { name:'category',      label:'Categoría',             type:'text'     },
-        { name:'subcategory',   label:'Subcategoría',          type:'text'     },
-        { name:'uploaded_by',   label:'Contribuidor',          type:'text'     },
-        { name:'organization',  label:'Organización',          type:'text'     },
-        { name:'contact',       label:'Contacto',              type:'text'     },
-        { name:'description',   label:'Descripción',           type:'textarea' },
-    ],
-    cleaning: [
-        { name:'zone_name',     label:'Zona',                  type:'text'     },
-        { name:'city',          label:'Ciudad',                type:'text'     },
-        { name:'state',         label:'Estado',                type:'text'     },
-        { name:'address',       label:'Dirección',             type:'text'     },
-        { name:'reporter_name', label:'Nombre del reportero',  type:'text'     },
-        { name:'reporter_phone',label:'Teléfono del reportero',type:'text'     },
-        { name:'notes',         label:'Notas adicionales',     type:'textarea' },
-    ],
-    transport: [
-        { name:'requester_name',   label:'Solicitante',        type:'text'     },
-        { name:'requester_phone',  label:'Teléfono',           type:'text'     },
-        { name:'origin_zone',      label:'Origen',             type:'text'     },
-        { name:'origin_state',     label:'Estado origen',      type:'text'     },
-        { name:'destination_zone', label:'Destino',            type:'text'     },
-        { name:'destination_state',label:'Estado destino',     type:'text'     },
-        { name:'description',      label:'Descripción',        type:'textarea' },
-        { name:'notes',            label:'Notas',              type:'textarea' },
-    ],
-    drivers: [
-        { name:'name',          label:'Nombre del conductor',  type:'text'     },
-        { name:'phone',         label:'Teléfono',              type:'text'     },
-        { name:'vehicle_type',  label:'Tipo de vehículo',      type:'text'     },
-        { name:'capacity',      label:'Capacidad',             type:'text'     },
-        { name:'state',         label:'Estado donde opera',    type:'text'     },
-        { name:'notes',         label:'Notas',                 type:'textarea' },
-    ],
-};
+/* ─── Campos editables en Verificación — se derivan de MODULE_DATA_FIELDS ───
+   Así "Editar datos" siempre cubre exactamente lo mismo que "Datos completos". */
+const NUMBER_EDIT_FIELDS = ['people_count', 'capacity'];
+const EMAIL_EDIT_FIELDS  = ['email'];
+
+function editFieldsFor(modKey) {
+    return (MODULE_DATA_FIELDS[modKey] || []).map(f => ({
+        name:  f.key,
+        label: f.label,
+        type:  f.bool ? 'bool'
+             : f.array ? 'array'
+             : f.full ? 'textarea'
+             : NUMBER_EDIT_FIELDS.includes(f.key) ? 'number'
+             : EMAIL_EDIT_FIELDS.includes(f.key) ? 'email'
+             : 'text',
+    }));
+}
 
 /* ════════════════════════════════════════════════════════════
    MODAL del Recorrido
@@ -871,9 +832,15 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
         setConfirmed(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
 
     const startEdit = () => {
-        const fields = MODULE_VERIFY_EDIT[modKey] || [];
         const initial = {};
-        fields.forEach(f => { initial[f.name] = item[f.name] ?? ''; });
+        editFields.forEach(f => {
+            if (f.type === 'bool') initial[f.name] = !!item[f.name];
+            else if (f.type === 'array') {
+                const raw = item[f.name];
+                initial[f.name] = Array.isArray(raw) ? raw : (typeof raw === 'string' ? (JSON.parse(raw || '[]')) : []);
+            }
+            else initial[f.name] = item[f.name] ?? '';
+        });
         setEditForm(initial);
         setEditMode(true);
     };
@@ -890,13 +857,15 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
     const nombre = itemLabel(item, modKey);
     const meta   = itemMeta(item, modKey);
     const dataFields = MODULE_DATA_FIELDS[modKey] || [];
-    const editFields = MODULE_VERIFY_EDIT[modKey] || [];
+    const editFields = editFieldsFor(modKey);
 
     const INPUT = {
-        width:'100%', padding:'8px 11px', borderRadius:9, border:'1.5px solid #e6e9f0',
-        fontSize:13, color:'#1a2230', outline:'none', fontFamily:'inherit',
+        width:'100%', padding:'10px 13px', borderRadius:11, border:'1.5px solid #e2e8f0',
+        fontSize:13, color:'#1e293b', outline:'none', fontFamily:'inherit',
         background:'white', boxSizing:'border-box',
     };
+    const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:16, padding:'15px 16px' };
+    const SEC  = { margin:'0 0 10px', fontSize:10.5, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' };
 
     const TABS = [
         { key:'datos',     label:'Datos completos' },
@@ -989,30 +958,67 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                     {activeTab === 'datos' && (
                         <>
                             {editMode ? (
-                                /* Formulario de edición (solo en Verificación) */
-                                <div style={{ display:'flex', flexDirection:'column', gap:11 }}>
+                                /* Formulario de edición (solo en Verificación) — cubre todos los campos */
+                                <div style={{ ...CARD, display:'flex', flexDirection:'column', gap:13 }}>
+                                    <p style={SEC}>Editar / corregir datos</p>
                                     {editFields.map(f => (
                                         <div key={f.name}>
-                                            <label style={{ fontSize:10.5, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:4 }}>
+                                            <label style={{ fontSize:10.5, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>
                                                 {f.label}
                                             </label>
-                                            {f.type === 'textarea' ? (
+                                            {f.type === 'bool' ? (
+                                                <div style={{ display:'flex', gap:8 }}>
+                                                    {[true, false].map(v => (
+                                                        <button key={String(v)} type="button" onClick={() => setEditForm(p => ({ ...p, [f.name]: v }))} style={{
+                                                            flex:1, padding:'9px', borderRadius:11,
+                                                            border:`1.5px solid ${editForm[f.name] === v ? '#4263ac' : '#e2e8f0'}`,
+                                                            background: editForm[f.name] === v ? '#eef1fa' : 'white',
+                                                            color: editForm[f.name] === v ? '#4263ac' : '#94a3b8',
+                                                            fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit',
+                                                        }}>
+                                                            {v ? 'Sí' : 'No'}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : f.type === 'array' ? (
+                                                <div>
+                                                    <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom: (editForm[f.name]||[]).length ? 8 : 0 }}>
+                                                        {(editForm[f.name] || []).map((tag, i) => (
+                                                            <span key={i} style={{ display:'flex', alignItems:'center', gap:5, background:'#eef1fa', color:'#4263ac', fontSize:11.5, fontWeight:700, padding:'4px 9px', borderRadius:999 }}>
+                                                                {tag}
+                                                                <button type="button" onClick={() => setEditForm(p => ({ ...p, [f.name]: p[f.name].filter((_, idx) => idx !== i) }))}
+                                                                    style={{ border:'none', background:'none', cursor:'pointer', color:'#4263ac', padding:0, display:'flex' }}>
+                                                                    <X size={10} strokeWidth={2.5}/>
+                                                                </button>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <input type="text" placeholder="Escribe y presiona Enter para agregar…" style={INPUT}
+                                                        onKeyDown={e => {
+                                                            if (e.key === 'Enter' && e.target.value.trim()) {
+                                                                e.preventDefault();
+                                                                setEditForm(p => ({ ...p, [f.name]: [...(p[f.name] || []), e.target.value.trim()] }));
+                                                                e.target.value = '';
+                                                            }
+                                                        }}/>
+                                                </div>
+                                            ) : f.type === 'textarea' ? (
                                                 <textarea rows={3} value={editForm[f.name]||''} onChange={e => setEditForm(p=>({...p,[f.name]:e.target.value}))} style={{ ...INPUT, resize:'vertical' }}/>
                                             ) : (
                                                 <input type={f.type||'text'} value={editForm[f.name]||''} onChange={e => setEditForm(p=>({...p,[f.name]:e.target.value}))} style={INPUT}/>
                                             )}
                                         </div>
                                     ))}
-                                    <div style={{ display:'flex', gap:8, marginTop:4 }}>
+                                    <div style={{ display:'flex', gap:8, marginTop:2 }}>
                                         <button onClick={saveEdit} disabled={saving} style={{
-                                            flex:1, padding:'10px', borderRadius:11, border:'none',
-                                            background:'#4263ac', color:'white', fontSize:13, fontWeight:700,
-                                            cursor:'pointer', fontFamily:'inherit', opacity:saving?.6:1,
+                                            flex:1, padding:'11px', borderRadius:12, border:'none',
+                                            background: saving ? '#83A2DB' : '#4263ac', color:'white', fontSize:13, fontWeight:700,
+                                            cursor: saving ? 'not-allowed' : 'pointer', fontFamily:'inherit',
                                         }}>
                                             {saving ? 'Guardando…' : 'Guardar cambios'}
                                         </button>
                                         <button onClick={() => setEditMode(false)} style={{
-                                            padding:'10px 14px', borderRadius:11, border:'1px solid #e6e9f0',
+                                            padding:'11px 16px', borderRadius:12, border:'1px solid #e2e8f0',
                                             background:'white', color:'#64748b', fontSize:13, fontWeight:600,
                                             cursor:'pointer', fontFamily:'inherit',
                                         }}>
@@ -1022,40 +1028,43 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                                 </div>
                             ) : (
                                 /* Vista de datos completos */
-                                <>
-                                    <div style={{ display:'flex', flexDirection:'column', gap:0, marginBottom:14 }}>
-                                        {dataFields.map((f, i) => {
-                                            const val = item[f.key];
-                                            const isEmpty = val === null || val === undefined || val === '' || (Array.isArray(val) && val.length === 0);
-                                            return (
-                                                <div key={f.key} style={{
-                                                    display:'grid', gridTemplateColumns:'120px 1fr',
-                                                    gap:8, padding:'9px 0',
-                                                    borderBottom: i < dataFields.length-1 ? '1px solid #f7f8fb' : 'none',
-                                                    alignItems: f.full || f.array ? 'flex-start' : 'center',
-                                                }}>
-                                                    <span style={{ fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.4px', paddingTop: f.full||f.array ? 1 : 0 }}>
-                                                        {f.label}
-                                                    </span>
-                                                    {isEmpty ? (
-                                                        <span style={{ fontSize:12.5, color:'#c0c8d4' }}>—</span>
-                                                    ) : f.bool ? renderBoolVal(val) :
-                                                       f.array ? renderArrayVal(val) :
-                                                       f.date ? (
-                                                           <span style={{ fontSize:13, color:'#2b3340', fontWeight:500 }}>{fmtDate(val)}</span>
-                                                       ) : (
-                                                           <span style={{ fontSize:13, color:'#2b3340', fontWeight: f.full ? 400 : 500, lineHeight:1.5 }}>{String(val)}</span>
-                                                       )
-                                                    }
-                                                </div>
-                                            );
-                                        })}
+                                <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                                    <div style={CARD}>
+                                        <p style={SEC}>Datos completos</p>
+                                        <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+                                            {dataFields.map((f, i) => {
+                                                const val = item[f.key];
+                                                const isEmpty = val === null || val === undefined || val === '' || (Array.isArray(val) && val.length === 0);
+                                                return (
+                                                    <div key={f.key} style={{
+                                                        display:'grid', gridTemplateColumns:'120px 1fr',
+                                                        gap:8, padding:'9px 0',
+                                                        borderBottom: i < dataFields.length-1 ? '1px solid #f7f8fb' : 'none',
+                                                        alignItems: f.full || f.array ? 'flex-start' : 'center',
+                                                    }}>
+                                                        <span style={{ fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.4px', paddingTop: f.full||f.array ? 1 : 0 }}>
+                                                            {f.label}
+                                                        </span>
+                                                        {isEmpty ? (
+                                                            <span style={{ fontSize:12.5, color:'#c0c8d4' }}>—</span>
+                                                        ) : f.bool ? renderBoolVal(val) :
+                                                           f.array ? renderArrayVal(val) :
+                                                           f.date ? (
+                                                               <span style={{ fontSize:13, color:'#2b3340', fontWeight:500 }}>{fmtDate(val)}</span>
+                                                           ) : (
+                                                               <span style={{ fontSize:13, color:'#2b3340', fontWeight: f.full ? 400 : 500, lineHeight:1.5 }}>{String(val)}</span>
+                                                           )
+                                                        }
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
 
                                     {/* Foto si existe */}
                                     {item.photo_path && (
-                                        <div style={{ marginBottom:14 }}>
-                                            <div style={{ fontSize:10.5, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.4px', marginBottom:6 }}>Foto</div>
+                                        <div style={CARD}>
+                                            <p style={SEC}>Foto</p>
                                             <img src={`/storage/${item.photo_path}`} alt="foto"
                                                 style={{ width:'100%', maxHeight:200, objectFit:'cover', borderRadius:12, border:'1px solid #e6e9f0' }}/>
                                         </div>
@@ -1064,15 +1073,15 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                                     {/* Botón editar — solo en Verificación */}
                                     {stage === 'verificacion' && editFields.length > 0 && (
                                         <button onClick={startEdit} style={{
-                                            width:'100%', padding:'10px', borderRadius:12,
-                                            border:'1.5px dashed #d1d9e6', background:'#f8fafc',
+                                            width:'100%', padding:'11px', borderRadius:12,
+                                            border:'1.5px dashed #a9b8dd', background:'#eef1fa',
                                             color:'#4263ac', fontSize:13, fontWeight:700,
                                             cursor:'pointer', fontFamily:'inherit',
                                         }}>
                                             Editar / corregir datos
                                         </button>
                                     )}
-                                </>
+                                </div>
                             )}
                         </>
                     )}
@@ -1081,10 +1090,8 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                     {activeTab === 'etapa' && (
                         <>
                             {/* Qué hacer */}
-                            <div style={{ marginBottom:18 }}>
-                                <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595', marginBottom:7 }}>
-                                    Qué hacer aquí
-                                </div>
+                            <div style={{ ...CARD, marginBottom:14 }}>
+                                <p style={SEC}>Qué hacer aquí</p>
                                 <p style={{ margin:'0 0 12px', fontSize:13, color:'#5b6677', lineHeight:1.55 }}>
                                     {stageAct.description}
                                 </p>
@@ -1115,7 +1122,7 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
 
                             {/* Asignación en vivo — padrinos pendientes del caso */}
                             {modKey === 'cases' && stage === 'asignacion' && (
-                                <div style={{ marginBottom:18, padding:'14px', borderRadius:14, background:'#eef1fa', border:'1px solid #d6dffa' }}>
+                                <div style={{ marginBottom:14, padding:'15px 16px', borderRadius:16, background:'#eef1fa', border:'1px solid #d6dffa' }}>
                                     <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:10 }}>
                                         <UserCheck size={14} color="#4263ac" strokeWidth={2}/>
                                         <span style={{ fontSize:12, fontWeight:700, color:'#4263ac' }}>Padrinos pendientes de este caso</span>
@@ -1145,7 +1152,7 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
 
                             {/* Cierre con comprobante — solo en Seguimiento */}
                             {canClose && (
-                                <form onSubmit={submitClose} style={{ marginBottom:18, padding:'14px', borderRadius:14, background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', flexDirection:'column', gap:9 }}>
+                                <form onSubmit={submitClose} style={{ marginBottom:14, padding:'15px 16px', borderRadius:16, background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', flexDirection:'column', gap:9 }}>
                                     <div style={{ display:'flex', alignItems:'center', gap:7 }}>
                                         <Camera size={14} color="#16a34a" strokeWidth={2}/>
                                         <span style={{ fontSize:12, fontWeight:700, color:'#15803d' }}>Cerrar con comprobante</span>
@@ -1193,9 +1200,11 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                     {/* ── TAB HISTORIAL ── */}
                     {activeTab === 'historial' && (
                         history.length === 0 ? (
-                            <p style={{ textAlign:'center', color:'#94a3b8', fontSize:13, padding:'20px 0' }}>Sin movimientos registrados todavía.</p>
+                            <div style={CARD}>
+                                <p style={{ textAlign:'center', color:'#94a3b8', fontSize:13, margin:0 }}>Sin movimientos registrados todavía.</p>
+                            </div>
                         ) : (
-                            <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+                            <div style={{ ...CARD, display:'flex', flexDirection:'column', gap:0 }}>
                                 {history.map((log, i) => (
                                     <div key={log.id} style={{
                                         display:'flex', gap:11, padding:'11px 0',
