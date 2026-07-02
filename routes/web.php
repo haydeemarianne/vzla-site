@@ -32,6 +32,8 @@ Route::prefix('validar')->group(function () {
     Route::post('/reject',   [ValidatorController::class, 'reject']);
     Route::post('/avanzar',  [ValidatorController::class, 'avanzar']);
     Route::post('/corregir', [ValidatorController::class, 'corregir']);
+    Route::post('/cerrar',   [ValidatorController::class, 'cerrar']);
+    Route::get('/historial', [ValidatorController::class, 'historial']);
     Route::post('/padrinos/{adoption}/aprobar',  [CaseSponsorshipController::class, 'approve']);
     Route::post('/padrinos/{adoption}/rechazar', [CaseSponsorshipController::class, 'reject']);
 

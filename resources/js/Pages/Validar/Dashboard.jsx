@@ -1,7 +1,7 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
-import { Plus, Upload, Calendar, Check, X, ArrowRight, ChevronRight, User, Phone, MapPin, Tag, Clock, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Upload, Calendar, Check, X, ArrowRight, ChevronRight, User, Phone, MapPin, Tag, Clock, LogOut, History, UserCheck, Camera } from 'lucide-react';
 
 /* ─── helpers ─── */
 const PASTEL = ['#e7dcf2','#dfe6f4','#d6e8e0','#f0d6d6','#f3e2cf','#fde68a'];
@@ -818,18 +818,54 @@ const MODULE_VERIFY_EDIT = {
 /* ════════════════════════════════════════════════════════════
    MODAL del Recorrido
 ═══════════════════════════════════════════════════════════════ */
-function RecorridoModal({ item, modKey, modType, onClose, onAvanzar }) {
+const CLOSEABLE_MODS = ['cases', 'cleaning', 'transport'];
+
+function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, onActAdoption }) {
+    const [confirmed,  setConfirmed]  = useState([]);
+    const [editMode,   setEditMode]   = useState(false);
+    const [editForm,   setEditForm]   = useState({});
+    const [saving,     setSaving]     = useState(false);
+    const [activeTab,  setActiveTab]  = useState('datos');
+    const [history,    setHistory]    = useState([]);
+    const [closeNote,  setCloseNote]  = useState('');
+    const [closePhoto, setClosePhoto] = useState(null);
+    const [closing,    setClosing]    = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'historial' && item && modType) {
+            fetch(`/validar/historial?type=${modType}&id=${item.id}`)
+                .then(r => r.json())
+                .then(setHistory)
+                .catch(() => setHistory([]));
+        }
+    }, [activeTab, item, modType]);
+
     if (!item) return null;
     const stage    = item.validation_stage || 'recepcion';
     const stageCfg = STAGE_CFG[stage] || STAGE_CFG.recepcion;
     const stageAct = MODULE_STAGE[modKey]?.[stage] || MODULE_STAGE.cases[stage];
     const actionLink = stageAct?.linkLabel && stageAct?.linkPath ? stageAct.linkPath(item) : null;
 
-    const [confirmed, setConfirmed] = useState([]);
-    const [editMode,  setEditMode]  = useState(false);
-    const [editForm,  setEditForm]  = useState({});
-    const [saving,    setSaving]    = useState(false);
-    const [activeTab, setActiveTab] = useState('datos');
+    const relatedAdoptions = (modKey === 'cases' && stage === 'asignacion')
+        ? (adoptions || []).filter(a => a.support_case_id === item.id)
+        : [];
+
+    const canClose = stage === 'seguimiento' && CLOSEABLE_MODS.includes(modKey);
+
+    const submitClose = (e) => {
+        e.preventDefault();
+        setClosing(true);
+        const form = new FormData();
+        form.append('type', modType);
+        form.append('id', item.id);
+        form.append('note', closeNote);
+        if (closePhoto) form.append('photo', closePhoto);
+        router.post('/validar/cerrar', form, {
+            preserveScroll: true,
+            onSuccess: () => { setCloseNote(''); setClosePhoto(null); setClosing(false); onClose(); },
+            onError:   () => setClosing(false),
+        });
+    };
 
     const toggle = (i) =>
         setConfirmed(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
@@ -863,8 +899,9 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar }) {
     };
 
     const TABS = [
-        { key:'datos', label:'Datos completos' },
-        { key:'etapa', label:'Etapa' },
+        { key:'datos',     label:'Datos completos' },
+        { key:'etapa',     label:'Etapa' },
+        { key:'historial', label:'Historial' },
     ];
 
     const renderBoolVal = (v) => v ? (
@@ -1076,6 +1113,58 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar }) {
                                 </div>
                             </div>
 
+                            {/* Asignación en vivo — padrinos pendientes del caso */}
+                            {modKey === 'cases' && stage === 'asignacion' && (
+                                <div style={{ marginBottom:18, padding:'14px', borderRadius:14, background:'#eef1fa', border:'1px solid #d6dffa' }}>
+                                    <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:10 }}>
+                                        <UserCheck size={14} color="#4263ac" strokeWidth={2}/>
+                                        <span style={{ fontSize:12, fontWeight:700, color:'#4263ac' }}>Padrinos pendientes de este caso</span>
+                                    </div>
+                                    {relatedAdoptions.length === 0 ? (
+                                        <p style={{ margin:0, fontSize:12.5, color:'#7b8595' }}>Aún no hay solicitudes de padrinazgo para este caso.</p>
+                                    ) : (
+                                        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                                            {relatedAdoptions.map(a => (
+                                                <div key={a.id} style={{ background:'white', borderRadius:11, padding:'9px 11px', display:'flex', alignItems:'center', gap:9 }}>
+                                                    <div style={{ flex:1, minWidth:0 }}>
+                                                        <div style={{ fontSize:12.5, fontWeight:700, color:'#1e293b' }}>{a.volunteer?.name || 'Voluntario'}</div>
+                                                        <div style={{ fontSize:11, color:'#94a3b8' }}>{a.volunteer?.phone}</div>
+                                                    </div>
+                                                    <button onClick={() => onActAdoption('reject', a.id)} style={{ padding:'6px 11px', borderRadius:9, border:'1px solid #fecaca', background:'#fef2f2', color:'#CE6969', fontSize:11.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+                                                        Rechazar
+                                                    </button>
+                                                    <button onClick={() => onActAdoption('approve', a.id)} style={{ padding:'6px 11px', borderRadius:9, border:'none', background:'#16a34a', color:'white', fontSize:11.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>
+                                                        Aprobar
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Cierre con comprobante — solo en Seguimiento */}
+                            {canClose && (
+                                <form onSubmit={submitClose} style={{ marginBottom:18, padding:'14px', borderRadius:14, background:'#f0fdf4', border:'1px solid #bbf7d0', display:'flex', flexDirection:'column', gap:9 }}>
+                                    <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+                                        <Camera size={14} color="#16a34a" strokeWidth={2}/>
+                                        <span style={{ fontSize:12, fontWeight:700, color:'#15803d' }}>Cerrar con comprobante</span>
+                                    </div>
+                                    <textarea rows={2} required placeholder="Diagnóstico final: qué se hizo, cómo quedó..."
+                                        value={closeNote} onChange={e => setCloseNote(e.target.value)}
+                                        style={{ ...INPUT, resize:'vertical', background:'white' }}/>
+                                    <input type="file" accept="image/*" onChange={e => setClosePhoto(e.target.files[0] ?? null)}
+                                        style={{ fontSize:12 }}/>
+                                    <button type="submit" disabled={closing} style={{
+                                        padding:'10px', borderRadius:11, border:'none',
+                                        background: closing ? '#86efac' : '#16a34a', color:'white',
+                                        fontSize:13, fontWeight:700, cursor: closing ? 'not-allowed' : 'pointer', fontFamily:'inherit',
+                                    }}>
+                                        {closing ? 'Cerrando…' : 'Cerrar caso con comprobante'}
+                                    </button>
+                                </form>
+                            )}
+
                             {/* Flujo de etapas */}
                             <div style={{ display:'flex', alignItems:'center', gap:5, flexWrap:'wrap', padding:'12px 0', borderTop:'1px solid #f0f2f7' }}>
                                 {STAGES.map((s, i) => {
@@ -1099,6 +1188,46 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar }) {
                                 })}
                             </div>
                         </>
+                    )}
+
+                    {/* ── TAB HISTORIAL ── */}
+                    {activeTab === 'historial' && (
+                        history.length === 0 ? (
+                            <p style={{ textAlign:'center', color:'#94a3b8', fontSize:13, padding:'20px 0' }}>Sin movimientos registrados todavía.</p>
+                        ) : (
+                            <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+                                {history.map((log, i) => (
+                                    <div key={log.id} style={{
+                                        display:'flex', gap:11, padding:'11px 0',
+                                        borderBottom: i < history.length-1 ? '1px solid #f7f8fb' : 'none',
+                                    }}>
+                                        <div style={{ width:30, height:30, borderRadius:'50%', flexShrink:0, background:'#eef1fa', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                            <History size={13} color="#4263ac" strokeWidth={2}/>
+                                        </div>
+                                        <div style={{ flex:1, minWidth:0 }}>
+                                            <div style={{ fontSize:12.5, fontWeight:700, color:'#1e293b' }}>
+                                                {log.action === 'avanzado' ? `Avanzó a ${STAGE_CFG[log.stage]?.label ?? log.stage}` :
+                                                 log.action === 'aprobado' ? 'Aprobó el registro' :
+                                                 log.action === 'rechazado' ? 'Rechazó el registro' :
+                                                 log.action === 'cerrado' ? 'Cerró con comprobante' : log.action}
+                                            </div>
+                                            <div style={{ fontSize:11.5, color:'#94a3b8', marginTop:1 }}>
+                                                {log.admin_name || 'Validador'} · {fmtDate(log.created_at)}
+                                            </div>
+                                            {log.note && (
+                                                <p style={{ margin:'5px 0 0', fontSize:12, color:'#5b6677', lineHeight:1.5, background:'#f8fafc', borderRadius:8, padding:'7px 10px' }}>
+                                                    {log.note}
+                                                </p>
+                                            )}
+                                            {log.photo_path && (
+                                                <img src={`/storage/${log.photo_path}`} alt="comprobante"
+                                                    style={{ marginTop:7, width:'100%', maxHeight:160, objectFit:'cover', borderRadius:10, border:'1px solid #e6e9f0' }}/>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )
                     )}
                 </div>
 
@@ -1630,6 +1759,8 @@ export default function ValidarDashboard({
                 modType={modalModType}
                 onClose={closeModal}
                 onAvanzar={avanzar}
+                adoptions={safeAdoptions}
+                onActAdoption={actAdoption}
             />
 
             {/* ── Modal Registro rápido ── */}

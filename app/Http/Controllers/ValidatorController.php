@@ -11,6 +11,7 @@ use App\Models\CleaningPoint;
 use App\Models\TransportRequest;
 use App\Models\TransportDriver;
 use App\Models\PrintableMaterial;
+use App\Models\ValidationLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -67,6 +68,9 @@ class ValidatorController extends Controller
                 'validation_stage'  => 'recepcion',
                 'validated_at'      => now(),
             ]);
+
+        ValidationLog::record($request->type, $request->id, 'aprobado', 'recepcion');
+
         return back()->with('success', 'Aprobado y en Recepción.');
     }
 
@@ -75,6 +79,9 @@ class ValidatorController extends Controller
         $this->requireAdmin();
         $this->resolveModel($request->type, $request->id)
             ->update(['validation_status' => 'rejected', 'validation_stage' => null]);
+
+        ValidationLog::record($request->type, $request->id, 'rechazado', null, $request->note);
+
         return back()->with('success', 'Rechazado.');
     }
 
@@ -134,7 +141,61 @@ class ValidatorController extends Controller
 
         $item->update($update);
 
+        ValidationLog::record($request->type, $request->id, 'avanzado', $newStage, $request->note);
+
         return back()->with('success', 'Etapa avanzada.');
+    }
+
+    public function cerrar(Request $request)
+    {
+        $this->requireAdmin();
+        $request->validate([
+            'type'  => 'required|string',
+            'id'    => 'required|integer',
+            'note'  => 'required|string|max:1000',
+            'photo' => 'nullable|image|max:10240',
+        ]);
+
+        $item = $this->resolveModel($request->type, $request->id);
+
+        if ($item->validation_stage !== 'seguimiento') {
+            return back()->withErrors(['general' => 'Solo se puede cerrar cuando el caso está en la etapa de seguimiento.']);
+        }
+
+        $photoPath = $request->hasFile('photo')
+            ? $request->file('photo')->store('validacion/cierres', 'public')
+            : null;
+
+        $closedStatus = match ($request->type) {
+            'support_case'      => ['status' => 'resolved', 'resolved_at' => now()],
+            'cleaning'           => ['status' => 'resolved', 'resolved_at' => now()],
+            'transport_request'  => ['status' => 'completed', 'completed_at' => now()],
+            default              => [],
+        };
+
+        if ($closedStatus) {
+            $item->update($closedStatus);
+        }
+
+        ValidationLog::record($request->type, $request->id, 'cerrado', 'seguimiento', $request->note, $photoPath);
+
+        return back()->with('success', 'Caso cerrado con comprobante.');
+    }
+
+    public function historial(Request $request)
+    {
+        $this->requireAdmin();
+        $request->validate([
+            'type' => 'required|string',
+            'id'   => 'required|integer',
+        ]);
+
+        $logs = ValidationLog::where('validatable_type', $request->type)
+            ->where('validatable_id', $request->id)
+            ->latest()
+            ->get();
+
+        return response()->json($logs);
     }
 
     private function publicStatusForStage(string $type, string $stage, $item): array
