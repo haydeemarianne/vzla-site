@@ -94,90 +94,90 @@ function TaskCard({ task, caseId, familyPhone, idx, hasActiveSponsor }) {
         <div style={{
             background: isDone ? '#f9fafb' : 'white',
             border: `1px solid ${isDone ? '#e2e8f0' : '#e9ebf1'}`,
-            borderRadius: 16, padding:'14px 15px',
+            borderRadius: 13, padding:'10px 11px',
             opacity: isDone ? 0.75 : 1,
         }}>
-            <div style={{ display:'flex', alignItems:'center', gap:11 }}>
-                <div style={{ width:38, height:38, borderRadius:11, background:bg, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    {isDone ? <CheckCircle size={18} color="#16a34a" strokeWidth={2}/> : <Icon size={18} color={icon} strokeWidth={2}/>}
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div style={{ width:30, height:30, borderRadius:9, background:bg, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    {isDone ? <CheckCircle size={14} color="#16a34a" strokeWidth={2}/> : <Icon size={14} color={icon} strokeWidth={2}/>}
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:13.5, fontWeight:700, color: isDone ? '#94a3b8' : '#1e293b' }}>{task.title}</div>
-                    {task.description && <div style={{ fontSize:11.5, color:'#94a3b8', marginTop:2 }}>{task.description}</div>}
+                    <div style={{ fontSize:12, fontWeight:700, color: isDone ? '#94a3b8' : '#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.title}</div>
+                    {task.description && <div style={{ fontSize:10.5, color:'#94a3b8', marginTop:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.description}</div>}
                 </div>
-                <span style={{ background:ubg, color:ucol, fontSize:10, fontWeight:700, padding:'3px 9px', borderRadius:999, flexShrink:0 }}>{urgency}</span>
+                <span style={{ background:ubg, color:ucol, fontSize:9, fontWeight:700, padding:'2px 7px', borderRadius:999, flexShrink:0 }}>{urgency}</span>
             </div>
 
             {(isClaimed || isDone) && (
-                <div style={{ marginTop:11, padding:'9px 12px', background: isDone ? '#f0fdf4' : '#f8fafc', borderRadius:10, display:'flex', alignItems:'center', gap:9 }}>
-                    <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0, background:PASTEL[idx % PASTEL.length], display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <span style={{ fontSize:10, fontWeight:700, color:'#3a4250' }}>{initials(task.volunteer_name)}</span>
+                <div style={{ marginTop:8, padding:'7px 9px', background: isDone ? '#f0fdf4' : '#f8fafc', borderRadius:9, display:'flex', alignItems:'center', gap:7 }}>
+                    <div style={{ width:22, height:22, borderRadius:'50%', flexShrink:0, background:PASTEL[idx % PASTEL.length], display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <span style={{ fontSize:9, fontWeight:700, color:'#3a4250' }}>{initials(task.volunteer_name)}</span>
                     </div>
-                    <div style={{ flex:1 }}>
-                        <div style={{ fontSize:12.5, fontWeight:700, color:'#1e293b' }}>{task.volunteer_name}</div>
-                        <div style={{ fontSize:11, color: isDone ? '#16a34a' : '#94a3b8', fontWeight:600 }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.volunteer_name}</div>
+                        <div style={{ fontSize:9.5, color: isDone ? '#16a34a' : '#94a3b8', fontWeight:600 }}>
                             {isDone ? '✓ Completada' : 'Se encargó'}
                         </div>
                     </div>
                     {isClaimed && (
-                        <button onClick={complete} style={{ padding:'7px 12px', borderRadius:9, background:'#0f172a', border:'none', fontSize:11.5, fontWeight:700, color:'#fff', cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
-                            Marcar lista ✓
+                        <button onClick={complete} style={{ padding:'5px 9px', borderRadius:8, background:'#0f172a', border:'none', fontSize:10, fontWeight:700, color:'#fff', cursor:'pointer', fontFamily:'inherit', flexShrink:0 }}>
+                            Lista ✓
                         </button>
                     )}
                 </div>
             )}
 
             {revealed && familyPhone && (
-                <div style={{ marginTop:10, padding:'11px 13px', background:'#eef1fa', borderRadius:11 }}>
-                    <div style={{ fontSize:11.5, fontWeight:700, color:'#4263ac', marginBottom:8 }}>Contacto de la familia</div>
-                    <div style={{ display:'flex', gap:8 }}>
+                <div style={{ marginTop:8, padding:'9px 10px', background:'#eef1fa', borderRadius:10 }}>
+                    <div style={{ fontSize:10.5, fontWeight:700, color:'#4263ac', marginBottom:6 }}>Contacto de la familia</div>
+                    <div style={{ display:'flex', gap:6 }}>
                         <a href={`https://wa.me/${familyPhone?.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
-                            style={{ flex:1, background:'#16a34a', color:'#fff', borderRadius:10, padding:'9px 0', fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', gap:5, textDecoration:'none' }}>
-                            <MessageCircle size={13} color="#fff"/> WhatsApp
+                            style={{ flex:1, background:'#16a34a', color:'#fff', borderRadius:9, padding:'7px 0', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', gap:4, textDecoration:'none' }}>
+                            <MessageCircle size={11} color="#fff"/> WhatsApp
                         </a>
                         <a href={`tel:${familyPhone}`}
-                            style={{ flex:1, background:'#fff', color:'#1e293b', border:'1.5px solid #e2e8f0', borderRadius:10, padding:'9px 0', fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', gap:5, textDecoration:'none' }}>
-                            <Phone size={13} color="#1e293b"/> Llamar
+                            style={{ flex:1, background:'#fff', color:'#1e293b', border:'1.5px solid #e2e8f0', borderRadius:9, padding:'7px 0', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', gap:4, textDecoration:'none' }}>
+                            <Phone size={11} color="#1e293b"/> Llamar
                         </a>
                     </div>
                 </div>
             )}
 
             {isPending && !hasActiveSponsor && (
-                <div style={{ marginTop:11, padding:'9px 12px', background:'#f8fafc', border:'1px dashed #cbd5e1', borderRadius:10, display:'flex', alignItems:'center', gap:8 }}>
-                    <Lock size={12} color="#94a3b8" strokeWidth={2} style={{ flexShrink:0 }}/>
-                    <span style={{ fontSize:11.5, color:'#94a3b8', fontWeight:600 }}>
-                        Este caso necesita un padrino antes de poder tomar tareas.
+                <div style={{ marginTop:8, padding:'7px 9px', background:'#f8fafc', border:'1px dashed #cbd5e1', borderRadius:9, display:'flex', alignItems:'center', gap:6 }}>
+                    <Lock size={10} color="#94a3b8" strokeWidth={2} style={{ flexShrink:0 }}/>
+                    <span style={{ fontSize:10, color:'#94a3b8', fontWeight:600 }}>
+                        Necesita un padrino antes de poder tomar tareas.
                     </span>
                 </div>
             )}
 
             {isPending && hasActiveSponsor && (
-                <div style={{ marginTop:11 }}>
+                <div style={{ marginTop:8 }}>
                     {claiming ? (
-                        <form onSubmit={claim} style={{ display:'flex', flexDirection:'column', gap:8 }}>
-                            <div style={{ background:'#fef9c3', borderRadius:9, padding:'8px 11px', fontSize:12, color:'#92600e', fontWeight:600, display:'flex', alignItems:'center', gap:6 }}>
-                                <Lock size={12} color="#92600e"/> Al confirmar verás el teléfono de la familia
+                        <form onSubmit={claim} style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                            <div style={{ background:'#fef9c3', borderRadius:8, padding:'6px 9px', fontSize:10.5, color:'#92600e', fontWeight:600, display:'flex', alignItems:'center', gap:5 }}>
+                                <Lock size={10} color="#92600e"/> Verás el teléfono al confirmar
                             </div>
-                            <input style={{ width:'100%', boxSizing:'border-box', border:'1.5px solid #e2e8f0', borderRadius:11, padding:'10px 13px', fontSize:13, fontFamily:'inherit', color:'#1e293b', outline:'none' }}
+                            <input style={{ width:'100%', boxSizing:'border-box', border:'1.5px solid #e2e8f0', borderRadius:9, padding:'7px 10px', fontSize:12, fontFamily:'inherit', color:'#1e293b', outline:'none' }}
                                 type="text" placeholder="Tu nombre completo *" value={data.volunteer_name} onChange={e => setData('volunteer_name', e.target.value)} required/>
-                            <input style={{ width:'100%', boxSizing:'border-box', border:'1.5px solid #e2e8f0', borderRadius:11, padding:'10px 13px', fontSize:13, fontFamily:'inherit', color:'#1e293b', outline:'none' }}
+                            <input style={{ width:'100%', boxSizing:'border-box', border:'1.5px solid #e2e8f0', borderRadius:9, padding:'7px 10px', fontSize:12, fontFamily:'inherit', color:'#1e293b', outline:'none' }}
                                 type="tel" placeholder="Tu teléfono *" value={data.volunteer_phone} onChange={e => setData('volunteer_phone', e.target.value)} required/>
                             {(errors.volunteer_name || errors.volunteer_phone) && (
-                                <p style={{ fontSize:11.5, color:'#CE6969', margin:0 }}>{errors.volunteer_name || errors.volunteer_phone}</p>
+                                <p style={{ fontSize:10.5, color:'#CE6969', margin:0 }}>{errors.volunteer_name || errors.volunteer_phone}</p>
                             )}
-                            <div style={{ display:'flex', gap:8 }}>
-                                <button type="button" onClick={() => setClaiming(false)} style={{ flex:1, padding:'10px', borderRadius:11, background:'#f1f4f9', border:'none', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', color:'#64748b' }}>
+                            <div style={{ display:'flex', gap:6 }}>
+                                <button type="button" onClick={() => setClaiming(false)} style={{ flex:1, padding:'8px', borderRadius:9, background:'#f1f4f9', border:'none', fontSize:11.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit', color:'#64748b' }}>
                                     Cancelar
                                 </button>
-                                <button type="submit" disabled={processing} style={{ flex:2, padding:'10px', borderRadius:11, background: processing ? '#83A2DB' : '#4263ac', border:'none', fontSize:13, fontWeight:700, cursor: processing ? 'not-allowed' : 'pointer', fontFamily:'inherit', color:'#fff' }}>
-                                    {processing ? 'Confirmando…' : 'Me encargo de esta tarea'}
+                                <button type="submit" disabled={processing} style={{ flex:2, padding:'8px', borderRadius:9, background: processing ? '#83A2DB' : '#4263ac', border:'none', fontSize:11.5, fontWeight:700, cursor: processing ? 'not-allowed' : 'pointer', fontFamily:'inherit', color:'#fff' }}>
+                                    {processing ? 'Confirmando…' : 'Me encargo'}
                                 </button>
                             </div>
                         </form>
                     ) : (
-                        <button onClick={() => setClaiming(true)} style={{ width:'100%', padding:'10px', borderRadius:11, background:'#f8fafc', border:'1.5px dashed #cbd5e1', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit', color:'#475569', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
-                            <Circle size={13} color="#475569" strokeWidth={2}/> Yo me encargo de esto
+                        <button onClick={() => setClaiming(true)} style={{ width:'100%', padding:'8px', borderRadius:9, background:'#f8fafc', border:'1.5px dashed #cbd5e1', fontSize:11.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit', color:'#475569', display:'flex', alignItems:'center', justifyContent:'center', gap:5 }}>
+                            <Circle size={11} color="#475569" strokeWidth={2}/> Yo me encargo de esto
                         </button>
                     )}
                 </div>
