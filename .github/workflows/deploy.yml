@@ -30,16 +30,25 @@ jobs:
         run: npm run build
 
       - name: Commit y push build assets al repo
+        continue-on-error: true
         run: |
           git config user.email "action@github.com"
           git config user.name "GitHub Actions"
           git add --force public/build/
           if git diff --staged --quiet; then
             echo "Assets sin cambios, no hace falta commit"
-          else
-            git commit -m "build: assets compilados [skip ci]"
-            git push origin main
+            exit 0
           fi
+          git commit -m "build: assets compilados [skip ci]"
+          for i in 1 2 3; do
+            if git push origin main; then
+              echo "Push OK"
+              exit 0
+            fi
+            echo "Push rechazado (intento $i), reintentando con rebase..."
+            git pull --rebase origin main
+          done
+          echo "No se pudo pushear el commit de assets tras 3 intentos; el deploy sigue con lo que ya esta en origin/main."
 
       - name: Disparar deploy en servidor
         run: |
