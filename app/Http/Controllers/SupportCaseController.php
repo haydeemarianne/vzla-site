@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\SupportCase;
 use App\Models\CaseTask;
 use App\Models\CaseUpdate;
+use App\Models\CaseAdoption;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -111,10 +112,15 @@ class SupportCaseController extends Controller
 
         $adoption = $supportCase->adoption;
 
+        $hasActiveSponsor = CaseAdoption::where('support_case_id', $supportCase->id)
+            ->where('status', 'active')
+            ->exists();
+
         return Inertia::render('Casos/Show', [
-            'supportCase' => $caseData,
-            'tasks'       => $supportCase->tasks()->orderBy('id')->get(),
-            'adoption'    => $adoption ? [
+            'supportCase'      => $caseData,
+            'tasks'            => $supportCase->tasks()->orderBy('id')->get(),
+            'hasActiveSponsor' => $hasActiveSponsor,
+            'adoption'         => $adoption ? [
                 'id'             => $adoption->id,
                 'status'         => $adoption->status,
                 'volunteer_name' => $adoption->volunteer?->name,
@@ -127,6 +133,14 @@ class SupportCaseController extends Controller
     {
         if ($task->status !== 'pending') {
             return back()->withErrors(['task' => 'Esta tarea ya fue tomada.']);
+        }
+
+        $hasActiveSponsor = CaseAdoption::where('support_case_id', $supportCase->id)
+            ->where('status', 'active')
+            ->exists();
+
+        if (!$hasActiveSponsor) {
+            return back()->withErrors(['task' => 'Este caso necesita al menos un padrino aprobado antes de poder tomar tareas.']);
         }
 
         $request->validate([
@@ -143,6 +157,27 @@ class SupportCaseController extends Controller
         $supportCase->syncStatusFromTasks();
 
         return back()->with('success', "¡Listo! Quedaste encargado de: {$task->title}");
+    }
+
+    public function addTask(Request $request, SupportCase $supportCase)
+    {
+        if (! session('is_admin')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title'       => 'required|string|max:200',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        $supportCase->tasks()->create([
+            'need_key'    => 'custom',
+            'title'       => $request->title,
+            'description' => $request->description,
+            'status'      => 'pending',
+        ]);
+
+        return back()->with('success', 'Tarea agregada al caso.');
     }
 
     public function completeTask(Request $request, SupportCase $supportCase, CaseTask $task)

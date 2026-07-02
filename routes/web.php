@@ -122,6 +122,7 @@ Route::prefix('casos')->group(function () {
     Route::get('/{supportCase}/apadrinar', [CaseSponsorshipController::class, 'create']);
     Route::post('/{supportCase}/apadrinar', [CaseSponsorshipController::class, 'store']);
     Route::post('/{supportCase}/actualizar', [SupportCaseController::class, 'addUpdate']);
+    Route::post('/{supportCase}/tareas', [SupportCaseController::class, 'addTask']);
     Route::post('/{supportCase}/tareas/{task}/tomar', [SupportCaseController::class, 'claimTask']);
     Route::patch('/{supportCase}/tareas/{task}/completar', [SupportCaseController::class, 'completeTask']);
 });

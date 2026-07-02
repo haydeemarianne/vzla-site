@@ -66,7 +66,7 @@ function parseNeeds(raw) {
 }
 
 // ─── TaskCard ─────────────────────────────────────────────────────────────────
-function TaskCard({ task, caseId, familyPhone, idx }) {
+function TaskCard({ task, caseId, familyPhone, idx, hasActiveSponsor }) {
     const meta  = NEED_META[task.need_key] ?? NEED_META.other;
     const { Icon, bg, icon, urgency, ubg, ucol } = meta;
     const [claiming, setClaiming] = useState(false);
@@ -143,7 +143,16 @@ function TaskCard({ task, caseId, familyPhone, idx }) {
                 </div>
             )}
 
-            {isPending && (
+            {isPending && !hasActiveSponsor && (
+                <div style={{ marginTop:11, padding:'9px 12px', background:'#f8fafc', border:'1px dashed #cbd5e1', borderRadius:10, display:'flex', alignItems:'center', gap:8 }}>
+                    <Lock size={12} color="#94a3b8" strokeWidth={2} style={{ flexShrink:0 }}/>
+                    <span style={{ fontSize:11.5, color:'#94a3b8', fontWeight:600 }}>
+                        Este caso necesita un padrino antes de poder tomar tareas.
+                    </span>
+                </div>
+            )}
+
+            {isPending && hasActiveSponsor && (
                 <div style={{ marginTop:11 }}>
                     {claiming ? (
                         <form onSubmit={claim} style={{ display:'flex', flexDirection:'column', gap:8 }}>
@@ -177,10 +186,49 @@ function TaskCard({ task, caseId, familyPhone, idx }) {
     );
 }
 
+// ─── Agregar tarea (solo validadores/admin) ────────────────────────────────────
+function AddTaskForm({ caseId }) {
+    const [open, setOpen] = useState(false);
+    const { data, setData, post, processing, errors, reset } = useForm({ title: '', description: '' });
+
+    const submit = (e) => {
+        e.preventDefault();
+        post(`/casos/${caseId}/tareas`, { onSuccess: () => { reset(); setOpen(false); } });
+    };
+
+    if (!open) {
+        return (
+            <button onClick={() => setOpen(true)} style={{ marginTop:11, width:'100%', padding:'10px', borderRadius:11, background:'#eef1fa', border:'1.5px dashed #a9b8dd', fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit', color:'#4263ac', display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                + Agregar tarea al caso
+            </button>
+        );
+    }
+
+    return (
+        <form onSubmit={submit} style={{ marginTop:11, ...CARD, padding:'14px 15px', display:'flex', flexDirection:'column', gap:8 }}>
+            <p style={{ margin:0, fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' }}>Nueva tarea (validador)</p>
+            <input style={{ width:'100%', boxSizing:'border-box', border:'1.5px solid #e2e8f0', borderRadius:11, padding:'10px 13px', fontSize:13, fontFamily:'inherit', color:'#1e293b', outline:'none' }}
+                type="text" placeholder="Título de la tarea *" value={data.title} onChange={e => setData('title', e.target.value)} required/>
+            {errors.title && <p style={{ fontSize:11.5, color:'#CE6969', margin:0 }}>{errors.title}</p>}
+            <textarea style={{ width:'100%', boxSizing:'border-box', border:'1.5px solid #e2e8f0', borderRadius:11, padding:'10px 13px', fontSize:13, fontFamily:'inherit', color:'#1e293b', outline:'none', resize:'none' }}
+                rows={2} placeholder="Detalle (opcional)" value={data.description} onChange={e => setData('description', e.target.value)}/>
+            <div style={{ display:'flex', gap:8 }}>
+                <button type="button" onClick={() => { setOpen(false); reset(); }} style={{ flex:1, padding:'9px', borderRadius:10, background:'#f1f4f9', border:'none', fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit', color:'#64748b' }}>
+                    Cancelar
+                </button>
+                <button type="submit" disabled={processing} style={{ flex:2, padding:'9px', borderRadius:10, background: processing ? '#83A2DB' : '#4263ac', border:'none', fontSize:12.5, fontWeight:700, cursor: processing ? 'not-allowed' : 'pointer', fontFamily:'inherit', color:'#fff' }}>
+                    {processing ? 'Agregando…' : 'Agregar tarea'}
+                </button>
+            </div>
+        </form>
+    );
+}
+
 // ─── Página ───────────────────────────────────────────────────────────────────
-export default function CasosShow({ supportCase, tasks, adoption }) {
+export default function CasosShow({ supportCase, tasks, adoption, hasActiveSponsor }) {
     const { props } = usePage();
-    const flash = props.flash ?? {};
+    const flash   = props.flash ?? {};
+    const isAdmin = !!props.auth?.is_admin;
 
     const days        = daysAgo(supportCase.created_at);
     const displayName = supportCase.family_name ?? 'Familia';
@@ -413,10 +461,12 @@ export default function CasosShow({ supportCase, tasks, adoption }) {
                         ) : (
                             <div className="va-tasks-2col">
                                 {taskList.map((task, i) => (
-                                    <TaskCard key={task.id} task={task} caseId={supportCase.id} familyPhone={familyPhone} idx={i}/>
+                                    <TaskCard key={task.id} task={task} caseId={supportCase.id} familyPhone={familyPhone} idx={i} hasActiveSponsor={hasActiveSponsor}/>
                                 ))}
                             </div>
                         )}
+
+                        {isAdmin && <AddTaskForm caseId={supportCase.id}/>}
                     </div>
                 </div>
             </div>
