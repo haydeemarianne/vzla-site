@@ -1,6 +1,7 @@
 import { useForm, router, usePage, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import MainLayout from '@/Layouts/MainLayout';
+import { PASTEL, initials } from '@/Components/UI/ShowKit';
 import {
     ArrowLeft, Check, CheckCircle, Circle, Phone, MessageCircle,
     Utensils, Droplets, Pill, Shirt, Home, Baby, Wrench,
@@ -52,11 +53,6 @@ const STATUS_MAP = {
     rejected:  { label:'Rechazado',      bg:'#f1f5f9', col:'#94a3b8' },
 };
 
-const PASTEL = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf'];
-
-function initials(name = '') {
-    return (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
-}
 function daysAgo(dateStr) {
     return Math.max(1, Math.floor((Date.now() - new Date(dateStr)) / 86400000));
 }
