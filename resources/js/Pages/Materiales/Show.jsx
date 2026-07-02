@@ -77,6 +77,31 @@ export default function MaterialesShow({ material: m }) {
                     </button>
                 </div>
 
+                {/* ── Portada — protagonismo al archivo ── */}
+                <div style={{ ...CARD, padding: isMedia && m.file_path ? 12 : 30 }}>
+                    {isMedia && m.file_path ? (
+                        <div style={{ borderRadius: 14, overflow: 'hidden', background: '#f8fafc', display: 'flex', justifyContent: 'center' }}>
+                            {isImage && (
+                                <img src={`/storage/${m.file_path}`} alt={m.title}
+                                    style={{ width: '100%', maxHeight: 440, objectFit: 'contain', display: 'block' }}/>
+                            )}
+                            {isVideo && (
+                                <video src={`/storage/${m.file_path}`} controls
+                                    style={{ width: '100%', maxHeight: 440, display: 'block' }}/>
+                            )}
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '20px 0' }}>
+                            <div style={{ width: 64, height: 64, borderRadius: 18, background: m.is_3d ? '#eef1fa' : '#f8fafc', border: '1px solid #e9ebf1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FileIcon fileType={m.file_type} is3d={m.is_3d}/>
+                            </div>
+                            <p style={{ margin: 0, fontSize: 12.5, color: '#94a3b8', fontWeight: 600 }}>
+                                {m.is_3d ? 'Archivo 3D — descarga para verlo' : `Archivo ${(m.file_type || '').toUpperCase()}`}
+                            </p>
+                        </div>
+                    )}
+                </div>
+
                 <div className="va-show-grid">
 
                     {/* ── Col izq: descripción + instrucciones ── */}
@@ -118,17 +143,64 @@ export default function MaterialesShow({ material: m }) {
                                     </div>
                                 </>
                             )}
+                            {!m.description && !hasPrint && !m.is_3d && (
+                                <p style={{ margin: 0, fontSize: 13, color: '#c0c8d4' }}>Sin descripción adicional.</p>
+                            )}
+                        </div>
+
+                        {/* Contribuidor — crédito visible a quien aporta el recurso */}
+                        <div style={CARD}>
+                            <p style={SEC}>Aportado por</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                                <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: PASTEL[(m.uploaded_by || '?').charCodeAt(0) % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: '#3a4250' }}>{initials(m.uploaded_by)}</span>
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b', letterSpacing: '-.2px' }}>{m.uploaded_by || 'Anónimo'}</p>
+                                    {m.organization && <p style={{ margin: '1px 0 0', fontSize: 11.5, color: '#94a3b8', fontWeight: 600 }}>{m.organization}</p>}
+                                </div>
+                            </div>
+                            {(m.contributor_instagram || m.contributor_phone) && <div style={DIV}/>}
+                            {(m.contributor_instagram || m.contributor_phone) && (
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    {m.contributor_instagram && (
+                                        <a href={`https://instagram.com/${m.contributor_instagram.replace('@','')}`}
+                                            target="_blank" rel="noopener noreferrer"
+                                            style={{ flex: '1 1 140px', display: 'flex', alignItems: 'center', gap: 8, background: '#fdf2f8', color: '#9d174d', fontSize: 12.5, fontWeight: 700, padding: '10px 13px', borderRadius: 12, textDecoration: 'none', border: '1px solid #fce7f3' }}>
+                                            <AtSign size={13} color="#9d174d" strokeWidth={2}/> {m.contributor_instagram.replace('@','')}
+                                        </a>
+                                    )}
+                                    {m.contributor_phone && (
+                                        <a href={`tel:${m.contributor_phone}`}
+                                            style={{ flex: '1 1 140px', display: 'flex', alignItems: 'center', gap: 8, background: '#eef1fa', color: '#4263ac', fontSize: 12.5, fontWeight: 700, padding: '10px 13px', borderRadius: 12, textDecoration: 'none', border: '1px solid #d6dffa' }}>
+                                            <Phone size={13} color="#4263ac" strokeWidth={2}/> {m.contributor_phone}
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+                            {m.price_estimate && (
+                                <>
+                                    <div style={DIV}/>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Tag size={13} color="#b45309" strokeWidth={2}/>
+                                        <div>
+                                            <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#1e293b' }}>{m.price_estimate}</p>
+                                            <p style={{ margin: 0, fontSize: 10, color: '#94a3b8' }}>costo referencial</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
-                    {/* ── Col der: acciones + contribuidor + media ── */}
+                    {/* ── Col der: acciones ── */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
                         {/* Acciones — botones sólidos + stats inline */}
                         <div style={CARD}>
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <a href={`/materiales/${m.id}/descargar`} style={{
-                                    flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                     background: '#4263ac', color: 'white', fontSize: 13, fontWeight: 700,
                                     padding: '11px', borderRadius: 12, textDecoration: 'none',
                                 }}>
@@ -158,66 +230,6 @@ export default function MaterialesShow({ material: m }) {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Contribuidor — crédito visible a quien aporta el recurso */}
-                        <div style={CARD}>
-                            <p style={SEC}>Aportado por</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-                                <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: PASTEL[(m.uploaded_by || '?').charCodeAt(0) % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <span style={{ fontSize: 14, fontWeight: 700, color: '#3a4250' }}>{initials(m.uploaded_by)}</span>
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                    <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b', letterSpacing: '-.2px' }}>{m.uploaded_by || 'Anónimo'}</p>
-                                    {m.organization && <p style={{ margin: '1px 0 0', fontSize: 11.5, color: '#94a3b8', fontWeight: 600 }}>{m.organization}</p>}
-                                </div>
-                            </div>
-                            {(m.contributor_instagram || m.contributor_phone) && <div style={DIV}/>}
-                            {(m.contributor_instagram || m.contributor_phone) && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                    {m.contributor_instagram && (
-                                        <a href={`https://instagram.com/${m.contributor_instagram.replace('@','')}`}
-                                            target="_blank" rel="noopener noreferrer"
-                                            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fdf2f8', color: '#9d174d', fontSize: 12.5, fontWeight: 700, padding: '10px 13px', borderRadius: 12, textDecoration: 'none', border: '1px solid #fce7f3' }}>
-                                            <AtSign size={13} color="#9d174d" strokeWidth={2}/> {m.contributor_instagram.replace('@','')}
-                                        </a>
-                                    )}
-                                    {m.contributor_phone && (
-                                        <a href={`tel:${m.contributor_phone}`}
-                                            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#eef1fa', color: '#4263ac', fontSize: 12.5, fontWeight: 700, padding: '10px 13px', borderRadius: 12, textDecoration: 'none', border: '1px solid #d6dffa' }}>
-                                            <Phone size={13} color="#4263ac" strokeWidth={2}/> {m.contributor_phone}
-                                        </a>
-                                    )}
-                                </div>
-                            )}
-                            {m.price_estimate && (
-                                <>
-                                    <div style={DIV}/>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <Tag size={13} color="#b45309" strokeWidth={2}/>
-                                        <div>
-                                            <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#1e293b' }}>{m.price_estimate}</p>
-                                            <p style={{ margin: 0, fontSize: 10, color: '#94a3b8' }}>costo referencial</p>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Media — dentro de card, consistente con el resto */}
-                        {isMedia && m.file_path && (
-                            <div style={{ ...CARD, padding: 12 }}>
-                                <div style={{ borderRadius: 12, overflow: 'hidden', background: '#f8fafc' }}>
-                                    {isImage && (
-                                        <img src={`/storage/${m.file_path}`} alt={m.title}
-                                            style={{ width: '100%', maxHeight: 320, objectFit: 'contain', display: 'block', margin: '0 auto' }}/>
-                                    )}
-                                    {isVideo && (
-                                        <video src={`/storage/${m.file_path}`} controls
-                                            style={{ width: '100%', maxHeight: 320, display: 'block' }}/>
-                                    )}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
