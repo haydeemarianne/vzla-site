@@ -2,6 +2,7 @@ import MainLayout from '@/Layouts/MainLayout';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Plus, X, Check, Trash2, Eye, EyeOff } from 'lucide-react';
+import { FloatInput, FloatSelect } from '@/Components/UI/FloatField';
 
 const ROLE_CFG = {
     super_admin: { label:'Super Admin', bg:'#0f172a', color:'white'  },
@@ -14,6 +15,9 @@ const initials = (name) =>
 
 const PASTEL = ['#e7dcf2','#dfe6f4','#d6e8e0','#f0d6d6','#f3e2cf'];
 const pastel  = (i) => PASTEL[i % PASTEL.length];
+
+const CARD = { background:'white', border:'1px solid #e9ebf1', borderRadius:20, padding:'20px' };
+const SEC  = { margin:'0 0 14px', fontSize:11, fontWeight:700, letterSpacing:'.5px', textTransform:'uppercase', color:'#7b8595' };
 
 export default function Usuarios({ users = [], admin_role, admin_name }) {
     const isSuperAdmin = admin_role === 'super_admin';
@@ -48,12 +52,6 @@ export default function Usuarios({ users = [], admin_role, admin_name }) {
         router.delete(`/validar/usuarios/${id}`, { preserveScroll: true });
     };
 
-    const INPUT = {
-        width:'100%', padding:'9px 13px', borderRadius:10,
-        border:'1.5px solid #e6e9f0', fontSize:13, color:'#1a2230',
-        outline:'none', fontFamily:'inherit', background:'white', boxSizing:'border-box',
-    };
-
     const visibleUsers = isSuperAdmin ? users : users.filter(u => u.role === 'validator');
 
     return (
@@ -84,59 +82,57 @@ export default function Usuarios({ users = [], admin_role, admin_name }) {
 
                 {/* Formulario nuevo usuario */}
                 {showForm && (
-                    <div style={{ background:'white', border:'1px solid #e6e9f0', borderRadius:20, padding:'20px 22px' }}>
-                        <div style={{ fontSize:14, fontWeight:700, color:'#1a2230', marginBottom:14 }}>
-                            Crear usuario
-                        </div>
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                            <div>
-                                <label style={{ fontSize:11, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>Nombre</label>
-                                <input value={form.name} onChange={e => set('name', e.target.value)} style={INPUT} placeholder="Nombre completo"/>
+                    <div style={CARD}>
+                        <p style={SEC}>Crear usuario</p>
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                            <FloatInput
+                                label="Nombre completo"
+                                value={form.name}
+                                onChange={e => set('name', e.target.value)}
+                            />
+                            <FloatInput
+                                label="Correo electrónico"
+                                type="email"
+                                value={form.email}
+                                onChange={e => set('email', e.target.value)}
+                            />
+                            <div style={{ position:'relative' }}>
+                                <FloatInput
+                                    label="Contraseña"
+                                    type={showPass ? 'text' : 'password'}
+                                    value={form.password}
+                                    onChange={e => set('password', e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPass(s => !s)}
+                                    style={{
+                                        position:'absolute', right:14, top:19,
+                                        background:'none', border:'none', cursor:'pointer', padding:2,
+                                        color:'#94a3b8', display:'flex', alignItems:'center', zIndex:3,
+                                    }}
+                                >
+                                    {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
+                                </button>
                             </div>
-                            <div>
-                                <label style={{ fontSize:11, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>Correo</label>
-                                <input type="email" value={form.email} onChange={e => set('email', e.target.value)} style={INPUT} placeholder="correo@ejemplo.com"/>
-                            </div>
-                            <div>
-                                <label style={{ fontSize:11, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>Contraseña</label>
-                                <div style={{ position:'relative' }}>
-                                    <input
-                                        type={showPass ? 'text' : 'password'}
-                                        value={form.password}
-                                        onChange={e => set('password', e.target.value)}
-                                        style={{ ...INPUT, paddingRight:38 }}
-                                        placeholder="Mínimo 6 caracteres"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPass(s => !s)}
-                                        style={{
-                                            position:'absolute', right:10, top:'50%', transform:'translateY(-50%)',
-                                            background:'none', border:'none', cursor:'pointer', padding:2,
-                                            color:'#94a3b8', display:'flex', alignItems:'center',
-                                        }}
-                                    >
-                                        {showPass ? <EyeOff size={15}/> : <Eye size={15}/>}
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label style={{ fontSize:11, fontWeight:700, color:'#7b8595', textTransform:'uppercase', letterSpacing:'.4px', display:'block', marginBottom:5 }}>Rol</label>
-                                <select value={form.role} onChange={e => set('role', e.target.value)} style={INPUT}>
-                                    {allowedRoles.map(r => <option key={r.v} value={r.v}>{r.label}</option>)}
-                                </select>
-                            </div>
+                            <FloatSelect
+                                label="Rol"
+                                value={form.role}
+                                onChange={e => set('role', e.target.value)}
+                            >
+                                {allowedRoles.map(r => <option key={r.v} value={r.v}>{r.label}</option>)}
+                            </FloatSelect>
                         </div>
                         <div style={{ display:'flex', gap:9, marginTop:16 }}>
                             <button onClick={submit} disabled={sending} style={{
                                 flex:1, padding:'11px', borderRadius:12, border:'none',
-                                background:'#4263ac', color:'white', fontSize:13, fontWeight:700,
-                                cursor:'pointer', fontFamily:'inherit', opacity: sending ? .6 : 1,
+                                background: sending ? '#83A2DB' : '#4263ac', color:'white', fontSize:13, fontWeight:700,
+                                cursor: sending ? 'not-allowed' : 'pointer', fontFamily:'inherit',
                             }}>
                                 {sending ? 'Guardando…' : 'Crear usuario'}
                             </button>
                             <button onClick={() => setShowForm(false)} style={{
-                                padding:'11px 16px', borderRadius:12, border:'1px solid #e6e9f0',
+                                padding:'11px 16px', borderRadius:12, border:'1px solid #e2e8f0',
                                 background:'white', color:'#64748b', fontSize:13, fontWeight:600,
                                 cursor:'pointer', fontFamily:'inherit',
                             }}>
@@ -147,7 +143,7 @@ export default function Usuarios({ users = [], admin_role, admin_name }) {
                 )}
 
                 {/* Lista de usuarios */}
-                <div style={{ background:'white', border:'1px solid #e6e9f0', borderRadius:20, overflow:'hidden' }}>
+                <div style={{ ...CARD, padding:0, overflow:'hidden' }}>
                     {visibleUsers.length === 0 ? (
                         <p style={{ textAlign:'center', color:'#94a3b8', fontSize:13, padding:'32px 0', margin:0 }}>
                             No hay usuarios registrados.
