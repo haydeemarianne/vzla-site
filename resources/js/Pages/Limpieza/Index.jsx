@@ -8,7 +8,7 @@ const CARD_H  = 168;
 const VISIBLE = 4;
 
 const COLUMNS = [
-    { key: 'pending',    label: 'Sin equipo',  color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
+    { key: 'pending',    label: 'Pendiente',   color: '#4263ac', bg: '#eef1fa', dot: '#4263ac' },
     { key: 'in_process', label: 'En proceso',  color: '#b45309', bg: '#fef3e2', dot: '#f59e0b' },
     { key: 'resolved',   label: 'Completados', color: '#16a34a', bg: '#dcfce7', dot: '#16a34a' },
 ];
@@ -167,7 +167,7 @@ export default function LimpiezaIndex({ by_status }) {
                     <div>
                         <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px', color: '#1e293b' }}>Limpieza comunitaria</h1>
                         <p style={{ margin: '3px 0 0', fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
-                            {pending.length} sin equipo · {total} en total
+                            {pending.length} pendientes · {total} en total
                         </p>
                     </div>
                     <Link href="/limpieza/reportar" style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#4263ac', color: 'white', fontSize: 12, fontWeight: 700, padding: '8px 13px', borderRadius: 11, textDecoration: 'none', flexShrink: 0 }}>
