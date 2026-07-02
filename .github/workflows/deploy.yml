@@ -3,20 +3,13 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'public/build/**'   # Evita loop infinito: ignora los pushes del propio CI
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write       # Necesario para que CI pueda hacer push de vuelta
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -26,29 +19,8 @@ jobs:
       - name: Instalar dependencias JS
         run: npm ci
 
-      - name: Build assets (Vite)
+      - name: Verificar que el build no esta roto
         run: npm run build
-
-      - name: Commit y push build assets al repo
-        continue-on-error: true
-        run: |
-          git config user.email "action@github.com"
-          git config user.name "GitHub Actions"
-          git add --force public/build/
-          if git diff --staged --quiet; then
-            echo "Assets sin cambios, no hace falta commit"
-            exit 0
-          fi
-          git commit -m "build: assets compilados [skip ci]"
-          for i in 1 2 3; do
-            if git push origin main; then
-              echo "Push OK"
-              exit 0
-            fi
-            echo "Push rechazado (intento $i), reintentando con rebase..."
-            git pull --rebase origin main
-          done
-          echo "No se pudo pushear el commit de assets tras 3 intentos; el deploy sigue con lo que ya esta en origin/main."
 
       - name: Disparar deploy en servidor
         run: |
