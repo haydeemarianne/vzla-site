@@ -46,16 +46,30 @@ class CaseSponsorshipController extends Controller
             return back()->withErrors(['phone' => 'Ya tienes una solicitud activa para este caso.']);
         }
 
-        $volunteer = CaseVolunteer::create([
-            'name'              => $request->name,
-            'cedula'            => $request->cedula,
-            'phone'             => $request->phone,
-            'email'             => $request->email ?? '',
-            'city'              => $request->city,
-            'state'             => $request->state,
-            'motivation'        => $request->motivation,
-            'validation_status' => 'pending',
-        ]);
+        // Si ya es padrino de otro caso, reutiliza su perfil (un padrino puede sumir varios casos)
+        $volunteer = CaseVolunteer::where('phone', $request->phone)->first();
+
+        if ($volunteer) {
+            $volunteer->update([
+                'name'       => $request->name,
+                'cedula'     => $request->cedula,
+                'email'      => $request->email ?? $volunteer->email,
+                'city'       => $request->city,
+                'state'      => $request->state,
+                'motivation' => $request->motivation,
+            ]);
+        } else {
+            $volunteer = CaseVolunteer::create([
+                'name'              => $request->name,
+                'cedula'            => $request->cedula,
+                'phone'             => $request->phone,
+                'email'             => $request->email ?? '',
+                'city'              => $request->city,
+                'state'             => $request->state,
+                'motivation'        => $request->motivation,
+                'validation_status' => 'pending',
+            ]);
+        }
 
         CaseAdoption::create([
             'support_case_id'   => $supportCase->id,

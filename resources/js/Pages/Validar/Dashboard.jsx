@@ -688,6 +688,16 @@ function RecorridoCalendarModal({ stagedMap, onClose }) {
 }
 
 /* ─── Campos completos por módulo (vista de datos) ─── */
+/* Traducción de necesidades (needs) — mismo mapeo que Casos/Index y Casos/Show */
+const NEED_LABELS = {
+    food: 'Alimentación', water: 'Agua', medicine: 'Medicamentos',
+    medical_care: 'Atención médica', shelter: 'Refugio', clothing: 'Ropa',
+    hygiene: 'Higiene', baby: 'Bebé', construction: 'Materiales',
+    cleaning: 'Limpieza', transport: 'Transporte', electricity: 'Electricidad',
+    tools: 'Herramientas', documents: 'Documentos', furniture: 'Mobiliario',
+    emotional: 'Apoyo emocional', other: 'Otro',
+};
+
 const MODULE_DATA_FIELDS = {
     cases: [
         { label:'Nombre familia',    key:'family_name'   },
@@ -873,19 +883,19 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
         { key:'historial', label:'Historial' },
     ];
 
-    const renderBoolVal = (v) => v ? (
-        <span style={{ color:'#16a34a', fontWeight:700 }}>Sí</span>
-    ) : (
-        <span style={{ color:'#94a3b8' }}>No</span>
+    const renderBoolVal = (v) => (
+        <span style={{ fontSize:13, fontWeight:600, color: v ? '#16a34a' : '#94a3b8' }}>{v ? 'Sí' : 'No'}</span>
     );
 
-    const renderArrayVal = (v) => {
+    const renderArrayVal = (v, key) => {
         const arr = Array.isArray(v) ? v : (typeof v === 'string' ? JSON.parse(v || '[]') : []);
-        if (!arr.length) return <span style={{ color:'#c0c8d4' }}>—</span>;
+        if (!arr.length) return <span style={{ fontSize:13, color:'#c0c8d4' }}>—</span>;
         return (
-            <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
                 {arr.map((t, i) => (
-                    <span key={i} style={{ padding:'2px 9px', borderRadius:999, background:'#eef1fa', color:'#4263ac', fontSize:11, fontWeight:700 }}>{t}</span>
+                    <span key={i} style={{ padding:'3px 10px', borderRadius:999, background:'#eef1fa', color:'#4263ac', fontSize:11.5, fontWeight:700 }}>
+                        {key === 'needs' ? (NEED_LABELS[t] ?? t) : t}
+                    </span>
                 ))}
             </div>
         );
@@ -985,7 +995,7 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                                                     <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom: (editForm[f.name]||[]).length ? 8 : 0 }}>
                                                         {(editForm[f.name] || []).map((tag, i) => (
                                                             <span key={i} style={{ display:'flex', alignItems:'center', gap:5, background:'#eef1fa', color:'#4263ac', fontSize:11.5, fontWeight:700, padding:'4px 9px', borderRadius:999 }}>
-                                                                {tag}
+                                                                {f.name === 'needs' ? (NEED_LABELS[tag] ?? tag) : tag}
                                                                 <button type="button" onClick={() => setEditForm(p => ({ ...p, [f.name]: p[f.name].filter((_, idx) => idx !== i) }))}
                                                                     style={{ border:'none', background:'none', cursor:'pointer', color:'#4263ac', padding:0, display:'flex' }}>
                                                                     <X size={10} strokeWidth={2.5}/>
@@ -1040,19 +1050,19 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                                                         display:'grid', gridTemplateColumns:'120px 1fr',
                                                         gap:8, padding:'9px 0',
                                                         borderBottom: i < dataFields.length-1 ? '1px solid #f7f8fb' : 'none',
-                                                        alignItems: f.full || f.array ? 'flex-start' : 'center',
+                                                        alignItems:'start',
                                                     }}>
-                                                        <span style={{ fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.4px', paddingTop: f.full||f.array ? 1 : 0 }}>
+                                                        <span style={{ fontSize:11, fontWeight:700, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'.4px', lineHeight:1.4 }}>
                                                             {f.label}
                                                         </span>
                                                         {isEmpty ? (
-                                                            <span style={{ fontSize:12.5, color:'#c0c8d4' }}>—</span>
+                                                            <span style={{ fontSize:13, fontWeight:600, color:'#c0c8d4' }}>—</span>
                                                         ) : f.bool ? renderBoolVal(val) :
-                                                           f.array ? renderArrayVal(val) :
+                                                           f.array ? renderArrayVal(val, f.key) :
                                                            f.date ? (
-                                                               <span style={{ fontSize:13, color:'#2b3340', fontWeight:500 }}>{fmtDate(val)}</span>
+                                                               <span style={{ fontSize:13, fontWeight:600, color:'#2b3340', lineHeight:1.4 }}>{fmtDate(val)}</span>
                                                            ) : (
-                                                               <span style={{ fontSize:13, color:'#2b3340', fontWeight: f.full ? 400 : 500, lineHeight:1.5 }}>{String(val)}</span>
+                                                               <span style={{ fontSize:13, fontWeight:600, color:'#2b3340', lineHeight:1.4 }}>{String(val)}</span>
                                                            )
                                                         }
                                                     </div>
