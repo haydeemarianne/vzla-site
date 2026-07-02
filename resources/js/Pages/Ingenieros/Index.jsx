@@ -1,6 +1,6 @@
 import MainLayout from '@/Layouts/MainLayout';
 import { Link, router } from '@inertiajs/react';
-import { Wrench, ClipboardList, MapPin, Phone, UserPlus, AlertTriangle, Clock } from 'lucide-react';
+import { Wrench, ClipboardList, MapPin, Phone, UserPlus, AlertTriangle, Clock, ChevronRight } from 'lucide-react';
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 
@@ -55,10 +55,10 @@ function RequestCard({ req }) {
     const days = Math.floor((Date.now() - new Date(req.created_at)) / 86400000);
 
     return (
-        <div style={{
+        <div onClick={() => router.visit(`/ingenieros/solicitud/${req.id}`)} style={{
             background: 'white', borderRadius: 12,
             boxShadow: '0 1px 6px rgba(16,24,40,.06)',
-            padding: '10px 12px', cursor: 'default',
+            padding: '10px 12px', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
         }}>
             {/* Zona + urgencia */}
@@ -77,16 +77,16 @@ function RequestCard({ req }) {
                 <span style={{ fontSize: 10.5, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.address}</span>
             </div>
 
-            {/* Tipo de estructura + solicitante */}
-            <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
-                {req.structure_type && (
-                    <span style={{ fontSize: 9.5, fontWeight: 700, background: '#f1f4f9', color: '#475569', padding: '2px 7px', borderRadius: 999 }}>
-                        {STRUCT[req.structure_type] || req.structure_type}
-                    </span>
-                )}
+            {/* Solicitante + estructura en una línea */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
                 <span style={{ fontSize: 10.5, color: '#64748b', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {req.requester_name}
                 </span>
+                {req.structure_type && (
+                    <span style={{ fontSize: 9.5, fontWeight: 700, background: '#f1f4f9', color: '#475569', padding: '2px 7px', borderRadius: 4, flexShrink: 0 }}>
+                        {STRUCT[req.structure_type] || req.structure_type}
+                    </span>
+                )}
             </div>
 
             {/* Ingeniero asignado (si aplica) */}
@@ -97,13 +97,15 @@ function RequestCard({ req }) {
                 </div>
             )}
 
-            {/* Fecha + días */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <Clock size={9} color="#cbd5e1" strokeWidth={2}/>
-                <span style={{ fontSize: 10, color: '#94a3b8' }}>
-                    {fmtDate(req.created_at)} ·{' '}
-                    <span style={{ color: days > 7 ? '#CE6969' : '#94a3b8' }}>{days}d</span>
-                </span>
+            {/* Fecha + días + flecha */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f4f9', paddingTop: 5, marginTop: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Clock size={9} color="#cbd5e1" strokeWidth={2}/>
+                    <span style={{ fontSize: 10, color: '#94a3b8' }}>
+                        {fmtDate(req.created_at)} · <span style={{ color: days > 7 ? '#CE6969' : '#94a3b8' }}>{days}d</span>
+                    </span>
+                </div>
+                <ChevronRight size={12} color="#cbd5e1" strokeWidth={2}/>
             </div>
         </div>
     );
@@ -113,48 +115,42 @@ function RequestCard({ req }) {
 
 function EngineerCard({ eng, idx }) {
     const zones = parseZones(eng.zones_available);
+    const count = eng.inspection_requests_count ?? 0;
 
     return (
         <div style={{
-            background: '#faf8ff', borderRadius: 12,
+            background: 'white', borderRadius: 12,
             border: '1px solid #ede9ff',
-            padding: '10px 12px',
-            display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0,
+            padding: '11px 12px',
+            display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0,
         }}>
-            {/* Avatar + nombre */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: PASTEL[idx % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Avatar + nombre + especialidad */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: PASTEL[idx % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#3a4250' }}>{initials(eng.name)}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eng.name}</div>
-                    {eng.specialty && (
-                        <span style={{ fontSize: 9.5, fontWeight: 700, color: '#7c3aed', background: '#ede9ff', padding: '1px 6px', borderRadius: 999 }}>{eng.specialty}</span>
-                    )}
+                    <div style={{ fontSize: 11, color: '#7c3aed', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {eng.specialty || 'Ingeniero'}
+                        {count > 0 && <span style={{ color: '#b45309', fontWeight: 700 }}> · {count} insp.</span>}
+                    </div>
                 </div>
             </div>
 
-            {/* Zonas */}
+            {/* Zonas — texto plano, sin chips */}
             {zones.length > 0 && (
-                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <MapPin size={9} color="#a78bfa" strokeWidth={2}/>
-                    {zones.slice(0, 2).map(z => (
-                        <span key={z} style={{ fontSize: 9.5, fontWeight: 600, color: '#7c3aed', background: '#ede9ff', padding: '1px 6px', borderRadius: 4 }}>{z}</span>
-                    ))}
-                    {zones.length > 2 && <span style={{ fontSize: 9.5, color: '#a78bfa' }}>+{zones.length - 2}</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <MapPin size={9} color="#a78bfa" strokeWidth={2} style={{ flexShrink: 0 }}/>
+                    <span style={{ fontSize: 11, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {zones.join(', ')}
+                    </span>
                 </div>
             )}
 
-            {/* Inspecciones asignadas */}
-            {(eng.inspection_requests_count ?? 0) > 0 && (
-                <span style={{ fontSize: 9.5, fontWeight: 700, background: '#fef3e2', color: '#b45309', padding: '2px 8px', borderRadius: 999, alignSelf: 'flex-start' }}>
-                    {eng.inspection_requests_count} solicitud{eng.inspection_requests_count !== 1 ? 'es' : ''}
-                </span>
-            )}
-
-            {/* Teléfono — CTA al fondo */}
+            {/* Teléfono */}
             {eng.phone && (
-                <a href={`tel:${eng.phone}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, background: '#ede9ff', color: '#7c3aed', fontSize: 11, fontWeight: 700, padding: '6px', borderRadius: 9, textDecoration: 'none' }}>
+                <a href={`tel:${eng.phone}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, background: '#f3eeff', color: '#7c3aed', fontSize: 11.5, fontWeight: 700, padding: '7px', borderRadius: 9, textDecoration: 'none' }}>
                     <Phone size={11} color="#7c3aed" strokeWidth={2}/> {eng.phone}
                 </a>
             )}

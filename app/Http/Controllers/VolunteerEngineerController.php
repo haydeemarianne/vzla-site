@@ -67,4 +67,50 @@ class VolunteerEngineerController extends Controller
 
         return redirect('/ingenieros')->with('success', 'Solicitud enviada. Un ingeniero se pondra en contacto.');
     }
+
+    public function showRequest(InspectionRequest $inspectionRequest)
+    {
+        $inspectionRequest->load('engineer');
+
+        return Inertia::render('Ingenieros/Show', [
+            'inspectionRequest' => $inspectionRequest,
+        ]);
+    }
+
+    public function postulate(Request $request, InspectionRequest $inspectionRequest)
+    {
+        if ($inspectionRequest->status !== 'pending') {
+            return back()->withErrors(['general' => 'Esta solicitud ya fue asignada a otro ingeniero.']);
+        }
+
+        $request->validate([
+            'name'           => 'required|string|max:200',
+            'phone'          => 'required|string|max:30',
+            'license_number' => 'nullable|string|max:50',
+            'specialty'      => 'nullable|string|max:200',
+        ]);
+
+        $engineer = VolunteerEngineer::where('phone', $request->phone)->first();
+        if (!$engineer) {
+            $engineer = VolunteerEngineer::create([
+                'name'              => $request->name,
+                'phone'             => $request->phone,
+                'email'             => '',
+                'license_number'    => $request->license_number,
+                'specialty'         => $request->specialty ?? '',
+                'zones_available'   => [],
+                'validation_status' => 'pending',
+            ]);
+        }
+
+        $inspectionRequest->update([
+            'status'               => 'assigned',
+            'assigned_engineer_id' => $engineer->id,
+            'assigned_at'          => now(),
+        ]);
+
+        return redirect("/ingenieros/solicitud/{$inspectionRequest->id}")
+            ->with('success', '¡Solicitud tomada! Ya puedes contactar al solicitante.')
+            ->with('contact_phone', $inspectionRequest->requester_phone);
+    }
 }

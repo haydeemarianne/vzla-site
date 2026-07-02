@@ -89,6 +89,8 @@ Route::prefix('ingenieros')->group(function () {
     Route::post('/', [VolunteerEngineerController::class, 'store']);
     Route::get('/solicitar', [VolunteerEngineerController::class, 'requestCreate']);
     Route::post('/solicitar', [VolunteerEngineerController::class, 'requestStore']);
+    Route::get('/solicitud/{inspectionRequest}', [VolunteerEngineerController::class, 'showRequest']);
+    Route::post('/solicitud/{inspectionRequest}/postular', [VolunteerEngineerController::class, 'postulate']);
 });
 
 Route::prefix('limpieza')->group(function () {
