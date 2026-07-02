@@ -78,7 +78,7 @@ class SupportCaseController extends Controller
             'needs'         => 'required|array|min:1',
             'needs.*'       => 'string|max:100',
             'zone'          => 'required|string|max:200',
-            'city'          => 'nullable|string|max:100',
+            'city'          => 'required|string|max:100',
             'state'         => 'required|string|max:100',
             'people_count'  => 'required|integer|min:1|max:50',
             'has_children'  => 'boolean',

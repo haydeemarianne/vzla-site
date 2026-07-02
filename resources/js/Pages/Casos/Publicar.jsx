@@ -181,7 +181,7 @@ export default function CasosPublicar() {
                                 icon={MapPin}
                             />
                             <FloatInput
-                                label="Ciudad / municipio"
+                                label="Ciudad / municipio *"
                                 value={data.city}
                                 onChange={e => setData('city', e.target.value)}
                                 error={errors.city}

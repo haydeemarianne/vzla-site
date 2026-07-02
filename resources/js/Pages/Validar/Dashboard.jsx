@@ -803,6 +803,15 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
     const [closing,    setClosing]    = useState(false);
 
     useEffect(() => {
+        setConfirmed([]);
+        setEditMode(false);
+        setActiveTab('datos');
+        setHistory([]);
+        setCloseNote('');
+        setClosePhoto(null);
+    }, [item?.id]);
+
+    useEffect(() => {
         if (activeTab === 'historial' && item && modType) {
             fetch(`/validar/historial?type=${modType}&id=${item.id}`)
                 .then(r => r.json())
@@ -816,6 +825,7 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
     const stageCfg = STAGE_CFG[stage] || STAGE_CFG.recepcion;
     const stageAct = MODULE_STAGE[modKey]?.[stage] || MODULE_STAGE.cases[stage];
     const actionLink = stageAct?.linkLabel && stageAct?.linkPath ? stageAct.linkPath(item) : null;
+    const allChecked = stageAct.checks.every((_, i) => confirmed.includes(i));
 
     const relatedAdoptions = (modKey === 'cases' && stage === 'asignacion')
         ? (adoptions || []).filter(a => a.support_case_id === item.id)
@@ -1263,13 +1273,19 @@ function RecorridoModal({ item, modKey, modType, onClose, onAvanzar, adoptions, 
                             {stageAct.linkLabel}
                         </a>
                     )}
+                    {stageCfg.nextLabel && !allChecked && (
+                        <p style={{ margin:0, fontSize:11.5, color:'#b45309', fontWeight:600, textAlign:'center' }}>
+                            Marca todos los puntos de "Qué hacer aquí" para poder avanzar.
+                        </p>
+                    )}
                     <div style={{ display:'flex', gap:9 }}>
                         {stageCfg.nextLabel ? (
-                            <button onClick={onAvanzar} style={{
+                            <button onClick={onAvanzar} disabled={!allChecked} style={{
                                 flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:7,
                                 padding:'12px 18px', borderRadius:13, border:'none',
-                                background:'#0f172a', color:'white',
-                                fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit',
+                                background: allChecked ? '#0f172a' : '#cbd5e1',
+                                color:'white', fontSize:13, fontWeight:700,
+                                cursor: allChecked ? 'pointer' : 'not-allowed', fontFamily:'inherit',
                             }}>
                                 <ArrowRight size={15} color="white" strokeWidth={2.2}/>
                                 {stageCfg.nextLabel}
