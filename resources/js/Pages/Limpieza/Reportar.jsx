@@ -55,8 +55,8 @@ export default function ReportarLimpieza() {
         city:           '',
         state:          'La Guaira (Vargas)',
         address:        '',
-        type:           'domestic',
-        volume:         'medium',
+        type:           '',
+        volume:         '',
         photo:          null,
         reporter_name:  '',
         reporter_phone: '',
@@ -72,10 +72,20 @@ export default function ReportarLimpieza() {
 
     const submit = (e) => {
         e.preventDefault();
+        let hasError = false;
+        if (!data.type) {
+            setError('type', 'Selecciona el tipo de desecho.');
+            hasError = true;
+        }
+        if (!data.volume) {
+            setError('volume', 'Selecciona la cantidad estimada.');
+            hasError = true;
+        }
         if (!data.photo) {
             setError('photo', 'La foto es requerida para identificar el punto.');
-            return;
+            hasError = true;
         }
+        if (hasError) return;
         post('/limpieza', { forceFormData: true });
     };
 
@@ -151,6 +161,7 @@ export default function ReportarLimpieza() {
                                 value={data.type}
                                 onChange={v => setData('type', v)}
                             />
+                            {errors.type && <p style={{ margin: '-6px 0 0', fontSize: 11.5, color: '#CE6969', fontWeight: 500 }}>{errors.type}</p>}
 
                             <div style={DIV}/>
 
@@ -161,6 +172,7 @@ export default function ReportarLimpieza() {
                                 onChange={v => setData('volume', v)}
                                 active="#CE6969"
                             />
+                            {errors.volume && <p style={{ margin: '-6px 0 0', fontSize: 11.5, color: '#CE6969', fontWeight: 500 }}>{errors.volume}</p>}
                         </div>
 
                         {/* Card 3 — Foto + notas */}
