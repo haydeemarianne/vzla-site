@@ -59,7 +59,7 @@ class VolunteerEngineerController extends Controller
             'requester_name'  => 'required|string|max:200',
             'requester_phone' => 'required|string|max:30',
             'description'     => 'nullable|string|max:500',
-            'structure_type'  => 'nullable|string|max:100',
+            'structure_type'  => 'required|string|in:house,apartment,building,commercial,other',
             'urgency'         => 'required|in:normal,urgent,critical',
         ]);
 

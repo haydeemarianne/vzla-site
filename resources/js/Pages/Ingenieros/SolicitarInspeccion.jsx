@@ -83,8 +83,9 @@ export default function SolicitarInspeccion() {
                             <div style={DIV}/>
                             <p style={SEC}>Tipo de estructura</p>
                             <FloatSelect
-                                label="Tipo de inmueble"
+                                label="Tipo de inmueble *"
                                 value={data.structure_type}
+                                error={errors.structure_type}
                                 onChange={e => setData('structure_type', e.target.value)}
                             >
                                 <option value="">— Selecciona —</option>
