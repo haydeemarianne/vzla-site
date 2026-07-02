@@ -12,9 +12,15 @@ const CATEGORY_LABEL = {
 const IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'svg', 'webp'];
 const VIDEO_TYPES = ['mp4', 'webm', 'mov', 'avi'];
 
+const PASTEL = ['#e7dcf2', '#dfe6f4', '#d6e8e0', '#f0d6d6', '#f3e2cf'];
+
 const CARD = { background: 'white', border: '1px solid #e9ebf1', borderRadius: 20, padding: '20px', display: 'flex', flexDirection: 'column', gap: 14 };
 const SEC  = { margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: '#7b8595' };
 const DIV  = { height: 1, background: '#f3f4f8' };
+
+function initials(name = '') {
+    return (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
+}
 
 function FileIcon({ fileType, is3d }) {
     if (is3d) return <Box size={22} color="#4263ac" strokeWidth={1.5}/>;
@@ -153,27 +159,32 @@ export default function MaterialesShow({ material: m }) {
                             </div>
                         </div>
 
-                        {/* Contribuidor */}
+                        {/* Contribuidor — crédito visible a quien aporta el recurso */}
                         <div style={CARD}>
-                            <p style={SEC}>Contribuidor</p>
-                            <div>
-                                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{m.uploaded_by}</p>
-                                {m.organization && <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#94a3b8' }}>{m.organization}</p>}
+                            <p style={SEC}>Aportado por</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                                <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: PASTEL[(m.uploaded_by || '?').charCodeAt(0) % PASTEL.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <span style={{ fontSize: 14, fontWeight: 700, color: '#3a4250' }}>{initials(m.uploaded_by)}</span>
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#1e293b', letterSpacing: '-.2px' }}>{m.uploaded_by || 'Anónimo'}</p>
+                                    {m.organization && <p style={{ margin: '1px 0 0', fontSize: 11.5, color: '#94a3b8', fontWeight: 600 }}>{m.organization}</p>}
+                                </div>
                             </div>
                             {(m.contributor_instagram || m.contributor_phone) && <div style={DIV}/>}
                             {(m.contributor_instagram || m.contributor_phone) && (
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                     {m.contributor_instagram && (
                                         <a href={`https://instagram.com/${m.contributor_instagram.replace('@','')}`}
                                             target="_blank" rel="noopener noreferrer"
-                                            style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fdf2f8', color: '#9d174d', fontSize: 12, fontWeight: 700, padding: '9px 12px', borderRadius: 11, textDecoration: 'none', border: '1px solid #fce7f3' }}>
-                                            <AtSign size={12} color="#9d174d" strokeWidth={2}/> {m.contributor_instagram.replace('@','')}
+                                            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fdf2f8', color: '#9d174d', fontSize: 12.5, fontWeight: 700, padding: '10px 13px', borderRadius: 12, textDecoration: 'none', border: '1px solid #fce7f3' }}>
+                                            <AtSign size={13} color="#9d174d" strokeWidth={2}/> {m.contributor_instagram.replace('@','')}
                                         </a>
                                     )}
                                     {m.contributor_phone && (
                                         <a href={`tel:${m.contributor_phone}`}
-                                            style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#eef1fa', color: '#4263ac', fontSize: 12, fontWeight: 700, padding: '9px 12px', borderRadius: 11, textDecoration: 'none', border: '1px solid #d6dffa' }}>
-                                            <Phone size={12} color="#4263ac" strokeWidth={2}/> {m.contributor_phone}
+                                            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#eef1fa', color: '#4263ac', fontSize: 12.5, fontWeight: 700, padding: '10px 13px', borderRadius: 12, textDecoration: 'none', border: '1px solid #d6dffa' }}>
+                                            <Phone size={13} color="#4263ac" strokeWidth={2}/> {m.contributor_phone}
                                         </a>
                                     )}
                                 </div>
