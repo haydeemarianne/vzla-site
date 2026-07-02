@@ -63,8 +63,6 @@ export default function MaterialesShow({ material: m }) {
                                 <span style={{ fontSize: 11, fontWeight: 700, background: '#eef1fa', color: '#4263ac', padding: '2px 10px', borderRadius: 999 }}>
                                     {CATEGORY_LABEL[m.category] || m.category}
                                 </span>
-                                <span style={{ fontSize: 11, color: '#94a3b8' }}>{m.download_count ?? 0} descargas</span>
-                                <span style={{ fontSize: 11, color: '#94a3b8' }}>{m.helpful_count ?? 0} útil</span>
                             </div>
                         </div>
                     </div>
@@ -117,93 +115,96 @@ export default function MaterialesShow({ material: m }) {
                         </div>
                     </div>
 
-                    {/* ── Col der: contribuidor | stats + acciones en línea + media ── */}
+                    {/* ── Col der: acciones + contribuidor + media ── */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-                        {/* Fila 1: Contribuidor (1fr) | Stats numbers (auto) */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'start' }}>
-
-                            {/* Contribuidor */}
-                            <div style={CARD}>
-                                <p style={SEC}>Contribuidor</p>
-                                <div>
-                                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{m.uploaded_by}</p>
-                                    {m.organization && <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#94a3b8' }}>{m.organization}</p>}
+                        {/* Acciones — botones sólidos + stats inline */}
+                        <div style={CARD}>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                                <a href={`/materiales/${m.id}/descargar`} style={{
+                                    flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                    background: '#4263ac', color: 'white', fontSize: 13, fontWeight: 700,
+                                    padding: '11px', borderRadius: 12, textDecoration: 'none',
+                                }}>
+                                    <Download size={14} color="white" strokeWidth={2}/> Descargar
+                                </a>
+                                <button onClick={vote} disabled={voted} style={{
+                                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+                                    background: voted ? '#dcfce7' : '#f8fafc',
+                                    border: `1.5px solid ${voted ? '#bbf7d0' : '#e2e8f0'}`,
+                                    color: voted ? '#16a34a' : '#475569',
+                                    fontSize: 13, fontWeight: 700, borderRadius: 12, padding: '11px',
+                                    cursor: voted ? 'default' : 'pointer', fontFamily: 'inherit',
+                                }}>
+                                    <ThumbsUp size={13} strokeWidth={2} color={voted ? '#16a34a' : '#475569'}/>
+                                    {voted ? '¡Gracias!' : 'Útil'}
+                                </button>
+                            </div>
+                            <div style={DIV}/>
+                            <div style={{ display: 'flex', gap: 20 }}>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                                    <span style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>{m.download_count ?? 0}</span>
+                                    <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>descargas</span>
                                 </div>
-                                {(m.contributor_instagram || m.contributor_phone) && <div style={DIV}/>}
-                                {m.contributor_instagram && (
-                                    <a href={`https://instagram.com/${m.contributor_instagram.replace('@','')}`}
-                                        target="_blank" rel="noopener noreferrer"
-                                        style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fdf2f8', color: '#9d174d', fontSize: 12, fontWeight: 700, padding: '9px 12px', borderRadius: 11, textDecoration: 'none', border: '1px solid #fce7f3' }}>
-                                        <AtSign size={12} color="#9d174d" strokeWidth={2}/> {m.contributor_instagram.replace('@','')}
-                                    </a>
-                                )}
-                                {m.contributor_phone && (
-                                    <a href={`tel:${m.contributor_phone}`}
-                                        style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#eef1fa', color: '#4263ac', fontSize: 12, fontWeight: 700, padding: '9px 12px', borderRadius: 11, textDecoration: 'none', border: '1px solid #d6dffa' }}>
-                                        <Phone size={12} color="#4263ac" strokeWidth={2}/> {m.contributor_phone}
-                                    </a>
-                                )}
-                                {m.price_estimate && (
-                                    <>
-                                        <div style={DIV}/>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <Tag size={13} color="#b45309" strokeWidth={2}/>
-                                            <div>
-                                                <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#1e293b' }}>{m.price_estimate}</p>
-                                                <p style={{ margin: 0, fontSize: 10, color: '#94a3b8' }}>costo referencial</p>
-                                            </div>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                                    <span style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>{m.helpful_count ?? 0}</span>
+                                    <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>marcaron útil</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contribuidor */}
+                        <div style={CARD}>
+                            <p style={SEC}>Contribuidor</p>
+                            <div>
+                                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{m.uploaded_by}</p>
+                                {m.organization && <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#94a3b8' }}>{m.organization}</p>}
+                            </div>
+                            {(m.contributor_instagram || m.contributor_phone) && <div style={DIV}/>}
+                            {(m.contributor_instagram || m.contributor_phone) && (
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                    {m.contributor_instagram && (
+                                        <a href={`https://instagram.com/${m.contributor_instagram.replace('@','')}`}
+                                            target="_blank" rel="noopener noreferrer"
+                                            style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fdf2f8', color: '#9d174d', fontSize: 12, fontWeight: 700, padding: '9px 12px', borderRadius: 11, textDecoration: 'none', border: '1px solid #fce7f3' }}>
+                                            <AtSign size={12} color="#9d174d" strokeWidth={2}/> {m.contributor_instagram.replace('@','')}
+                                        </a>
+                                    )}
+                                    {m.contributor_phone && (
+                                        <a href={`tel:${m.contributor_phone}`}
+                                            style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#eef1fa', color: '#4263ac', fontSize: 12, fontWeight: 700, padding: '9px 12px', borderRadius: 11, textDecoration: 'none', border: '1px solid #d6dffa' }}>
+                                            <Phone size={12} color="#4263ac" strokeWidth={2}/> {m.contributor_phone}
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+                            {m.price_estimate && (
+                                <>
+                                    <div style={DIV}/>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Tag size={13} color="#b45309" strokeWidth={2}/>
+                                        <div>
+                                            <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: '#1e293b' }}>{m.price_estimate}</p>
+                                            <p style={{ margin: 0, fontSize: 10, color: '#94a3b8' }}>costo referencial</p>
                                         </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Stats — solo números */}
-                            <div style={{ ...CARD, padding: '14px', gap: 10, width: 110, textAlign: 'center' }}>
-                                <div>
-                                    <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>{m.download_count ?? 0}</p>
-                                    <p style={{ margin: '2px 0 0', fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>descargas</p>
-                                </div>
-                                <div style={{ height: 1, background: '#f1f4f9' }}/>
-                                <div>
-                                    <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1e293b', lineHeight: 1 }}>{m.helpful_count ?? 0}</p>
-                                    <p style={{ margin: '2px 0 0', fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>útil</p>
-                                </div>
-                            </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
-                        {/* Fila 2: acciones en línea — texto puro */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-                            <button onClick={vote} disabled={voted} style={{
-                                display: 'flex', alignItems: 'center', gap: 5,
-                                background: 'none', border: 'none',
-                                color: voted ? '#16a34a' : '#64748b',
-                                fontSize: 13, fontWeight: 600,
-                                cursor: voted ? 'default' : 'pointer',
-                                fontFamily: 'inherit', padding: 0,
-                            }}>
-                                <ThumbsUp size={14} strokeWidth={2} color={voted ? '#16a34a' : '#64748b'}/>
-                                {voted ? '¡Gracias!' : 'Es útil'}
-                            </button>
-                            <a href={`/materiales/${m.id}/descargar`} style={{
-                                display: 'flex', alignItems: 'center', gap: 5,
-                                color: '#4263ac', fontSize: 13, fontWeight: 700, textDecoration: 'none',
-                            }}>
-                                <Download size={14} color="#4263ac" strokeWidth={2}/> Descargar
-                            </a>
-                        </div>
-
-                        {/* Fila 3: media — sin fondo gris */}
+                        {/* Media — dentro de card, consistente con el resto */}
                         {isMedia && m.file_path && (
-                            <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid #e9ebf1' }}>
-                                {isImage && (
-                                    <img src={`/storage/${m.file_path}`} alt={m.title}
-                                        style={{ width: '100%', maxHeight: 360, objectFit: 'contain', display: 'block' }}/>
-                                )}
-                                {isVideo && (
-                                    <video src={`/storage/${m.file_path}`} controls
-                                        style={{ width: '100%', maxHeight: 360, display: 'block' }}/>
-                                )}
+                            <div style={{ ...CARD, padding: 12 }}>
+                                <div style={{ borderRadius: 12, overflow: 'hidden', background: '#f8fafc' }}>
+                                    {isImage && (
+                                        <img src={`/storage/${m.file_path}`} alt={m.title}
+                                            style={{ width: '100%', maxHeight: 320, objectFit: 'contain', display: 'block', margin: '0 auto' }}/>
+                                    )}
+                                    {isVideo && (
+                                        <video src={`/storage/${m.file_path}`} controls
+                                            style={{ width: '100%', maxHeight: 320, display: 'block' }}/>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
