@@ -211,6 +211,13 @@ export default function CasosShow({ supportCase, tasks, adoption }) {
                     </div>
                 )}
 
+                {supportCase.validation_status === 'pending' && (
+                    <div style={{ background:'#fef3e2', border:'1px solid #fcd34d', color:'#92600e', borderRadius:11, padding:'12px 14px', fontSize:13, fontWeight:600, marginBottom:14, display:'flex', alignItems:'center', gap:8 }}>
+                        <Hourglass size={15} color="#b45309" strokeWidth={2} style={{ flexShrink:0 }}/>
+                        Este caso está pendiente de validación. Será visible en el tablero una vez que el equipo lo apruebe.
+                    </div>
+                )}
+
                 {/* ─── Layout 2 columnas ─── */}
                 <div className="va-show-grid">
 
