@@ -54,7 +54,7 @@ export default function InspeccionShow({ inspectionRequest: req }) {
 
     const [claiming, setClaiming] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '', phone: '', license_number: '', specialty: '',
+        phone: '',
     });
 
     const submit = (e) => {
@@ -208,7 +208,7 @@ export default function InspeccionShow({ inspectionRequest: req }) {
                                 <div style={{ background: '#fff7ed', border: '1px solid #fde7c6', borderRadius: 12, padding: '11px 13px', display: 'flex', gap: 9, alignItems: 'flex-start', marginBottom: 14 }}>
                                     <AlertTriangle size={14} color="#b45309" strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }}/>
                                     <p style={{ margin: 0, fontSize: 12, color: '#92400e', lineHeight: 1.55 }}>
-                                        Al postularte verás el teléfono del solicitante para coordinar la visita.
+                                        Solo ingenieros ya registrados y validados por el equipo pueden postularse.
                                     </p>
                                 </div>
 
@@ -219,24 +219,20 @@ export default function InspeccionShow({ inspectionRequest: req }) {
                                     </button>
                                 ) : (
                                     <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-                                        {[
-                                            { field: 'name',           placeholder: 'Tu nombre completo *', type: 'text',  req: true  },
-                                            { field: 'phone',          placeholder: 'Tu teléfono *',        type: 'tel',   req: true  },
-                                            { field: 'specialty',      placeholder: 'Especialidad (opcional)', type: 'text', req: false },
-                                            { field: 'license_number', placeholder: 'Nro. de colegiatura (opcional)', type: 'text', req: false },
-                                        ].map(({ field, placeholder, type, req: required }) => (
-                                            <div key={field}>
-                                                <input
-                                                    style={{ width: '100%', boxSizing: 'border-box', border: `1.5px solid ${errors[field] ? '#CE6969' : '#e2e8f0'}`, borderRadius: 11, padding: '10px 13px', fontSize: 13, fontFamily: 'inherit', color: '#1e293b', outline: 'none' }}
-                                                    type={type}
-                                                    placeholder={placeholder}
-                                                    value={data[field]}
-                                                    onChange={e => setData(field, e.target.value)}
-                                                    required={required}
-                                                />
-                                                {errors[field] && <p style={{ fontSize: 11.5, color: '#CE6969', margin: '3px 0 0' }}>{errors[field]}</p>}
-                                            </div>
-                                        ))}
+                                        <div>
+                                            <input
+                                                style={{ width: '100%', boxSizing: 'border-box', border: `1.5px solid ${errors.phone ? '#CE6969' : '#e2e8f0'}`, borderRadius: 11, padding: '10px 13px', fontSize: 13, fontFamily: 'inherit', color: '#1e293b', outline: 'none' }}
+                                                type="tel"
+                                                placeholder="Tu teléfono registrado *"
+                                                value={data.phone}
+                                                onChange={e => setData('phone', e.target.value)}
+                                                required
+                                            />
+                                            {errors.phone && <p style={{ fontSize: 11.5, color: '#CE6969', margin: '3px 0 0' }}>{errors.phone}</p>}
+                                        </div>
+                                        <p style={{ margin: 0, fontSize: 11.5, color: '#94a3b8' }}>
+                                            ¿Aún no estás registrado? <Link href="/ingenieros/registrar" style={{ color: '#4263ac', fontWeight: 700, textDecoration: 'none' }}>Regístrate aquí</Link>
+                                        </p>
                                         <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
                                             <button type="button" onClick={() => { setClaiming(false); reset(); }}
                                                 style={{ flex: 1, padding: '10px', borderRadius: 11, background: '#f1f4f9', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', color: '#64748b' }}>
@@ -244,7 +240,7 @@ export default function InspeccionShow({ inspectionRequest: req }) {
                                             </button>
                                             <button type="submit" disabled={processing}
                                                 style={{ flex: 2, padding: '10px', borderRadius: 11, background: processing ? '#83A2DB' : '#4263ac', border: 'none', fontSize: 13, fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer', fontFamily: 'inherit', color: '#fff' }}>
-                                                {processing ? 'Enviando…' : 'Confirmar postulación'}
+                                                {processing ? 'Verificando…' : 'Confirmar postulación'}
                                             </button>
                                         </div>
                                     </form>

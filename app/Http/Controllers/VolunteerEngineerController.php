@@ -84,23 +84,17 @@ class VolunteerEngineerController extends Controller
         }
 
         $request->validate([
-            'name'           => 'required|string|max:200',
-            'phone'          => 'required|string|max:30',
-            'license_number' => 'nullable|string|max:50',
-            'specialty'      => 'nullable|string|max:200',
+            'phone' => 'required|string|max:30',
         ]);
 
         $engineer = VolunteerEngineer::where('phone', $request->phone)->first();
+
         if (!$engineer) {
-            $engineer = VolunteerEngineer::create([
-                'name'              => $request->name,
-                'phone'             => $request->phone,
-                'email'             => '',
-                'license_number'    => $request->license_number,
-                'specialty'         => $request->specialty ?? '',
-                'zones_available'   => [],
-                'validation_status' => 'pending',
-            ]);
+            return back()->withErrors(['phone' => 'No encontramos un registro con ese teléfono. Debes registrarte primero como ingeniero voluntario.']);
+        }
+
+        if ($engineer->validation_status !== 'approved') {
+            return back()->withErrors(['phone' => 'Tu registro aún está pendiente de validación por el equipo coordinador.']);
         }
 
         $inspectionRequest->update([
