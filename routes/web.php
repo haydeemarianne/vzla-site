@@ -118,6 +118,7 @@ Route::prefix('transporte')->group(function () {
 
 Route::prefix('casos')->group(function () {
     Route::get('/', [SupportCaseController::class, 'index']);
+    Route::get('/buscar', [SupportCaseController::class, 'search']);
     Route::get('/publicar', [SupportCaseController::class, 'create']);
     Route::post('/', [SupportCaseController::class, 'store']);
     Route::get('/{supportCase}', [SupportCaseController::class, 'show']);

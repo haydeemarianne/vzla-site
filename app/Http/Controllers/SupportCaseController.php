@@ -30,6 +30,26 @@ const NEED_TASK_TITLES = [
 
 class SupportCaseController extends Controller
 {
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = SupportCase::approved()
+            ->where(function ($query) use ($q) {
+                $query->where('family_name', 'like', "%{$q}%")
+                    ->orWhere('zone', 'like', "%{$q}%")
+                    ->orWhere('city', 'like', "%{$q}%");
+            })
+            ->latest()
+            ->limit(8)
+            ->get(['id', 'family_name', 'zone', 'city', 'is_anonymous', 'status']);
+
+        return response()->json($results);
+    }
+
     public function index(Request $request)
     {
         $base = SupportCase::approved()->with('tasks')->latest();

@@ -1,8 +1,9 @@
 import { Link, router, usePage } from '@inertiajs/react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Heart, Sparkles, Wrench, Home, Truck,
     ArrowLeft, Share2, Plus, Users, Settings, BarChart2,
-    Search, RotateCw,
+    Search, RotateCw, MapPin,
 } from 'lucide-react';
 
 /* ─── Navegación ──────────────────────────────── */
@@ -83,6 +84,140 @@ function HeaderCircle({ onClick, title, children, href, notif = false }) {
     );
     if (href) return <Link href={href} style={{ textDecoration: 'none' }}>{inner}</Link>;
     return inner;
+}
+
+/* Tiempo relativo en español, ej. "hace 3 min" */
+function relativeTime(ts) {
+    if (!ts) return null;
+    const diff = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    if (diff < 10) return 'justo ahora';
+    if (diff < 60) return `hace ${diff} seg`;
+    const min = Math.floor(diff / 60);
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.floor(min / 60);
+    return `hace ${h} h`;
+}
+
+/* Botón "Actualizar" — recuerda y muestra la última vez que se refrescó */
+function RefreshButton() {
+    const [lastUpdated, setLastUpdated] = useState(() => {
+        const stored = Number(localStorage.getItem('va_last_updated'));
+        return stored || Date.now();
+    });
+    const [, forceTick] = useState(0);
+
+    useEffect(() => {
+        const id = setInterval(() => forceTick(t => t + 1), 15000);
+        return () => clearInterval(id);
+    }, []);
+
+    const refresh = () => {
+        const now = Date.now();
+        localStorage.setItem('va_last_updated', String(now));
+        setLastUpdated(now);
+        router.reload();
+    };
+
+    return (
+        <HeaderCircle title={`Actualizar · Última vez: ${relativeTime(lastUpdated)}`} onClick={refresh}>
+            <RotateCw size={16} color="#5b6677" strokeWidth={1.9} />
+        </HeaderCircle>
+    );
+}
+
+/* Buscador de casos — campo desplegable + resultados en vivo */
+function CaseSearchBox() {
+    const [open, setOpen] = useState(false);
+    const [q, setQ]       = useState('');
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const boxRef = useRef(null);
+
+    useEffect(() => {
+        if (!open) return;
+        const onClickOutside = (e) => {
+            if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', onClickOutside);
+        return () => document.removeEventListener('mousedown', onClickOutside);
+    }, [open]);
+
+    useEffect(() => {
+        if (q.trim().length < 2) { setResults([]); return; }
+        setLoading(true);
+        const id = setTimeout(() => {
+            fetch(`/casos/buscar?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(setResults)
+                .catch(() => setResults([]))
+                .finally(() => setLoading(false));
+        }, 300);
+        return () => clearTimeout(id);
+    }, [q]);
+
+    const goTo = (id) => {
+        setOpen(false);
+        setQ('');
+        setResults([]);
+        router.visit(`/casos/${id}`);
+    };
+
+    return (
+        <div ref={boxRef} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            {open && (
+                <div style={{
+                    position: 'absolute', right: 46, top: '50%', transform: 'translateY(-50%)',
+                    width: 240, animation: 'va-search-expand .15s ease-out',
+                }}>
+                    <input
+                        autoFocus
+                        value={q}
+                        onChange={e => setQ(e.target.value)}
+                        placeholder="Buscar caso por nombre o zona…"
+                        style={{
+                            width: '100%', boxSizing: 'border-box', padding: '9px 13px',
+                            borderRadius: 999, border: '1.5px solid #e2e8f0', outline: 'none',
+                            fontSize: 12.5, fontFamily: 'inherit', color: '#1e293b',
+                            background: 'white', boxShadow: '0 4px 14px rgba(16,24,40,.08)',
+                        }}
+                    />
+                    {q.trim().length >= 2 && (
+                        <div style={{
+                            position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+                            background: 'white', borderRadius: 14, border: '1px solid #e9ebf1',
+                            boxShadow: '0 12px 30px rgba(16,24,40,.12)', overflow: 'hidden', zIndex: 50,
+                        }}>
+                            {loading ? (
+                                <div style={{ padding: '11px 14px', fontSize: 12, color: '#94a3b8' }}>Buscando…</div>
+                            ) : results.length === 0 ? (
+                                <div style={{ padding: '11px 14px', fontSize: 12, color: '#94a3b8' }}>Sin resultados.</div>
+                            ) : (
+                                results.map(c => (
+                                    <div key={c.id} onClick={() => goTo(c.id)} style={{
+                                        display: 'flex', alignItems: 'center', gap: 7,
+                                        padding: '9px 14px', cursor: 'pointer', borderBottom: '1px solid #f7f8fb',
+                                    }}>
+                                        <MapPin size={11} color="#94a3b8" strokeWidth={2} style={{ flexShrink: 0 }} />
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {c.is_anonymous ? 'Familia anónima' : (c.family_name || 'Familia')}
+                                            </div>
+                                            <div style={{ fontSize: 10.5, color: '#94a3b8' }}>
+                                                {[c.zone, c.city].filter(Boolean).join(', ')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+            <HeaderCircle title="Buscar casos" onClick={() => setOpen(v => !v)}>
+                <Search size={17} color="#5b6677" strokeWidth={1.9} />
+            </HeaderCircle>
+        </div>
+    );
 }
 
 /* ─── Layout principal ─────────────────────────── */
@@ -178,20 +313,10 @@ export default function MainLayout({ children }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
 
                         {/* Actualizar */}
-                        <HeaderCircle title="Actualizar" onClick={() => router.reload()}>
-                            <RotateCw size={16} color="#5b6677" strokeWidth={1.9} />
-                        </HeaderCircle>
+                        <RefreshButton />
 
                         {/* Búsqueda */}
-                        <HeaderCircle
-                            title="Buscar casos"
-                            onClick={() => {
-                                const q = prompt('Buscar:');
-                                if (q) router.visit(`/casos?search=${encodeURIComponent(q)}`);
-                            }}
-                        >
-                            <Search size={17} color="#5b6677" strokeWidth={1.9} />
-                        </HeaderCircle>
+                        <CaseSearchBox />
 
                         {/* Compartir — solo mobile */}
                         <span className="va-mobile-only" style={{ display: 'flex' }}>

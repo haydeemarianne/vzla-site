@@ -23,6 +23,11 @@
     50% { opacity: .35; }
 }
 
+@keyframes va-search-expand {
+    from { opacity: 0; transform: translateY(-50%) scaleX(.85); }
+    to   { opacity: 1; transform: translateY(-50%) scaleX(1); }
+}
+
 /* ══════════════════════════════════════════════
    VA DESIGN SYSTEM
    ══════════════════════════════════════════════ */
